@@ -1,0 +1,47 @@
+.guess-input {
+  width: 120px;
+  padding: 10px 14px;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  border: 3px solid var(--dark);
+  border-radius: 10px;
+  text-align: center;
+  background: white;
+  color: var(--dark);
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--dark);
+}
+
+.guess-input:focus {
+  outline: none;
+  border-color: var(--coral);
+  background: #fff5f5;
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--dark);
+}
+
+.guess-input.incorrect {
+  border-color: var(--coral);
+  background: #ffe5e5;
+  animation: shake 0.4s ease-in-out;
+}
+
+.guess-input:disabled {
+  background: var(--cyan);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.guess-input::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-2deg); }
+  40% { transform: translateX(8px) rotate(2deg); }
+  60% { transform: translateX(-6px) rotate(-1deg); }
+  80% { transform: translateX(6px) rotate(1deg); }
+}

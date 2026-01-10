@@ -1,0 +1,32 @@
+.clue-button {
+  background: var(--peach);
+  border: 3px solid var(--dark);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clue-button:hover:not(:disabled) {
+  background: var(--yellow);
+  transform: translate(1px, 1px) scale(1.1);
+  box-shadow: 2px 2px 0 var(--dark);
+}
+
+.clue-button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.clue-button:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

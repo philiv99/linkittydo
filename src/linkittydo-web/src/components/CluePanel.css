@@ -1,0 +1,155 @@
+.clue-panel {
+  width: 50%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--cream);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.clue-panel-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, var(--peach) 0%, var(--cream) 100%);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.clue-panel-empty h3 {
+  font-family: 'Lobster', cursive;
+  font-size: 36px;
+  color: var(--coral);
+  margin: 0 0 12px 0;
+  text-shadow: 2px 2px 0 var(--dark);
+}
+
+.clue-panel-empty p {
+  color: var(--dark);
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.clue-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 8px 0 8px;
+  background: var(--dark);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.clue-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.clue-tabs::-webkit-scrollbar-track {
+  background: var(--dark);
+}
+
+.clue-tabs::-webkit-scrollbar-thumb {
+  background: var(--peach);
+  border-radius: 3px;
+}
+
+.clue-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--peach);
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  min-width: 120px;
+  max-width: 200px;
+  transition: all 0.2s;
+  border: 2px solid var(--dark);
+  border-bottom: none;
+}
+
+.clue-tab:hover {
+  background: var(--yellow);
+}
+
+.clue-tab.active {
+  background: var(--cream);
+  position: relative;
+}
+
+.clue-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--cream);
+}
+
+.tab-position {
+  background: var(--coral);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.tab-title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--dark);
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.tab-close:hover {
+  background: var(--coral);
+  color: white;
+}
+
+.clue-iframe-container {
+  flex: 1;
+  background: white;
+  position: relative;
+}
+
+.clue-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}

@@ -1,0 +1,35 @@
+.word-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 6px;
+}
+
+.word-slot.revealed {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--dark);
+  font-family: 'Poppins', sans-serif;
+}
+
+.word-slot.was-hidden {
+  color: var(--coral);
+  font-weight: 700;
+  text-shadow: 1px 1px 0 var(--dark);
+  animation: pop-in 0.3s ease-out;
+}
+
+.word-slot.hidden {
+  display: inline-flex;
+  gap: 6px;
+  background: rgba(142, 216, 216, 0.3);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px dashed var(--dark);
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}

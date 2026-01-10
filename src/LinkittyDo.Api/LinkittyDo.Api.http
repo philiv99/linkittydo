@@ -1,0 +1,6 @@
+@LinkittyDo.Api_HostAddress = http://localhost:5157
+
+GET {{LinkittyDo.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

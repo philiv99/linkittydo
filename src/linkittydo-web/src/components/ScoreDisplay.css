@@ -1,0 +1,26 @@
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--cream);
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: 3px solid var(--dark);
+  box-shadow: 3px 3px 0 var(--dark);
+}
+
+.score-label {
+  color: var(--dark);
+  font-weight: 600;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.score-value {
+  font-weight: 700;
+  color: var(--coral);
+  font-size: 28px;
+  font-family: 'Lobster', cursive;
+  text-shadow: 1px 1px 0 var(--dark);
+}

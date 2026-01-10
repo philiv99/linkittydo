@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&family=Poppins:wght@400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --yellow: #F5E050;
+  --cyan: #8ED8D8;
+  --peach: #F5C896;
+  --coral: #E84A5F;
+  --dark: #2D2D2D;
+  --cream: #FFF9E6;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: 
+    linear-gradient(135deg, var(--cyan) 25%, transparent 25%) -50px 0,
+    linear-gradient(225deg, var(--cyan) 25%, transparent 25%) -50px 0,
+    linear-gradient(315deg, var(--cyan) 25%, transparent 25%),
+    linear-gradient(45deg, var(--cyan) 25%, transparent 25%);
+  background-size: 100px 100px;
+  background-color: var(--yellow);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
