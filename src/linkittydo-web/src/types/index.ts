@@ -140,3 +140,19 @@ export interface ErrorResponse {
     message: string;
   };
 }
+
+// LLM types
+export interface LlmTestRequest {
+  prompt: string;
+  systemPrompt?: string;
+}
+
+export interface LlmTestResponse {
+  success: boolean;
+  content?: string;
+  model?: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  error?: string;
+}

@@ -158,11 +158,15 @@ export const GameBoard: React.FC = () => {
     );
   }
 
-  // Loading state
+  // Loading state - show a proper full-screen loading overlay
   if (loading) {
     return (
-      <div className="game-board">
-        <div className="loading">Loading...</div>
+      <div className="loading-screen">
+        <div className="loading-content">
+          <h1 className="loading-title">LinkittyDo!</h1>
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Finding the perfect phrase...</p>
+        </div>
       </div>
     );
   }

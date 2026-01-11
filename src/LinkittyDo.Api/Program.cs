@@ -1,5 +1,9 @@
+using DotNetEnv;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
+
+// Load .env file if it exists
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +14,14 @@ builder.Services.AddSwaggerGen();
 
 // Register data repositories
 builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
+builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>();
 
 // Register application services
+builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
 builder.Services.AddSingleton<IGameService, GameService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddHttpClient<IClueService, ClueService>();
+builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 
 // Configure CORS for React frontend
 builder.Services.AddCors(options =>

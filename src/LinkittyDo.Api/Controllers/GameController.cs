@@ -21,12 +21,12 @@ public class GameController : ControllerBase
     /// Start a new game session
     /// </summary>
     [HttpPost("start")]
-    public ActionResult<GameState> StartGame([FromBody] StartGameRequest? request = null)
+    public async Task<ActionResult<GameState>> StartGame([FromBody] StartGameRequest? request = null)
     {
         var userId = request?.UserId;
         var difficulty = request?.Difficulty ?? 10;
         
-        var session = _gameService.StartNewGame(userId, difficulty);
+        var session = await _gameService.StartNewGameAsync(userId, difficulty);
         var state = _gameService.GetGameState(session.SessionId);
         return Ok(state);
     }

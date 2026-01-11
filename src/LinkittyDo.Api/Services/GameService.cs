@@ -4,7 +4,7 @@ namespace LinkittyDo.Api.Services;
 
 public interface IGameService
 {
-    GameSession StartNewGame(string? userId = null, int difficulty = 10);
+    Task<GameSession> StartNewGameAsync(string? userId = null, int difficulty = 10);
     GameSession? GetGame(Guid sessionId);
     GuessResponse SubmitGuess(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
@@ -15,90 +15,13 @@ public interface IGameService
 public class GameService : IGameService
 {
     private readonly Dictionary<Guid, GameSession> _sessions = new();
-    private readonly List<Phrase> _phrases;
-    private readonly Random _random = new();
-    
-    // Common stop words that should never be hidden for guessing
-    private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Articles
-        "a", "an", "the",
-        // Pronouns
-        "i", "me", "my", "myself", "we", "our", "ours", "ourselves",
-        "you", "your", "yours", "yourself", "yourselves",
-        "he", "him", "his", "himself", "she", "her", "hers", "herself",
-        "it", "its", "itself", "they", "them", "their", "theirs", "themselves",
-        "what", "which", "who", "whom", "this", "that", "these", "those",
-        // Prepositions
-        "in", "on", "at", "by", "for", "with", "about", "against", "between",
-        "into", "through", "during", "before", "after", "above", "below",
-        "to", "from", "up", "down", "out", "off", "over", "under",
-        // Conjunctions
-        "and", "but", "or", "nor", "so", "yet", "both", "either", "neither",
-        // Auxiliary/Modal verbs
-        "is", "am", "are", "was", "were", "be", "been", "being",
-        "have", "has", "had", "having", "do", "does", "did", "doing",
-        "will", "would", "shall", "should", "may", "might", "must", "can", "could",
-        // Other common words
-        "of", "as", "if", "than", "then", "because", "while", "although",
-        "where", "when", "how", "why", "all", "each", "every", "any", "some",
-        "no", "not", "only", "own", "same", "just", "also", "very", "too"
-    };
+    private readonly IGamePhraseService _phraseService;
+    private readonly ILogger<GameService> _logger;
 
-    public GameService()
+    public GameService(IGamePhraseService phraseService, ILogger<GameService> logger)
     {
-        // Initialize with sample phrases - words to hide will be auto-selected
-        _phrases = new List<Phrase>
-        {
-            CreatePhrase(1, "The quick brown fox jumps over the lazy dog"),
-            CreatePhrase(2, "A penny saved is a penny earned"),
-            CreatePhrase(3, "All that glitters is not gold"),
-            CreatePhrase(4, "Actions speak louder than words"),
-            CreatePhrase(5, "Better late than never"),
-            CreatePhrase(6, "Every cloud has a silver lining"),
-            CreatePhrase(7, "Knowledge is power"),
-            CreatePhrase(8, "Time flies when you are having fun"),
-            CreatePhrase(9, "Practice makes perfect"),
-            CreatePhrase(10, "Fortune favors the bold"),
-        };
-    }
-
-    private Phrase CreatePhrase(int id, string text)
-    {
-        var words = text.Split(' ');
-        
-        // Find indices of non-stop words - all of these will be hidden for guessing
-        var hiddenIndices = words
-            .Select((word, index) => new { Word = word, Index = index })
-            .Where(w => !IsStopWord(w.Word))
-            .Select(w => w.Index)
-            .ToHashSet();
-
-        return new Phrase
-        {
-            Id = id,
-            FullText = text,
-            Words = words.Select((word, index) => new PhraseWord
-            {
-                Index = index,
-                Text = word,
-                IsHidden = hiddenIndices.Contains(index),
-                ClueSearchTerm = hiddenIndices.Contains(index) ? CleanWord(word) : null
-            }).ToList()
-        };
-    }
-    
-    private static bool IsStopWord(string word)
-    {
-        // Clean punctuation before checking
-        var cleanWord = CleanWord(word);
-        return StopWords.Contains(cleanWord);
-    }
-    
-    private static string CleanWord(string word)
-    {
-        // Remove punctuation from start and end
-        return word.Trim(',', '.', '!', '?', ';', ':', '"', '\'');
+        _phraseService = phraseService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -111,9 +34,12 @@ public class GameService : IGameService
         return $"GAME-{timestamp}-{random}";
     }
 
-    public GameSession StartNewGame(string? userId = null, int difficulty = 10)
+    public async Task<GameSession> StartNewGameAsync(string? userId = null, int difficulty = 10)
     {
-        var phrase = _phrases[_random.Next(_phrases.Count)];
+        _logger.LogInformation("Starting new game for user: {UserId}, difficulty: {Difficulty}", 
+            userId ?? "guest", difficulty);
+        
+        var phrase = await _phraseService.GetPhraseForUserAsync(userId);
         var now = DateTime.UtcNow;
         
         var session = new GameSession

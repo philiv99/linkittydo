@@ -6,3 +6,4 @@ export { ClueButton } from './ClueButton';
 export { ScoreDisplay } from './ScoreDisplay';
 export { UserModal } from './UserModal';
 export { UserManageModal } from './UserManageModal';
+export { LlmTestButton } from './LlmTestButton';

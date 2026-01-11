@@ -11,7 +11,9 @@ import type {
   DifficultyResponse,
   PointsResponse,
   StartGameRequest,
-  GameRecord
+  GameRecord,
+  LlmTestRequest,
+  LlmTestResponse
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:5157/api';
@@ -179,5 +181,31 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`);
     if (!response.ok) throw new Error('Failed to get user games');
     return response.json();
+  },
+
+  // LLM endpoints
+  async testLlm(request: LlmTestRequest): Promise<LlmTestResponse> {
+    console.log('=== LLM Test Request ===');
+    console.log('Prompt:', request.prompt);
+    console.log('System Prompt:', request.systemPrompt ?? '(none)');
+
+    const response = await fetch(`${API_BASE_URL}/llm/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+
+    const data: LlmTestResponse = await response.json();
+
+    console.log('=== LLM Test Response ===');
+    console.log('Success:', data.success);
+    console.log('Content:', data.content);
+    console.log('Model:', data.model);
+    console.log('Token Usage - Prompt:', data.promptTokens, 'Completion:', data.completionTokens, 'Total:', data.totalTokens);
+    if (data.error) {
+      console.error('Error:', data.error);
+    }
+
+    return data;
   },
 };
