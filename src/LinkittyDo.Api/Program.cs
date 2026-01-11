@@ -1,3 +1,4 @@
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +8,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Register data repositories
+builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
+
 // Register application services
 builder.Services.AddSingleton<IGameService, GameService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddHttpClient<IClueService, ClueService>();
 
 // Configure CORS for React frontend

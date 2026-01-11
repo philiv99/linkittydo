@@ -21,7 +21,10 @@ public class ClueController : ControllerBase
     /// Get a clue URL for a hidden word
     /// </summary>
     [HttpGet("{sessionId}/{wordIndex}")]
-    public async Task<ActionResult<ClueResponse>> GetClue(Guid sessionId, int wordIndex)
+    public async Task<ActionResult<ClueResponse>> GetClue(
+        Guid sessionId, 
+        int wordIndex, 
+        [FromQuery(Name = "excludeUrl")] List<string>? excludeUrls = null)
     {
         var session = _gameService.GetGame(sessionId);
         if (session == null)
@@ -40,7 +43,23 @@ public class ClueController : ControllerBase
             return BadRequest(new { message = "Word is not hidden, no clue needed" });
         }
 
+        // Add client-excluded URLs to the session's used URLs
+        if (excludeUrls != null && excludeUrls.Count > 0)
+        {
+            foreach (var url in excludeUrls)
+            {
+                session.UsedClueUrls.Add(url);
+            }
+        }
+
         var clue = await _clueService.GetClueAsync(session, wordIndex);
+        
+        // Record the clue event for non-guest sessions
+        if (!string.IsNullOrEmpty(clue.Url))
+        {
+            _gameService.RecordClueEvent(sessionId, wordIndex, clue.SearchTerm, clue.Url);
+        }
+        
         return Ok(clue);
     }
 }

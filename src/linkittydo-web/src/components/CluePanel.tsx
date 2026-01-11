@@ -1,4 +1,5 @@
 import React from 'react';
+import type { WordState } from '../types';
 import './CluePanel.css';
 
 export interface ClueTab {
@@ -13,13 +14,26 @@ interface CluePanelProps {
   activeTabId: string | null;
   onTabSelect: (tabId: string) => void;
   onTabClose: (tabId: string) => void;
+  words: WordState[];
 }
+
+// Calculate the 1-based position among only guessable (hidden) words
+const getGuessablePosition = (wordIndex: number, words: WordState[]): number => {
+  let position = 0;
+  for (let i = 0; i <= wordIndex && i < words.length; i++) {
+    if (words[i].isHidden) {
+      position++;
+    }
+  }
+  return position;
+};
 
 export const CluePanel: React.FC<CluePanelProps> = ({ 
   tabs, 
   activeTabId, 
   onTabSelect, 
-  onTabClose 
+  onTabClose,
+  words
 }) => {
   if (tabs.length === 0) {
     return (
@@ -44,7 +58,7 @@ export const CluePanel: React.FC<CluePanelProps> = ({
             className={`clue-tab ${tab.id === activeTab.id ? 'active' : ''}`}
             onClick={() => onTabSelect(tab.id)}
           >
-            <span className="tab-position">#{tab.wordIndex + 1}</span>
+            <span className="tab-position">#{getGuessablePosition(tab.wordIndex, words)}</span>
             <span className="tab-title">{tab.title}</span>
             <button 
               className="tab-close"

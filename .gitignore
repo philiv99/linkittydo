@@ -22,6 +22,9 @@ project.lock.json
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
+# Data storage (JSON files)
+src/LinkittyDo.Api/Data/Users/
+
 # =========================
 # Node.js / React / Vite
 # =========================

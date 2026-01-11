@@ -4,3 +4,5 @@ export { WordSlot } from './WordSlot';
 export { GuessInput } from './GuessInput';
 export { ClueButton } from './ClueButton';
 export { ScoreDisplay } from './ScoreDisplay';
+export { UserModal } from './UserModal';
+export { UserManageModal } from './UserManageModal';

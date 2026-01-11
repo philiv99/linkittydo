@@ -18,6 +18,55 @@
   overflow-y: auto;
 }
 
+/* Click to Start Screen */
+.click-to-start {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--coral) 0%, var(--yellow) 50%, var(--cyan) 100%);
+  cursor: pointer;
+  z-index: 2000;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.click-content {
+  text-align: center;
+  color: var(--dark);
+  animation: clickPulse 1.5s ease-in-out infinite;
+}
+
+.click-content h1 {
+  font-family: 'Lobster', cursive;
+  font-size: 64px;
+  margin: 0 0 20px 0;
+  text-shadow: 3px 3px 0 white;
+}
+
+.click-content p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 15px 30px;
+  border-radius: 30px;
+  border: 3px solid var(--dark);
+}
+
+@keyframes clickPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 /* Splash Screen */
 .splash-screen {
   position: fixed;
@@ -68,8 +117,8 @@
 }
 
 @keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; transform: translateX(-50%) translateY(30px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .play-button {
@@ -126,6 +175,21 @@
 
 .play-text {
   text-shadow: 2px 2px 0 var(--dark);
+}
+
+.audio-hint {
+  color: var(--dark);
+  font-size: 18px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px 20px;
+  border-radius: 20px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* Random floating word bubbles */
@@ -385,12 +449,70 @@
   box-shadow: 0 4px 0 var(--dark);
 }
 
+.header-title {
+  display: flex;
+  flex-direction: column;
+}
+
 .game-header h1 {
   margin: 0;
   font-family: 'Lobster', cursive;
   font-size: 42px;
   color: var(--coral);
   text-shadow: 2px 2px 0 var(--dark);
+}
+
+.user-name {
+  font-size: 14px;
+  color: var(--dark);
+  font-weight: 600;
+  opacity: 0.8;
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-name.user-name-clickable {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.user-name.user-name-clickable:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--coral);
+  transform: translateY(-1px);
+}
+
+.guest-badge {
+  font-size: 12px;
+}
+
+.lifetime-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  border-radius: 15px;
+  border: 2px solid var(--dark);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  box-shadow: 2px 2px 0 var(--dark);
+}
+
+.lifetime-points .points-icon {
+  font-size: 14px;
+}
+
+.lifetime-points .points-value {
+  font-family: 'Poppins', sans-serif;
 }
 
 .game-main {

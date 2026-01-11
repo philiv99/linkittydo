@@ -4,10 +4,12 @@ namespace LinkittyDo.Api.Services;
 
 public interface IGameService
 {
-    GameSession StartNewGame();
+    GameSession StartNewGame(string? userId = null, int difficulty = 10);
     GameSession? GetGame(Guid sessionId);
     GuessResponse SubmitGuess(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
+    GameState GiveUp(Guid sessionId);
+    void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url);
 }
 
 public class GameService : IGameService
@@ -99,9 +101,20 @@ public class GameService : IGameService
         return word.Trim(',', '.', '!', '?', ';', ':', '"', '\'');
     }
 
-    public GameSession StartNewGame()
+    /// <summary>
+    /// Generates a unique game ID following the format: GAME-{timestamp}-{random}
+    /// </summary>
+    private static string GenerateGameId()
+    {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var random = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
+        return $"GAME-{timestamp}-{random}";
+    }
+
+    public GameSession StartNewGame(string? userId = null, int difficulty = 10)
     {
         var phrase = _phrases[_random.Next(_phrases.Count)];
+        var now = DateTime.UtcNow;
         
         var session = new GameSession
         {
@@ -110,13 +123,30 @@ public class GameService : IGameService
             Phrase = phrase,
             RevealedWords = new Dictionary<int, bool>(),
             Score = 0,
-            StartedAt = DateTime.UtcNow
+            StartedAt = now,
+            UserId = userId
         };
 
         // Initialize all hidden words as not revealed
         foreach (var word in phrase.Words.Where(w => w.IsHidden))
         {
             session.RevealedWords[word.Index] = false;
+        }
+
+        // Create game record for non-guest users
+        if (!session.IsGuestSession)
+        {
+            session.GameRecord = new GameRecord
+            {
+                GameId = GenerateGameId(),
+                PlayedAt = now,
+                PhraseId = phrase.Id,
+                PhraseText = phrase.FullText,
+                Difficulty = difficulty,
+                Score = 0,
+                Result = GameResult.InProgress,
+                Events = new List<GameEvent>()
+            };
         }
 
         _sessions[session.SessionId] = session;
@@ -144,14 +174,41 @@ public class GameService : IGameService
 
         // Case-insensitive comparison
         var isCorrect = string.Equals(word.Text, request.Guess, StringComparison.OrdinalIgnoreCase);
+        var pointsAwarded = isCorrect ? 100 : 0;
 
         if (isCorrect)
         {
             session.RevealedWords[request.WordIndex] = true;
-            session.Score += 100; // Base points per correct guess
+            session.Score += pointsAwarded;
+        }
+
+        // Record guess event for non-guest sessions
+        if (!session.IsGuestSession && session.GameRecord != null)
+        {
+            session.GameRecord.Events.Add(new GuessEvent
+            {
+                WordIndex = request.WordIndex,
+                GuessText = request.Guess,
+                IsCorrect = isCorrect,
+                PointsAwarded = pointsAwarded,
+                Timestamp = DateTime.UtcNow
+            });
+            session.GameRecord.Score = session.Score;
         }
 
         var isComplete = session.RevealedWords.All(kv => kv.Value);
+        
+        // If phrase is complete, mark game as solved
+        if (isComplete && !session.IsGuestSession && session.GameRecord != null)
+        {
+            session.GameRecord.Events.Add(new GameEndEvent
+            {
+                Reason = "solved",
+                Timestamp = DateTime.UtcNow
+            });
+            session.GameRecord.Result = GameResult.Solved;
+            session.GameRecord.CompletedAt = DateTime.UtcNow;
+        }
 
         return new GuessResponse
         {
@@ -187,5 +244,55 @@ public class GameService : IGameService
             Score = session.Score,
             IsComplete = session.RevealedWords.All(kv => kv.Value)
         };
+    }
+
+    public GameState GiveUp(Guid sessionId)
+    {
+        var session = GetGame(sessionId);
+        if (session == null)
+        {
+            return new GameState();
+        }
+
+        // Reveal all hidden words
+        foreach (var word in session.Phrase.Words.Where(w => w.IsHidden))
+        {
+            session.RevealedWords[word.Index] = true;
+        }
+
+        // Set score to 0 for giving up
+        session.Score = 0;
+        
+        // Record game end event for non-guest sessions
+        if (!session.IsGuestSession && session.GameRecord != null)
+        {
+            session.GameRecord.Events.Add(new GameEndEvent
+            {
+                Reason = "gaveup",
+                Timestamp = DateTime.UtcNow
+            });
+            session.GameRecord.Result = GameResult.GaveUp;
+            session.GameRecord.Score = 0;
+            session.GameRecord.CompletedAt = DateTime.UtcNow;
+        }
+
+        return GetGameState(sessionId);
+    }
+
+    public void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url)
+    {
+        var session = GetGame(sessionId);
+        if (session == null || session.IsGuestSession || session.GameRecord == null)
+        {
+            return;
+        }
+
+        session.GameRecord.Events.Add(new ClueEvent
+        {
+            WordIndex = wordIndex,
+            SearchTerm = searchTerm,
+            Url = url,
+            Timestamp = DateTime.UtcNow
+        });
     }
 }
