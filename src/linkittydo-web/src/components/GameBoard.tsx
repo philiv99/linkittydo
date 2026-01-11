@@ -130,6 +130,18 @@ export const GameBoard: React.FC = () => {
     await giveUp();
   };
 
+  const handleSignOut = () => {
+    // Sign out the user (resets to guest)
+    signOut();
+    // Clear and restart game for the guest user
+    setClueTabs([]);
+    setActiveTabId(null);
+    setGaveUp(false);
+    stopAll();
+    // Start a new game without userId (guest mode)
+    startGame();
+  };
+
   // Click to start screen - need user interaction for audio
   if (!audioStarted && !gameState && !loading) {
     return (
@@ -282,7 +294,7 @@ export const GameBoard: React.FC = () => {
           currentUser={user}
           allUsers={allUsers}
           isGuest={isGuest}
-          onSignOut={signOut}
+          onSignOut={handleSignOut}
           onSwitchUser={handleSwitchUser}
           onUpdateDifficulty={updateDifficulty}
           onCreateProfile={() => setShowUserModal(true)}

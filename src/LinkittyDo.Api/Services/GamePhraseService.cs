@@ -1,3 +1,4 @@
+using System.Linq;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 
@@ -230,13 +231,13 @@ Return only the phrase with no quotes or additional text.";
     /// </summary>
     private Phrase CreatePhraseFromGamePhrase(GamePhrase gamePhrase)
     {
-        var words = gamePhrase.Text.Split(' ');
+        var tokens = TokenizePhrase(gamePhrase.Text);
         
-        // Find indices of non-stop words - all of these will be hidden for guessing
-        var hiddenIndices = words
-            .Select((word, index) => new { Word = word, Index = index })
-            .Where(w => !IsStopWord(w.Word))
-            .Select(w => w.Index)
+        // Find indices of non-stop words and non-punctuation - these will be hidden for guessing
+        var hiddenIndices = tokens
+            .Select((token, index) => new { Token = token, Index = index })
+            .Where(t => !IsStopWord(t.Token) && !IsPunctuation(t.Token))
+            .Select(t => t.Index)
             .ToHashSet();
 
         // Generate a consistent ID from the phrase's unique ID
@@ -246,20 +247,89 @@ Return only the phrase with no quotes or additional text.";
         {
             Id = phraseId,
             FullText = gamePhrase.Text,
-            Words = words.Select((word, index) => new PhraseWord
+            Words = tokens.Select((token, index) => new PhraseWord
             {
                 Index = index,
-                Text = word,
+                Text = token,
                 IsHidden = hiddenIndices.Contains(index),
-                ClueSearchTerm = hiddenIndices.Contains(index) ? CleanWord(word) : null
+                ClueSearchTerm = hiddenIndices.Contains(index) ? token : null
             }).ToList()
         };
     }
     
+    /// <summary>
+    /// Tokenizes a phrase by separating words from punctuation.
+    /// Punctuation marks become their own tokens.
+    /// </summary>
+    private static List<string> TokenizePhrase(string phrase)
+    {
+        var tokens = new List<string>();
+        var currentWord = new System.Text.StringBuilder();
+        
+        foreach (var c in phrase)
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                // End of word - add if not empty
+                if (currentWord.Length > 0)
+                {
+                    tokens.Add(currentWord.ToString());
+                    currentWord.Clear();
+                }
+            }
+            else if (IsPunctuationChar(c))
+            {
+                // Punctuation found - save current word first, then add punctuation as separate token
+                if (currentWord.Length > 0)
+                {
+                    tokens.Add(currentWord.ToString());
+                    currentWord.Clear();
+                }
+                tokens.Add(c.ToString());
+            }
+            else
+            {
+                // Regular character - add to current word
+                currentWord.Append(c);
+            }
+        }
+        
+        // Don't forget the last word
+        if (currentWord.Length > 0)
+        {
+            tokens.Add(currentWord.ToString());
+        }
+        
+        return tokens;
+    }
+    
+    /// <summary>
+    /// Checks if a character is a punctuation mark that should be separated
+    /// </summary>
+    private static bool IsPunctuationChar(char c)
+    {
+        // Note: apostrophe (') is NOT included so contractions like "don't" stay together
+        return c == ',' || c == '.' || c == '!' || c == '?' || 
+               c == ';' || c == ':' || c == '"' ||
+               c == '(' || c == ')' || c == '-' || c == '–' || c == '—';
+    }
+    
+    /// <summary>
+    /// Checks if a token is punctuation (treated like a stop word - always visible)
+    /// </summary>
+    private static bool IsPunctuation(string token)
+    {
+        // Single character punctuation
+        if (token.Length == 1 && IsPunctuationChar(token[0]))
+            return true;
+        
+        // Also catch any token that is entirely punctuation
+        return token.All(c => IsPunctuationChar(c) || char.IsPunctuation(c));
+    }
+    
     private static bool IsStopWord(string word)
     {
-        var cleanWord = CleanWord(word);
-        return StopWords.Contains(cleanWord);
+        return StopWords.Contains(word);
     }
     
     private static string CleanWord(string word)
