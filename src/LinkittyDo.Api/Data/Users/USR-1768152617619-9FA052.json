@@ -1,0 +1,1375 @@
+{
+  "uniqueId": "USR-1768152617619-9FA052",
+  "name": "Tom",
+  "email": "tom@tom.com",
+  "lifetimePoints": 8000,
+  "preferredDifficulty": 10,
+  "games": [
+    {
+      "gameId": "GAME-1768154134963-16A0ED",
+      "playedAt": "2026-01-11T17:55:34.9639384Z",
+      "completedAt": "2026-01-11T17:56:00.3274673Z",
+      "score": 200,
+      "phraseId": 3,
+      "phraseText": "All that glitters is not gold",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "stars",
+          "url": "https://en.wikipedia.org/wiki/stars",
+          "timestamp": "2026-01-11T17:55:38.9409865Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "gold",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:55:53.6066664Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "glitters",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:56:00.3274634Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T17:56:00.3274671Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768154332894-9D2948",
+      "playedAt": "2026-01-11T17:58:52.8941927Z",
+      "completedAt": "2026-01-11T17:59:07.5102992Z",
+      "score": 200,
+      "phraseId": 3,
+      "phraseText": "All that glitters is not gold",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "sparkles",
+          "url": "https://en.wikipedia.org/wiki/sparkles",
+          "timestamp": "2026-01-11T17:58:55.9034848Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "glitters",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:59:00.7316118Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 5,
+          "searchTerm": "golden",
+          "url": "https://en.wikipedia.org/wiki/golden",
+          "timestamp": "2026-01-11T17:59:03.1835417Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "gold",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:59:07.5102935Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T17:59:07.5102988Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768154386833-A967A7",
+      "playedAt": "2026-01-11T17:59:46.8333334Z",
+      "completedAt": "2026-01-11T18:02:14.2357421Z",
+      "score": 100,
+      "phraseId": 1,
+      "phraseText": "The quick brown fox jumps over the lazy dog",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "quick",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:59:52.6373466Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "brownness",
+          "url": "https://en.wikipedia.org/wiki/brownness",
+          "timestamp": "2026-01-11T17:59:55.303838Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "brown",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T17:59:57.8966166Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "discombobulate",
+          "url": "https://en.wikipedia.org/wiki/discombobulate",
+          "timestamp": "2026-01-11T18:00:00.2940831Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "george fox",
+          "url": "https://en.wikipedia.org/wiki/george\u002Bfox",
+          "timestamp": "2026-01-11T18:00:05.1046498Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "bedevil",
+          "url": "https://en.wikipedia.org/wiki/bedevil",
+          "timestamp": "2026-01-11T18:00:07.3825266Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "throw",
+          "url": "https://en.wikipedia.org/wiki/throw",
+          "timestamp": "2026-01-11T18:00:09.2495502Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "zorro",
+          "url": "https://en.wikipedia.org/wiki/zorro",
+          "timestamp": "2026-01-11T18:00:10.5147134Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "slyboots",
+          "url": "https://en.wikipedia.org/wiki/slyboots",
+          "timestamp": "2026-01-11T18:00:11.7057211Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "trick",
+          "url": "https://en.wikipedia.org/wiki/trick",
+          "timestamp": "2026-01-11T18:00:13.3137658Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "reynard",
+          "url": "https://en.wikipedia.org/wiki/reynard",
+          "timestamp": "2026-01-11T18:00:14.7125091Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "confuse",
+          "url": "https://en.wikipedia.org/wiki/confuse",
+          "timestamp": "2026-01-11T18:00:15.8715911Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "fox",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T18:00:19.9983573Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 4,
+          "searchTerm": "stand out",
+          "url": "https://en.wikipedia.org/wiki/stand\u002Bout",
+          "timestamp": "2026-01-11T18:00:26.1627771Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 4,
+          "searchTerm": "jump out",
+          "url": "https://en.wikipedia.org/wiki/jump\u002Bout",
+          "timestamp": "2026-01-11T18:00:28.1995065Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "jumped",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-11T18:00:32.4452862Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "jumps",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T18:00:34.4666264Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 7,
+          "searchTerm": "idle",
+          "url": "https://en.wikipedia.org/wiki/idle",
+          "timestamp": "2026-01-11T18:00:37.6498225Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 7,
+          "searchTerm": "independent",
+          "url": "https://en.wikipedia.org/wiki/independent",
+          "timestamp": "2026-01-11T18:00:40.1881505Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 7,
+          "guessText": "lazy",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T18:00:43.5426049Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 8,
+          "guessText": "dog",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T18:00:46.5255504Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T18:00:46.5256681Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 8,
+          "searchTerm": "blackguard",
+          "url": "https://en.wikipedia.org/wiki/blackguard",
+          "timestamp": "2026-01-11T18:00:49.8648342Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 8,
+          "searchTerm": "tag",
+          "url": "https://en.wikipedia.org/wiki/tag",
+          "timestamp": "2026-01-11T18:00:51.9137585Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 8,
+          "searchTerm": "andiron",
+          "url": "https://en.wikipedia.org/wiki/andiron",
+          "timestamp": "2026-01-11T18:00:53.4716838Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-11T18:00:59.5053405Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 8,
+          "guessText": "dog",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T18:02:14.2357365Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T18:02:14.2357418Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768154546123-B77D87",
+      "playedAt": "2026-01-11T18:02:26.1234824Z",
+      "completedAt": "2026-01-11T18:02:29.7729413Z",
+      "score": 0,
+      "phraseId": 1,
+      "phraseText": "The quick brown fox jumps over the lazy dog",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-11T18:02:29.7729402Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222030404-F0E6A4",
+      "playedAt": "2026-01-12T12:47:10.404283Z",
+      "completedAt": "2026-01-12T12:48:20.4284367Z",
+      "score": 0,
+      "phraseId": 930990996,
+      "phraseText": "A blessing in disguise!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "benediction",
+          "url": "https://www.dictionary.com/browse/benediction",
+          "timestamp": "2026-01-12T12:47:18.4301265Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "wealth",
+          "url": "https://en.wikipedia.org/wiki/wealth",
+          "timestamp": "2026-01-12T12:47:18.640941Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "mercy",
+          "url": "https://en.wikipedia.org/wiki/mercy",
+          "timestamp": "2026-01-12T12:47:27.6410943Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "dissemble",
+          "url": "https://en.wikipedia.org/wiki/dissemble",
+          "timestamp": "2026-01-12T12:47:32.8031091Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "distract",
+          "url": "https://en.wikipedia.org/wiki/distract",
+          "timestamp": "2026-01-12T12:47:39.7431509Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "concealment",
+          "url": "https://en.wikipedia.org/wiki/concealment",
+          "timestamp": "2026-01-12T12:47:46.2401029Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "richness",
+          "url": "https://en.wikipedia.org/wiki/richness",
+          "timestamp": "2026-01-12T12:47:53.1744815Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T12:48:20.4284348Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222112410-60C7FD",
+      "playedAt": "2026-01-12T12:48:32.4100542Z",
+      "completedAt": "2026-01-12T12:48:48.3629775Z",
+      "score": 200,
+      "phraseId": 1916583917,
+      "phraseText": "Bite the bullet!",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "collation",
+          "url": "https://en.wikipedia.org/wiki/collation",
+          "timestamp": "2026-01-12T12:48:36.4663153Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "gunshot",
+          "url": "https://en.wikipedia.org/wiki/gunshot",
+          "timestamp": "2026-01-12T12:48:38.6765543Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "bite",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:48:43.042721Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "bullet",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:48:48.3629707Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:48:48.3629763Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222130289-A64973",
+      "playedAt": "2026-01-12T12:48:50.2891089Z",
+      "completedAt": "2026-01-12T12:49:06.2160704Z",
+      "score": 200,
+      "phraseId": 859718267,
+      "phraseText": "When it rains , it pours",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "pours",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:48:59.7135018Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "tents",
+          "url": "https://en.wikipedia.org/wiki/tents",
+          "timestamp": "2026-01-12T12:49:04.0276485Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "rains",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:06.2160634Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:49:06.2160698Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222148316-631BAD",
+      "playedAt": "2026-01-12T12:49:08.3160082Z",
+      "completedAt": "2026-01-12T12:49:23.8094441Z",
+      "score": 300,
+      "phraseId": 296883732,
+      "phraseText": "Every cloud has a silver lining!",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "cloud",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:15.8942469Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "silver",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:19.9900993Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "lining",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:23.809439Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:49:23.8094436Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222165748-42FA8D",
+      "playedAt": "2026-01-12T12:49:25.7488042Z",
+      "completedAt": "2026-01-12T12:49:35.0702953Z",
+      "score": 200,
+      "phraseId": 2005892662,
+      "phraseText": "A penny for your thoughts?",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "penny",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:32.0241678Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "thoughts",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:35.0702905Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:49:35.0702948Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222177181-6DEE8C",
+      "playedAt": "2026-01-12T12:49:37.1815655Z",
+      "completedAt": "2026-01-12T12:49:57.301808Z",
+      "score": 400,
+      "phraseId": 1542125930,
+      "phraseText": "A stitch in time, saves nine.",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "mesh",
+          "url": "https://en.wikipedia.org/wiki/mesh",
+          "timestamp": "2026-01-12T12:49:42.5290495Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "suture",
+          "url": "https://en.wikipedia.org/wiki/suture",
+          "timestamp": "2026-01-12T12:49:45.3403368Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "stitch",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:49.8352599Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "time",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:52.0147586Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "saves",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:55.3621991Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 6,
+          "guessText": "nine",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:49:57.301803Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:49:57.3018075Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222199593-65F4CF",
+      "playedAt": "2026-01-12T12:49:59.593572Z",
+      "completedAt": "2026-01-12T12:50:22.5914604Z",
+      "score": 400,
+      "phraseId": 1455142965,
+      "phraseText": "All good things come to an end.",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "virtuous",
+          "url": "https://en.wikipedia.org/wiki/virtuous",
+          "timestamp": "2026-01-12T12:50:05.7453174Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "good",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:50:12.4881572Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "things",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:50:16.0629405Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "come",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:50:20.5849642Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 6,
+          "guessText": "end",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:50:22.591457Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:50:22.5914601Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222227427-FC120A",
+      "playedAt": "2026-01-12T12:50:27.427005Z",
+      "completedAt": "2026-01-12T12:51:27.3909165Z",
+      "score": 300,
+      "phraseId": 928388466,
+      "phraseText": "Barking up the wrong tree",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "latrant",
+          "url": "https://en.wikipedia.org/wiki/latrant",
+          "timestamp": "2026-01-12T12:50:37.5396385Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "wow",
+          "url": "https://en.wikipedia.org/wiki/wow",
+          "timestamp": "2026-01-12T12:50:40.3241162Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "keening",
+          "url": "https://en.wikipedia.org/wiki/keening",
+          "timestamp": "2026-01-12T12:50:42.5937033Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 4,
+          "searchTerm": "plant",
+          "url": "https://en.wikipedia.org/wiki/plant",
+          "timestamp": "2026-01-12T12:51:07.4041932Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "awry",
+          "url": "https://en.wikipedia.org/wiki/awry",
+          "timestamp": "2026-01-12T12:51:11.5416571Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "bark",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T12:51:16.3462399Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "wrong",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:51:20.5894556Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "tree",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:51:23.321212Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "barking",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:51:27.3909135Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:51:27.3909161Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222292799-52F0F9",
+      "playedAt": "2026-01-12T12:51:32.7996719Z",
+      "completedAt": "2026-01-12T12:52:08.8303202Z",
+      "score": 200,
+      "phraseId": 755186336,
+      "phraseText": "A penny for your thoughts",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "priced",
+          "url": "https://en.wikipedia.org/wiki/priced",
+          "timestamp": "2026-01-12T12:51:36.6681141Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 4,
+          "searchTerm": "conceits",
+          "url": "https://en.wikipedia.org/wiki/conceits",
+          "timestamp": "2026-01-12T12:51:43.7029004Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 4,
+          "searchTerm": "intellection",
+          "url": "https://en.wikipedia.org/wiki/intellection",
+          "timestamp": "2026-01-12T12:51:45.6587535Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "thought",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T12:51:54.7434157Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "thought",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T12:51:56.7591736Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "penny",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:52:04.310776Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "thoughts",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T12:52:08.830304Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T12:52:08.8303196Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768222332591-6D83D0",
+      "playedAt": "2026-01-12T12:52:12.5914414Z",
+      "completedAt": "2026-01-12T12:52:26.2595663Z",
+      "score": 0,
+      "phraseId": 990683107,
+      "phraseText": "Bite the bullet",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "sting",
+          "url": "https://en.wikipedia.org/wiki/sting",
+          "timestamp": "2026-01-12T12:52:16.0874644Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "ammo",
+          "url": "https://en.wikipedia.org/wiki/ammo",
+          "timestamp": "2026-01-12T12:52:17.9779082Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T12:52:26.2595656Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768242304463-6972CE",
+      "playedAt": "2026-01-12T18:25:04.4633837Z",
+      "completedAt": "2026-01-12T18:25:10.0972999Z",
+      "score": 0,
+      "phraseId": 1651755746,
+      "phraseText": "Every cloud has a silver lining",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T18:25:10.0972987Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768242315630-01DB99",
+      "playedAt": "2026-01-12T18:25:15.6306517Z",
+      "completedAt": "2026-01-12T18:26:30.6504045Z",
+      "score": 300,
+      "phraseId": 1212374797,
+      "phraseText": "Familiarity breeds contempt",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "impropriety",
+          "url": "https://www.wordreference.com/definition/impropriety",
+          "timestamp": "2026-01-12T18:25:20.4501788Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "conversance",
+          "url": "https://en.wikipedia.org/wiki/conversance",
+          "timestamp": "2026-01-12T18:25:25.6801928Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "talk",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:25:36.0703823Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "closeness",
+          "url": "https://en.wikipedia.org/wiki/closeness",
+          "timestamp": "2026-01-12T18:25:38.9753079Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "brings",
+          "url": "https://en.wikipedia.org/wiki/brings",
+          "timestamp": "2026-01-12T18:25:45.2836037Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "libel",
+          "url": "https://en.wikipedia.org/wiki/libel",
+          "timestamp": "2026-01-12T18:25:49.73731Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "disdain",
+          "url": "https://en.wikipedia.org/wiki/disdain",
+          "timestamp": "2026-01-12T18:25:56.4387751Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "stigma",
+          "url": "https://en.wikipedia.org/wiki/stigma",
+          "timestamp": "2026-01-12T18:26:03.8394713Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "familiarisation",
+          "url": "https://en.wikipedia.org/wiki/familiarisation",
+          "timestamp": "2026-01-12T18:26:11.4119371Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "familiarity",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:26:16.7732314Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "brings",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:26:20.9392794Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "arouses",
+          "url": "https://en.wikipedia.org/wiki/arouses",
+          "timestamp": "2026-01-12T18:26:22.9325792Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "breeds",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:26:26.5100804Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "contempt",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:26:30.6504013Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T18:26:30.650404Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768242392572-92ED7B",
+      "playedAt": "2026-01-12T18:26:32.5726168Z",
+      "completedAt": "2026-01-12T18:27:35.3160407Z",
+      "score": 300,
+      "phraseId": 1819527192,
+      "phraseText": "Burning the midnight oil",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "aflame",
+          "url": "https://en.wikipedia.org/wiki/aflame",
+          "timestamp": "2026-01-12T18:26:35.4813994Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "fiery",
+          "url": "https://en.wikipedia.org/wiki/fiery",
+          "timestamp": "2026-01-12T18:26:59.9559108Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "mid-",
+          "url": "https://en.wikipedia.org/wiki/mid-",
+          "timestamp": "2026-01-12T18:27:03.0374354Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "pitch-dark",
+          "url": "https://en.wikipedia.org/wiki/pitch-dark",
+          "timestamp": "2026-01-12T18:27:04.9552314Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "lubrication",
+          "url": "https://en.wikipedia.org/wiki/lubrication",
+          "timestamp": "2026-01-12T18:27:10.4265367Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "oil",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:27:20.1333024Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "midnight",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:27:23.7242987Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "burn",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:27:27.2136195Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "burning",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:27:35.3160324Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T18:27:35.3160403Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768242459070-A48E53",
+      "playedAt": "2026-01-12T18:27:39.0705226Z",
+      "completedAt": "2026-01-12T18:28:48.3236868Z",
+      "score": 400,
+      "phraseId": 439624799,
+      "phraseText": "Don\u0027t count your chickens before they hatch",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "yellow-bellied",
+          "url": "https://en.wikipedia.org/wiki/yellow-bellied",
+          "timestamp": "2026-01-12T18:27:50.3976831Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "gallus gallus",
+          "url": "https://en.wikipedia.org/wiki/gallus\u002Bgallus",
+          "timestamp": "2026-01-12T18:27:52.4732656Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "birds",
+          "url": "https://en.wikipedia.org/wiki/birds",
+          "timestamp": "2026-01-12T18:27:54.1359907Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "eggs",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:04.1182155Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "egg",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:05.3383164Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "dunno",
+          "url": "https://en.wikipedia.org/wiki/dunno",
+          "timestamp": "2026-01-12T18:28:08.7109714Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "dont",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:11.6196634Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "don\u0027t",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:28:14.0132185Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "count",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:28:18.2154406Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "chicks",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:23.8560531Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 6,
+          "guessText": "hatch",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:28:30.795655Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "eggs",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:35.0814718Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "egg",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:38.0597224Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "birds",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:40.5471005Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "hens",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:28:43.8764866Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "chickens",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:28:48.323682Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T18:28:48.323686Z"
+        }
+      ],
+      "isCompleted": true
+    }
+  ],
+  "createdAt": "2026-01-11T17:30:17.619909Z",
+  "updatedAt": "2026-01-12T18:28:48.3464758Z"
+}

@@ -1,0 +1,300 @@
+{
+  "uniqueId": "USR-1768158132151-ACFD1B",
+  "name": "Sally",
+  "email": "sally@sally.com",
+  "lifetimePoints": 2400,
+  "preferredDifficulty": 10,
+  "games": [
+    {
+      "gameId": "GAME-1768158152460-AF649B",
+      "playedAt": "2026-01-11T19:02:32.4606043Z",
+      "completedAt": "2026-01-11T19:02:44.0105606Z",
+      "score": 200,
+      "phraseId": 1157469167,
+      "phraseText": "A penny for your thoughts",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "penny",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:02:39.9477852Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "thoughts",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:02:44.0105552Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T19:02:44.0105601Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158165583-4998CB",
+      "playedAt": "2026-01-11T19:02:45.5837527Z",
+      "completedAt": "2026-01-11T19:03:05.6252438Z",
+      "score": 400,
+      "phraseId": 88452923,
+      "phraseText": "All good things come to an end",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "great",
+          "url": "https://en.wikipedia.org/wiki/great",
+          "timestamp": "2026-01-11T19:02:50.2700455Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "good",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:02:53.9781922Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "things",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:02:59.2179817Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "come",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:03:02.6656414Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 6,
+          "guessText": "end",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:03:05.6252403Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T19:03:05.6252434Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158187575-FA5E3E",
+      "playedAt": "2026-01-11T19:03:07.5753758Z",
+      "completedAt": "2026-01-11T19:03:20.9196361Z",
+      "score": 0,
+      "phraseId": 88371595,
+      "phraseText": "When it rains , it pours",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "rainfall",
+          "url": "https://en.wikipedia.org/wiki/rainfall",
+          "timestamp": "2026-01-11T19:03:11.4611329Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "cluster",
+          "url": "https://en.wikipedia.org/wiki/cluster",
+          "timestamp": "2026-01-11T19:03:14.008654Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-11T19:03:20.9196352Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158377475-9CF9C1",
+      "playedAt": "2026-01-11T19:06:17.475367Z",
+      "completedAt": "2026-01-11T19:06:34.6807424Z",
+      "score": 200,
+      "phraseId": 1916583917,
+      "phraseText": "Bite the bullet!",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "sting",
+          "url": "https://en.wikipedia.org/wiki/sting",
+          "timestamp": "2026-01-11T19:06:24.9789711Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 0,
+          "guessText": "bite",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:06:31.2758392Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "bullet",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:06:34.6807385Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T19:06:34.6807419Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158397259-81B306",
+      "playedAt": "2026-01-11T19:06:37.2590157Z",
+      "completedAt": "2026-01-11T19:06:43.2396647Z",
+      "score": 0,
+      "phraseId": 296883732,
+      "phraseText": "Every cloud has a silver lining!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-11T19:06:43.239663Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158404525-C15F36",
+      "playedAt": "2026-01-11T19:06:44.5254236Z",
+      "completedAt": "2026-01-11T19:06:52.9307469Z",
+      "score": 0,
+      "phraseId": 930990996,
+      "phraseText": "A blessing in disguise!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "approval",
+          "url": "https://en.wikipedia.org/wiki/approval",
+          "timestamp": "2026-01-11T19:06:50.5090857Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-11T19:06:52.9307461Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768158414368-A83538",
+      "playedAt": "2026-01-11T19:06:54.3688573Z",
+      "completedAt": "2026-01-11T19:07:17.88113Z",
+      "score": 400,
+      "phraseId": 1455142965,
+      "phraseText": "All good things come to an end.",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "good",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:07:04.2182084Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "elements",
+          "url": "https://en.wikipedia.org/wiki/elements",
+          "timestamp": "2026-01-11T19:07:06.4324324Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "things",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:07:09.7138073Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 3,
+          "guessText": "come",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:07:15.0340633Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 6,
+          "guessText": "end",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-11T19:07:17.8811252Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-11T19:07:17.8811296Z"
+        }
+      ],
+      "isCompleted": true
+    }
+  ],
+  "createdAt": "2026-01-11T19:02:12.1512526Z",
+  "updatedAt": "2026-01-11T19:07:17.8929764Z"
+}
