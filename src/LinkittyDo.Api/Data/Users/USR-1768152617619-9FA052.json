@@ -2,7 +2,7 @@
   "uniqueId": "USR-1768152617619-9FA052",
   "name": "Tom",
   "email": "tom@tom.com",
-  "lifetimePoints": 8000,
+  "lifetimePoints": 8600,
   "preferredDifficulty": 10,
   "games": [
     {
@@ -1368,8 +1368,144 @@
         }
       ],
       "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768242531336-DD9827",
+      "playedAt": "2026-01-12T18:28:51.3366558Z",
+      "completedAt": "2026-01-12T18:35:27.0186307Z",
+      "score": 300,
+      "phraseId": 986088613,
+      "phraseText": "It takes two to tango",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "undergo",
+          "url": "https://dictionary.cambridge.org/dictionary/english/undergo",
+          "timestamp": "2026-01-12T18:34:12.4248784Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "take away",
+          "url": "https://en.wikipedia.org/wiki/take\u002Baway",
+          "timestamp": "2026-01-12T18:34:16.1396435Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "convey",
+          "url": "https://en.wikipedia.org/wiki/convey",
+          "timestamp": "2026-01-12T18:34:20.406162Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "submit",
+          "url": "https://en.wikipedia.org/wiki/submit",
+          "timestamp": "2026-01-12T18:34:25.7632618Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "take up",
+          "url": "https://en.wikipedia.org/wiki/take\u002Bup",
+          "timestamp": "2026-01-12T18:34:27.8830581Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "pays",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:34:32.5092114Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "twofold",
+          "url": "https://en.wikipedia.org/wiki/twofold",
+          "timestamp": "2026-01-12T18:34:37.6846609Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "2",
+          "url": "https://en.wikipedia.org/wiki/2",
+          "timestamp": "2026-01-12T18:35:03.6685708Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "three",
+          "url": "https://en.wikipedia.org/wiki/three",
+          "timestamp": "2026-01-12T18:35:04.971357Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "twice",
+          "url": "https://en.wikipedia.org/wiki/twice",
+          "timestamp": "2026-01-12T18:35:09.6389373Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "double",
+          "isCorrect": false,
+          "pointsAwarded": 0,
+          "timestamp": "2026-01-12T18:35:13.8130756Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "two",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:35:16.2101952Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 1,
+          "guessText": "takes",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:35:23.5651384Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 4,
+          "guessText": "tango",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-12T18:35:27.0186259Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-12T18:35:27.0186304Z"
+        }
+      ],
+      "isCompleted": true
     }
   ],
   "createdAt": "2026-01-11T17:30:17.619909Z",
-  "updatedAt": "2026-01-12T18:28:48.3464758Z"
+  "updatedAt": "2026-01-12T18:35:27.0439329Z"
 }

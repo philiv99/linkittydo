@@ -714,8 +714,322 @@
         }
       ],
       "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255392995-D9A964",
+      "playedAt": "2026-01-12T22:03:12.9950143Z",
+      "completedAt": "2026-01-12T22:06:12.9168762Z",
+      "score": 0,
+      "phraseId": 2027073458,
+      "phraseText": "Familiarity breeds contempt",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "liberty",
+          "url": "https://www.nps.gov/stli/index.htm",
+          "timestamp": "2026-01-12T22:03:18.124517Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "spawn",
+          "url": "https://www.imdb.com/title/tt0120177/",
+          "timestamp": "2026-01-12T22:03:32.0512737Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 2,
+          "searchTerm": "stigma",
+          "url": "https://en.wikipedia.org/wiki/stigma",
+          "timestamp": "2026-01-12T22:03:37.089056Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "strain",
+          "url": "https://www.britannica.com/dictionary/strain",
+          "timestamp": "2026-01-12T22:05:44.9871143Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:12.9168752Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255577280-90D557",
+      "playedAt": "2026-01-12T22:06:17.2800497Z",
+      "completedAt": "2026-01-12T22:06:26.5008787Z",
+      "score": 0,
+      "phraseId": 1995077949,
+      "phraseText": "A stitch in time, saves nine.",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "sew together",
+          "url": "https://sewtogetherfabrics.com/",
+          "timestamp": "2026-01-12T22:06:22.3079164Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:26.5008777Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255587954-42C84B",
+      "playedAt": "2026-01-12T22:06:27.9541257Z",
+      "completedAt": "2026-01-12T22:06:30.0911646Z",
+      "score": 0,
+      "phraseId": 1522596438,
+      "phraseText": "Break the ice",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:30.0911638Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255591292-69292F",
+      "playedAt": "2026-01-12T22:06:31.2924277Z",
+      "completedAt": "2026-01-12T22:06:32.154133Z",
+      "score": 0,
+      "phraseId": 1386070020,
+      "phraseText": "Burning the midnight oil",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:32.1541321Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255593975-EF50DC",
+      "playedAt": "2026-01-12T22:06:33.9751078Z",
+      "completedAt": "2026-01-12T22:06:35.2405285Z",
+      "score": 0,
+      "phraseId": 1508482829,
+      "phraseText": "Barking up the wrong tree",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:35.2405278Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255597797-E2045F",
+      "playedAt": "2026-01-12T22:06:37.7971274Z",
+      "completedAt": "2026-01-12T22:06:38.5806778Z",
+      "score": 0,
+      "phraseId": 148777491,
+      "phraseText": "When it rains , it pours",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:38.5806768Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255599864-189805",
+      "playedAt": "2026-01-12T22:06:39.8646071Z",
+      "completedAt": "2026-01-12T22:06:40.7480616Z",
+      "score": 0,
+      "phraseId": 1767638749,
+      "phraseText": "Don\u0027t count your chickens before they hatch",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:40.7480607Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255602205-78EC8B",
+      "playedAt": "2026-01-12T22:06:42.2057929Z",
+      "completedAt": "2026-01-12T22:06:44.0020889Z",
+      "score": 0,
+      "phraseId": 1541302165,
+      "phraseText": "It takes two to tango",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:44.0020876Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255606070-276B6E",
+      "playedAt": "2026-01-12T22:06:46.0705607Z",
+      "completedAt": "2026-01-12T22:06:51.579442Z",
+      "score": 0,
+      "phraseId": 1755247319,
+      "phraseText": "A blessing in disguise!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:51.579441Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255613131-23F6E6",
+      "playedAt": "2026-01-12T22:06:53.1317014Z",
+      "completedAt": "2026-01-12T22:06:54.3199205Z",
+      "score": 0,
+      "phraseId": 1716858981,
+      "phraseText": "Every cloud has a silver lining!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:54.3199192Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255615904-CA0B58",
+      "playedAt": "2026-01-12T22:06:55.904103Z",
+      "completedAt": "2026-01-12T22:06:57.0940625Z",
+      "score": 0,
+      "phraseId": 1654885286,
+      "phraseText": "Bite the bullet!",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:57.0940608Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255618441-7D57FB",
+      "playedAt": "2026-01-12T22:06:58.4411101Z",
+      "completedAt": "2026-01-12T22:06:59.7356975Z",
+      "score": 0,
+      "phraseId": 1687688069,
+      "phraseText": "All good things come to an end.",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:06:59.7356965Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255621101-3BB166",
+      "playedAt": "2026-01-12T22:07:01.1017338Z",
+      "completedAt": "2026-01-12T22:07:02.0794983Z",
+      "score": 0,
+      "phraseId": 1744310342,
+      "phraseText": "The early bird catches the worm",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:07:02.0794976Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768255623963-80581A",
+      "playedAt": "2026-01-12T22:07:03.9633764Z",
+      "completedAt": "2026-01-12T22:07:07.7198839Z",
+      "score": 0,
+      "phraseId": 1948414988,
+      "phraseText": "A penny for your thoughts?",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "currency",
+          "url": "https://www.x-rates.com/",
+          "timestamp": "2026-01-12T22:07:07.3866443Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-12T22:07:07.7198832Z"
+        }
+      ],
+      "isCompleted": true
     }
   ],
   "createdAt": "2026-01-11T17:25:47.0058248Z",
-  "updatedAt": "2026-01-11T18:56:52.8806548Z"
+  "updatedAt": "2026-01-12T22:07:07.7206612Z"
 }

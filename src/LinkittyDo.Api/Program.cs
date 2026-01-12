@@ -37,11 +37,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments for API documentation
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "LinkittyDo API v1");
+    c.RoutePrefix = "swagger"; // Swagger UI at /swagger
+});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");

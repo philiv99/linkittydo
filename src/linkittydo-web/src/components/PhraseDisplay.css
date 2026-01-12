@@ -25,16 +25,20 @@
   align-self: flex-end;
   margin-top: 20px;
   background: rgba(0, 0, 0, 0.05);
-  color: var(--dark);
+  color: black;
   border: 2px dashed var(--dark);
   border-radius: 15px;
   padding: 6px 16px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-family: 'Poppins', sans-serif;
-  opacity: 0.6;
+  font-family: 'Poppins', sans-serif,;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .phrase-display .give-up-button:hover {

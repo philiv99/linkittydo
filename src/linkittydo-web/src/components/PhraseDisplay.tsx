@@ -26,7 +26,7 @@ export const PhraseDisplay: React.FC<PhraseDisplayProps> = ({ words, onGuess, on
       </div>
       {onGiveUp && (
         <button className="give-up-button" onClick={onGiveUp}>
-          I Give Up 🏳️
+          I Give Up
         </button>
       )}
     </div>
