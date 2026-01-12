@@ -27,7 +27,7 @@ project.lock.json
 ScaffoldingReadMe.txt
 
 # Data storage (JSON files)
-src/LinkittyDo.Api/Data/Users/
+#src/LinkittyDo.Api/Data/Users/
 
 # =========================
 # Node.js / React / Vite

@@ -24,4 +24,11 @@ public interface ILlmService
     /// <param name="systemPrompt">Optional system prompt for context</param>
     /// <returns>The LLM response with content and token usage</returns>
     Task<LlmResponse> GetCompletionAsync(string prompt, string? systemPrompt = null);
+
+    /// <summary>
+    /// Generates multiple unique phrases for the word guessing game
+    /// </summary>
+    /// <param name="count">Number of phrases to generate (default 10)</param>
+    /// <returns>List of unique phrase strings</returns>
+    Task<List<string>> GeneratePhrasesAsync(int count = 10);
 }

@@ -82,6 +82,11 @@ public class GamePhraseService : IGamePhraseService
         var allPhrases = (await _phraseRepository.GetAllAsync()).ToList();
         _logger.LogInformation("Phrase manager contains {Count} phrases", allPhrases.Count);
 
+        // Build a set of all existing phrase texts for quick lookup
+        var existingPhraseTexts = allPhrases
+            .Select(p => NormalizeText(p.Text))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         // Find phrases the user hasn't played yet
         var unplayedPhrases = allPhrases
             .Where(p => !playedPhraseTexts.Contains(NormalizeText(p.Text)))
@@ -96,17 +101,110 @@ public class GamePhraseService : IGamePhraseService
         }
 
         // No unplayed phrases available - need to generate new ones with LLM
-        _logger.LogInformation("No unplayed phrases available, generating new phrase with LLM");
+        _logger.LogInformation("No unplayed phrases available, generating batch of phrases with LLM");
         
-        var existingPhraseTexts = allPhrases
-            .Select(p => NormalizeText(p.Text))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // Generate 10 phrases at once using the batch generation method
+        var newPhrasesAdded = await GenerateAndAddNewPhrasesAsync(existingPhraseTexts);
 
+        if (newPhrasesAdded.Count > 0)
+        {
+            // Filter to phrases not played by this user (should be all of them since they're new)
+            var unplayedNewPhrases = newPhrasesAdded
+                .Where(p => !playedPhraseTexts.Contains(NormalizeText(p.Text)))
+                .ToList();
+
+            if (unplayedNewPhrases.Count > 0)
+            {
+                // Return a random one of the newly added phrases
+                var selectedPhrase = unplayedNewPhrases[_random.Next(unplayedNewPhrases.Count)];
+                _logger.LogInformation("Selected newly generated phrase: {PhraseId} - {Text}", 
+                    selectedPhrase.UniqueId, selectedPhrase.Text);
+                return CreatePhraseFromGamePhrase(selectedPhrase);
+            }
+        }
+
+        // If batch generation failed, fall back to single phrase generation with retries
+        _logger.LogWarning("Batch generation returned no new phrases, falling back to single phrase generation");
+        
+        return await GenerateSinglePhraseWithRetriesAsync(existingPhraseTexts, playedPhraseTexts);
+    }
+
+    /// <summary>
+    /// Generates a batch of phrases via LLM and adds new unique ones to the game manager.
+    /// Returns the list of newly added GamePhrase objects.
+    /// </summary>
+    private async Task<List<GamePhrase>> GenerateAndAddNewPhrasesAsync(HashSet<string> existingPhraseTexts)
+    {
+        _logger.LogInformation("Generating batch of 10 phrases via LLM");
+        
+        var generatedPhrases = await _llmService.GeneratePhrasesAsync(10);
+        
+        if (generatedPhrases.Count == 0)
+        {
+            _logger.LogWarning("LLM returned no phrases");
+            return new List<GamePhrase>();
+        }
+
+        _logger.LogInformation("LLM returned {Count} phrases, checking for new ones", generatedPhrases.Count);
+
+        var newPhrases = new List<GamePhrase>();
+        
+        foreach (var phraseText in generatedPhrases)
+        {
+            var normalizedText = NormalizeText(phraseText);
+            
+            // Check if this phrase already exists in the manager
+            if (existingPhraseTexts.Contains(normalizedText))
+            {
+                _logger.LogDebug("Phrase already exists in manager, skipping: {Phrase}", phraseText);
+                continue;
+            }
+
+            // This is a new phrase - create a GamePhrase for it
+            var gamePhrase = new GamePhrase
+            {
+                UniqueId = GamePhrase.GenerateUniqueId(),
+                Text = phraseText,
+                WordCount = phraseText.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length,
+                GeneratedByLlm = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            newPhrases.Add(gamePhrase);
+            
+            // Add to our tracking set so we don't add duplicates from the same batch
+            existingPhraseTexts.Add(normalizedText);
+            
+            _logger.LogInformation("Found new phrase to add: {Text}", phraseText);
+        }
+
+        if (newPhrases.Count > 0)
+        {
+            // Batch add all new phrases to the repository
+            await _phraseRepository.CreateManyAsync(newPhrases);
+            _logger.LogInformation("Added {Count} new phrases to the game manager", newPhrases.Count);
+        }
+        else
+        {
+            _logger.LogWarning("All {Count} generated phrases already exist in the manager", generatedPhrases.Count);
+        }
+
+        return newPhrases;
+    }
+
+    /// <summary>
+    /// Fallback method: Generates a single phrase with multiple retry attempts
+    /// </summary>
+    private async Task<Phrase> GenerateSinglePhraseWithRetriesAsync(
+        HashSet<string> existingPhraseTexts, 
+        HashSet<string> playedPhraseTexts)
+    {
         for (int attempt = 1; attempt <= MaxLlmGenerationAttempts; attempt++)
         {
-            _logger.LogInformation("LLM generation attempt {Attempt}/{MaxAttempts}", attempt, MaxLlmGenerationAttempts);
+            _logger.LogInformation("Single phrase generation attempt {Attempt}/{MaxAttempts}", 
+                attempt, MaxLlmGenerationAttempts);
             
-            var generatedPhrase = await GeneratePhraseWithLlmAsync();
+            var generatedPhrase = await GenerateSinglePhraseWithLlmAsync();
             
             if (string.IsNullOrEmpty(generatedPhrase))
             {
@@ -163,9 +261,9 @@ public class GamePhraseService : IGamePhraseService
     }
 
     /// <summary>
-    /// Generates a new phrase using the LLM service
+    /// Generates a single new phrase using the LLM service (used as fallback)
     /// </summary>
-    private async Task<string?> GeneratePhraseWithLlmAsync()
+    private async Task<string?> GenerateSinglePhraseWithLlmAsync()
     {
         const string systemPrompt = @"You are a phrase generator for a word guessing game. 
 Your task is to generate well-known phrases, idioms, proverbs, or common sayings.

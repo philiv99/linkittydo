@@ -163,4 +163,118 @@ public class OpenAiLlmService : ILlmService
     }
 
     #endregion
+
+    public async Task<List<string>> GeneratePhrasesAsync(int count = 10)
+    {
+        _logger.LogInformation("Generating {Count} unique phrases via LLM", count);
+
+        var systemPrompt = @"You are a phrase generator for a word guessing game. 
+Your task is to generate well-known phrases, idioms, proverbs, or common sayings.
+Rules:
+- Each phrase must be 7 words or less
+- Use common, well-known phrases that most English speakers would recognize
+- Do not include quotes around phrases
+- Each phrase must be on its own line
+- Do not number the phrases
+- Do not include explanations or context
+- All phrases must be UNIQUE - no duplicates";
+
+        var userPrompt = $@"Generate exactly {count} unique, well-known English phrases, idioms, proverbs, or common sayings.
+Each phrase must be 7 words or less.
+Put each phrase on its own line with no numbering, no quotes, and no additional text.
+
+Examples of good phrases:
+- Actions speak louder than words
+- Better late than never
+- Knowledge is power
+- Practice makes perfect
+- Time is money
+- A penny saved is a penny earned
+
+Return only the {count} phrases, one per line.";
+
+        try
+        {
+            var response = await GetCompletionAsync(userPrompt, systemPrompt);
+            
+            if (string.IsNullOrWhiteSpace(response.Content))
+            {
+                _logger.LogWarning("LLM returned empty content for batch phrase generation");
+                return new List<string>();
+            }
+
+            // Parse the response - split by newlines and clean up each phrase
+            var phrases = response.Content
+                .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line
+                    .Trim()
+                    .TrimStart('-', '*', '•', ' ', '\t')  // Remove list markers
+                    .Trim()
+                    .Trim('"', '\'', '.', '!', '?')       // Remove quotes and trailing punctuation
+                    .Trim())
+                .Where(phrase => !string.IsNullOrWhiteSpace(phrase))
+                .Where(phrase => 
+                {
+                    // Filter out numbered lines like "1." or "1)"
+                    if (phrase.Length > 0 && char.IsDigit(phrase[0]))
+                    {
+                        var firstNonDigit = phrase.SkipWhile(char.IsDigit).FirstOrDefault();
+                        if (firstNonDigit == '.' || firstNonDigit == ')' || firstNonDigit == ':')
+                        {
+                            // Remove the numbering and keep the rest
+                            var indexOfSeparator = phrase.IndexOfAny(new[] { '.', ')', ':' });
+                            if (indexOfSeparator >= 0 && indexOfSeparator < phrase.Length - 1)
+                            {
+                                return false; // We'll handle this in the Select below
+                            }
+                        }
+                    }
+                    return true;
+                })
+                .Select(phrase =>
+                {
+                    // Also handle numbered lines by extracting just the phrase part
+                    if (phrase.Length > 0 && char.IsDigit(phrase[0]))
+                    {
+                        var indexOfSeparator = phrase.IndexOfAny(new[] { '.', ')', ':' });
+                        if (indexOfSeparator >= 0 && indexOfSeparator < phrase.Length - 1)
+                        {
+                            return phrase.Substring(indexOfSeparator + 1).Trim();
+                        }
+                    }
+                    return phrase;
+                })
+                .Where(phrase =>
+                {
+                    var wordCount = phrase.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+                    if (wordCount > 7)
+                    {
+                        _logger.LogDebug("Filtering out phrase with {WordCount} words: {Phrase}", wordCount, phrase);
+                        return false;
+                    }
+                    if (wordCount < 2)
+                    {
+                        _logger.LogDebug("Filtering out phrase with too few words: {Phrase}", phrase);
+                        return false;
+                    }
+                    return true;
+                })
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            _logger.LogInformation("LLM generated {Count} valid unique phrases", phrases.Count);
+            
+            foreach (var phrase in phrases)
+            {
+                _logger.LogDebug("Generated phrase: {Phrase}", phrase);
+            }
+
+            return phrases;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating batch phrases from LLM");
+            return new List<string>();
+        }
+    }
 }

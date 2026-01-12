@@ -29,6 +29,13 @@ public interface IGamePhraseRepository
     Task<GamePhrase> CreateAsync(GamePhrase phrase);
 
     /// <summary>
+    /// Create multiple game phrases at once
+    /// </summary>
+    /// <param name="phrases">The phrases to create</param>
+    /// <returns>The created phrases</returns>
+    Task<IEnumerable<GamePhrase>> CreateManyAsync(IEnumerable<GamePhrase> phrases);
+
+    /// <summary>
     /// Delete a game phrase by its unique ID
     /// </summary>
     Task<bool> DeleteAsync(string uniqueId);

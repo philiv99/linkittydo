@@ -100,6 +100,30 @@ public class JsonGamePhraseRepository : IGamePhraseRepository
         }
     }
 
+    public async Task<IEnumerable<GamePhrase>> CreateManyAsync(IEnumerable<GamePhrase> phrases)
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            var createdPhrases = new List<GamePhrase>();
+            
+            foreach (var phrase in phrases)
+            {
+                var filePath = GetPhraseFilePath(phrase.UniqueId);
+                await WritePhraseToFileAsync(filePath, phrase);
+                createdPhrases.Add(phrase);
+                _logger.LogInformation("Created game phrase: {UniqueId} - {Text}", phrase.UniqueId, phrase.Text);
+            }
+            
+            _logger.LogInformation("Batch created {Count} game phrases", createdPhrases.Count);
+            return createdPhrases;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
     public async Task<bool> DeleteAsync(string uniqueId)
     {
         await _lock.WaitAsync();
