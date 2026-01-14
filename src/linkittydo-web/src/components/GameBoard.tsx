@@ -98,6 +98,13 @@ export const GameBoard: React.FC = () => {
     }
   }, [isGuest, gameState, loading, user.uniqueId, user.preferredDifficulty, startGame, playSequence]);
 
+  // Reset auto-start flag if there's an error, allowing retry
+  useEffect(() => {
+    if (error && !isGuest) {
+      hasAutoStartedRef.current = false;
+    }
+  }, [error, isGuest]);
+
   // Handle click to start audio
   const handleStartAudio = () => {
     if (!audioStarted) {
