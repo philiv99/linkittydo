@@ -9,6 +9,76 @@
   overflow: hidden;
 }
 
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .clue-panel {
+    width: 50%;
+    height: 100%;
+  }
+
+  .clue-panel-empty {
+    padding: 24px 16px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .clue-panel-empty h3 {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .clue-panel-empty p {
+    font-size: 14px;
+  }
+
+  .clue-tabs {
+    padding: 6px 6px 0 6px;
+    gap: 1px;
+  }
+
+  .clue-tab {
+    padding: 8px 10px;
+    min-width: 90px;
+    max-width: 150px;
+  }
+
+  .tab-position {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+
+  .tab-title {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .clue-panel-empty {
+    padding: 20px 12px;
+  }
+
+  .empty-icon {
+    font-size: 40px;
+  }
+
+  .clue-panel-empty h3 {
+    font-size: 24px;
+  }
+
+  .clue-panel-empty p {
+    font-size: 13px;
+  }
+
+  .clue-tab {
+    min-width: 70px;
+    max-width: 120px;
+    padding: 6px 8px;
+  }
+}
+
 .clue-panel-empty {
   flex: 1;
   display: flex;

@@ -24,3 +24,37 @@
   font-family: 'Lobster', cursive;
   text-shadow: 1px 1px 0 var(--dark);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .score-display {
+    gap: 8px;
+    padding: 8px 16px;
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+
+  .score-label {
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .score-value {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .score-display {
+    gap: 6px;
+    padding: 6px 12px;
+    border-width: 2px;
+  }
+
+  .score-label {
+    font-size: 12px;
+  }
+
+  .score-value {
+    font-size: 18px;
+  }
+}

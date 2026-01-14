@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useGame } from '../hooks/useGame';
 import { useAudioSequence } from '../hooks/useAudio';
 import { useUser } from '../hooks/useUser';
@@ -35,7 +35,46 @@ export const GameBoard: React.FC = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [showManageModal, setShowManageModal] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [activePanel, setActivePanel] = useState<'game' | 'clues'>('game');
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const { playSequence, stopAll } = useAudioSequence();
+
+  // Touch swipe handling
+  const panelsRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // minimum px to trigger swipe
+
+    if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (swipeDistance > 0) {
+        // Swiped left - show clues
+        setActivePanel('clues');
+      } else {
+        // Swiped right - show game
+        setActivePanel('game');
+      }
+      setShowSwipeHint(false);
+    }
+  }, []);
+
+  // Hide swipe hint after first interaction or after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSwipeHint(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle click to start audio
   const handleStartAudio = () => {
@@ -75,6 +114,9 @@ export const GameBoard: React.FC = () => {
       };
       setClueTabs(prev => [...prev, newTab]);
       setActiveTabId(tabId);
+      // Auto-switch to clues panel on mobile when clue is requested
+      setActivePanel('clues');
+      setShowSwipeHint(false);
     }
   };
 
@@ -187,63 +229,118 @@ export const GameBoard: React.FC = () => {
   if (gameState) {
     return (
       <div className="game-layout">
-        <div className="game-board">
-          <header className="game-header">
-            <div className="header-title">
-              <h1>LinkittyDo!</h1>
-              <span 
-                className="user-name user-name-clickable"
-                onClick={() => isGuest ? setShowUserModal(true) : setShowManageModal(true)}
-                title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
-              >
-                Playing as {user.name}
-                {isGuest && <span className="guest-badge">👤</span>}
-              </span>
-              <div className="lifetime-points" title="Lifetime Points">
-                <span className="points-icon">⭐</span>
-                <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
-              </div>
+        {/* Header outside game-board for mobile - spans full width */}
+        <header className="game-header">
+          <div className="header-title">
+            <h1>LinkittyDo!</h1>
+            <span 
+              className="user-name user-name-clickable"
+              onClick={() => isGuest ? setShowUserModal(true) : setShowManageModal(true)}
+              title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
+            >
+              Playing as {user.name}
+              {isGuest && <span className="guest-badge">👤</span>}
+            </span>
+            <div className="lifetime-points" title="Lifetime Points">
+              <span className="points-icon">⭐</span>
+              <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
             </div>
-            <ScoreDisplay score={gameState.score} />
-          </header>
+          </div>
+          <ScoreDisplay score={gameState.score} />
+        </header>
 
-          <main className="game-main">
-            {gameState.isComplete ? (
-              <div className="victory">
-                <h2>{gaveUp ? 'Better luck next time!' : 'Congratulations!'}</h2>
-                <p>{gaveUp ? 'The phrase was:' : 'You completed the phrase!'}</p>
-                <PhraseDisplay 
-                  words={gameState.words} 
-                  onGuess={handleGuess} 
-                  onClue={handleClue} 
-                />
-                <p className="final-score">Final Score: {gameState.score}</p>
-                <button className="start-button" onClick={handleNewGame}>
-                  Play Again
-                </button>
-              </div>
-            ) : (
-              <PhraseDisplay 
-                words={gameState.words} 
-                onGuess={handleGuess} 
-                onClue={handleClue}
-                onGiveUp={handleGiveUp}
-              />
-            )}
-          </main>
+        {/* Mobile panel navigation tabs */}
+        <nav className="mobile-panel-nav">
+          <button 
+            className={`panel-nav-tab game-tab ${activePanel === 'game' ? 'active' : ''}`}
+            onClick={() => setActivePanel('game')}
+          >
+            <span className="tab-icon">🎮</span>
+            Game
+          </button>
+          <button 
+            className={`panel-nav-tab clue-tab ${activePanel === 'clues' ? 'active' : ''}`}
+            onClick={() => setActivePanel('clues')}
+          >
+            <span className="tab-icon">🔍</span>
+            Clues {clueTabs.length > 0 && `(${clueTabs.length})`}
+          </button>
+        </nav>
 
-          <footer className="game-footer">
-            <p>Type your guess and press Enter • Click the clue button for hints!</p>
-          </footer>
+        {/* Swipeable panels container */}
+        <div className="panels-container">
+          <div 
+            ref={panelsRef}
+            className={`panels-wrapper ${activePanel === 'clues' ? 'show-clues' : ''}`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="game-board">
+              {/* Header inside game-board for desktop */}
+              <header className="game-header">
+                <div className="header-title">
+                  <h1>LinkittyDo!</h1>
+                  <span 
+                    className="user-name user-name-clickable"
+                    onClick={() => isGuest ? setShowUserModal(true) : setShowManageModal(true)}
+                    title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
+                  >
+                    Playing as {user.name}
+                    {isGuest && <span className="guest-badge">👤</span>}
+                  </span>
+                  <div className="lifetime-points" title="Lifetime Points">
+                    <span className="points-icon">⭐</span>
+                    <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
+                  </div>
+                </div>
+                <ScoreDisplay score={gameState.score} />
+              </header>
+
+              <main className="game-main">
+                {gameState.isComplete ? (
+                  <div className="victory">
+                    <h2>{gaveUp ? 'Better luck next time!' : 'Congratulations!'}</h2>
+                    <p>{gaveUp ? 'The phrase was:' : 'You completed the phrase!'}</p>
+                    <PhraseDisplay 
+                      words={gameState.words} 
+                      onGuess={handleGuess} 
+                      onClue={handleClue} 
+                    />
+                    <p className="final-score">Final Score: {gameState.score}</p>
+                    <button className="start-button" onClick={handleNewGame}>
+                      Play Again
+                    </button>
+                  </div>
+                ) : (
+                  <PhraseDisplay 
+                    words={gameState.words} 
+                    onGuess={handleGuess} 
+                    onClue={handleClue}
+                    onGiveUp={handleGiveUp}
+                  />
+                )}
+              </main>
+
+              <footer className="game-footer">
+                <p>Type your guess and press Enter • Click the clue button for hints!</p>
+              </footer>
+            </div>
+
+            <CluePanel 
+              tabs={clueTabs}
+              activeTabId={activeTabId}
+              onTabSelect={setActiveTabId}
+              onTabClose={handleTabClose}
+              words={gameState.words}
+            />
+          </div>
+
+          {/* Mobile swipe hint */}
+          <div className={`swipe-hint ${showSwipeHint ? 'visible' : ''}`}>
+            👈 Swipe to switch panels 👉
+          </div>
         </div>
-
-        <CluePanel 
-          tabs={clueTabs}
-          activeTabId={activeTabId}
-          onTabSelect={setActiveTabId}
-          onTabClose={handleTabClose}
-          words={gameState.words}
-        />
 
         <UserModal
           isOpen={showUserModal}

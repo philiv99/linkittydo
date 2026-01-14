@@ -45,3 +45,45 @@
   background: rgba(0, 0, 0, 0.1);
   opacity: 1;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .phrase-display {
+    padding: 30px 20px 16px;
+    border-radius: 16px;
+    border-width: 3px;
+    box-shadow: 6px 6px 0 var(--dark);
+    font-size: 20px;
+    min-height: 100px;
+  }
+
+  .phrase-words {
+    gap: 8px 12px;
+  }
+
+  .phrase-display .give-up-button {
+    padding: 5px 12px;
+    font-size: 12px;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .phrase-display {
+    padding: 24px 16px 14px;
+    border-radius: 12px;
+    box-shadow: 4px 4px 0 var(--dark);
+    font-size: 16px;
+    min-height: 80px;
+  }
+
+  .phrase-words {
+    gap: 6px 10px;
+  }
+
+  .phrase-display .give-up-button {
+    padding: 4px 10px;
+    font-size: 11px;
+    margin-top: 12px;
+  }
+}

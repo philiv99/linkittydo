@@ -1028,8 +1028,75 @@
         }
       ],
       "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768308431798-2C7712",
+      "playedAt": "2026-01-13T12:47:11.798343Z",
+      "completedAt": "2026-01-13T12:48:37.7720528Z",
+      "score": 0,
+      "phraseId": 1401462613,
+      "phraseText": "Curiosity killed the cat",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "curious",
+          "url": "https://en.wikipedia.org/wiki/curious",
+          "timestamp": "2026-01-13T12:47:16.0370249Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "disgorge",
+          "url": "https://en.wikipedia.org/wiki/disgorge",
+          "timestamp": "2026-01-13T12:47:23.5923689Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "gassing",
+          "url": "https://en.wikipedia.org/wiki/gassing",
+          "timestamp": "2026-01-13T12:47:26.181851Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 0,
+          "searchTerm": "odd",
+          "url": "https://en.wikipedia.org/wiki/odd",
+          "timestamp": "2026-01-13T12:48:20.0778827Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "bolt down",
+          "url": "https://en.wikipedia.org/wiki/bolt\u002Bdown",
+          "timestamp": "2026-01-13T12:48:27.4454702Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "vote down",
+          "url": "https://en.wikipedia.org/wiki/vote\u002Bdown",
+          "timestamp": "2026-01-13T12:48:33.2313351Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-13T12:48:37.7720519Z"
+        }
+      ],
+      "isCompleted": true
     }
   ],
   "createdAt": "2026-01-11T17:25:47.0058248Z",
-  "updatedAt": "2026-01-12T22:07:07.7206612Z"
+  "updatedAt": "2026-01-13T12:48:37.7749487Z"
 }

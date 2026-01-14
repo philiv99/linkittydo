@@ -16,6 +16,7 @@
   border-right: 4px solid var(--dark);
   flex-shrink: 0;
   overflow-y: auto;
+  background: linear-gradient(135deg, var(--peach) 0%, var(--yellow) 100%);
 }
 
 /* Click to Start Screen */
@@ -660,4 +661,370 @@
 .error {
   color: #e74c3c;
   font-weight: 500;
+}
+
+/* ===========================================
+   MOBILE RESPONSIVE LAYOUT
+   =========================================== */
+
+/* Mobile panel navigation tabs */
+.mobile-panel-nav {
+  display: none;
+  width: 100%;
+  background: var(--dark);
+  padding: 0;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.panel-nav-tab {
+  flex: 1;
+  padding: 12px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.panel-nav-tab.game-tab {
+  background: var(--peach);
+  color: var(--dark);
+}
+
+.panel-nav-tab.clue-tab {
+  background: var(--cyan);
+  color: var(--dark);
+}
+
+.panel-nav-tab.active {
+  background: var(--coral);
+  color: white;
+}
+
+.panel-nav-tab:not(.active):hover {
+  filter: brightness(1.1);
+}
+
+.tab-icon {
+  font-size: 16px;
+}
+
+/* Swipe container for panels */
+.panels-container {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Desktop: panels wrapper shows both panels side by side */
+.panels-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Desktop: hide the outer header (it's duplicated inside game-board for desktop) */
+.game-layout > .game-header {
+  display: none;
+}
+
+/* Mobile swipe hint indicator */
+.swipe-hint {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(45, 45, 45, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 100;
+  animation: swipeHintPulse 2s ease-in-out infinite;
+}
+
+@keyframes swipeHintPulse {
+  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Mobile Media Queries */
+@media (max-width: 1024px) {
+  /* Restructure layout for mobile */
+  .game-layout {
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Show outer header on mobile - it spans full width */
+  .game-layout > .game-header {
+    display: flex;
+    width: 100%;
+    padding: 12px 16px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  .game-header h1 {
+    font-size: 28px;
+  }
+
+  .header-title {
+    flex: 1;
+  }
+
+  .user-name {
+    font-size: 12px;
+  }
+
+  .lifetime-points {
+    font-size: 12px;
+    padding: 3px 8px;
+    margin-left: 8px;
+  }
+
+  /* Show mobile navigation tabs */
+  .mobile-panel-nav {
+    display: flex;
+  }
+
+  /* Panels container for swipe */
+  .panels-container {
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .panels-wrapper {
+    display: flex;
+    width: 200vw;
+    height: 100%;
+    transition: transform 0.3s ease-out;
+    touch-action: pan-y;
+    will-change: transform;
+  }
+
+  .panels-wrapper.show-clues {
+    transform: translateX(-100vw);
+  }
+
+  /* Game board takes 100vw on mobile */
+  .game-board {
+    width: 100vw;
+    min-width: 100vw;
+    height: 100%;
+    border-right: none;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: linear-gradient(135deg, var(--peach) 0%, var(--yellow) 100%);
+  }
+
+  /* Clue panel takes 100vw on mobile */
+  .clue-panel {
+    width: 100vw;
+    min-width: 100vw;
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  /* Hide header in game-board on mobile (it's outside now) */
+  .game-board .game-header {
+    display: none;
+  }
+
+  .game-main {
+    padding: 20px 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .game-footer {
+    padding: 12px 16px;
+  }
+
+  .game-footer p {
+    font-size: 13px;
+  }
+
+  /* Victory section mobile adjustments */
+  .victory {
+    padding: 24px 20px;
+  }
+
+  .victory h2 {
+    font-size: 32px;
+  }
+
+  .final-score {
+    font-size: 24px;
+  }
+
+  /* Swipe hint visible on mobile */
+  .swipe-hint.visible {
+    display: block;
+  }
+}
+
+/* Smaller mobile devices */
+@media (max-width: 480px) {
+  .game-header {
+    padding: 10px 12px;
+  }
+
+  .game-header h1 {
+    font-size: 22px;
+  }
+
+  .user-name {
+    font-size: 11px;
+  }
+
+  .lifetime-points {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .panel-nav-tab {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .game-main {
+    padding: 16px 12px;
+  }
+
+  .start-button {
+    padding: 16px 40px;
+    font-size: 18px;
+  }
+
+  .victory {
+    padding: 20px 16px;
+  }
+
+  .victory h2 {
+    font-size: 28px;
+  }
+
+  .final-score {
+    font-size: 20px;
+  }
+}
+
+/* Mobile responsive styles for splash/loading screens */
+@media (max-width: 1024px) {
+  /* Click to start screen */
+  .click-content h1 {
+    font-size: 42px;
+  }
+
+  .click-content p {
+    font-size: 18px;
+    padding: 12px 24px;
+  }
+
+  /* Splash screen */
+  .splash-overlay {
+    bottom: 10%;
+    gap: 15px;
+  }
+
+  .play-button {
+    padding: 18px 50px;
+    font-size: 28px;
+    letter-spacing: 3px;
+    border-width: 4px;
+    box-shadow: 5px 5px 0 var(--dark);
+  }
+
+  .play-icon {
+    font-size: 26px;
+  }
+
+  .audio-hint {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  /* Loading screen */
+  .loading-title {
+    font-size: 42px;
+  }
+
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+  }
+
+  .loading-text {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Click to start screen - smaller */
+  .click-content h1 {
+    font-size: 32px;
+  }
+
+  .click-content p {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  /* Splash screen - smaller */
+  .splash-overlay {
+    bottom: 8%;
+    gap: 12px;
+  }
+
+  .play-button {
+    padding: 14px 36px;
+    font-size: 22px;
+    letter-spacing: 2px;
+    border-width: 3px;
+    box-shadow: 4px 4px 0 var(--dark);
+    gap: 10px;
+  }
+
+  .play-icon {
+    font-size: 20px;
+  }
+
+  .audio-hint {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* Loading screen - smaller */
+  .loading-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 20px;
+  }
+
+  .loading-text {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
 }

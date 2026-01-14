@@ -45,3 +45,46 @@
   60% { transform: translateX(-6px) rotate(-1deg); }
   80% { transform: translateX(6px) rotate(1deg); }
 }
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .guess-input {
+    width: 100px;
+    padding: 8px 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+}
+
+@media (max-width: 480px) {
+  .guess-input {
+    width: 80px;
+    padding: 6px 8px;
+    font-size: 14px;
+    border-width: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .guess-input {
+    width: 100px;
+    padding: 8px 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+}
+
+@media (max-width: 480px) {
+  .guess-input {
+    width: 80px;
+    padding: 6px 8px;
+    font-size: 14px;
+    border-width: 2px;
+    border-radius: 6px;
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+}
