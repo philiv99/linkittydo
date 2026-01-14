@@ -76,6 +76,20 @@ export const GameBoard: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-start game for connected (non-guest) users
+  useEffect(() => {
+    if (!isGuest && !gameState && !loading) {
+      // Set audio started for connected users to skip click-to-start screen
+      setAudioStarted(true);
+      playSequence();
+      // Start game with user's settings
+      startGame({ 
+        userId: user.uniqueId,
+        difficulty: user.preferredDifficulty 
+      });
+    }
+  }, [isGuest, gameState, loading, user.uniqueId, user.preferredDifficulty, startGame, playSequence]);
+
   // Handle click to start audio
   const handleStartAudio = () => {
     if (!audioStarted) {
