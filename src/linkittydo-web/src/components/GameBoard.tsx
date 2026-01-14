@@ -39,6 +39,9 @@ export const GameBoard: React.FC = () => {
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const { playSequence, stopAll } = useAudioSequence();
 
+  // Track if we've auto-started a game for a connected user
+  const hasAutoStartedRef = useRef(false);
+
   // Touch swipe handling
   const panelsRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
@@ -78,7 +81,8 @@ export const GameBoard: React.FC = () => {
 
   // Auto-start game for connected (non-guest) users
   useEffect(() => {
-    if (!isGuest && !gameState && !loading) {
+    if (!isGuest && !gameState && !loading && !hasAutoStartedRef.current) {
+      hasAutoStartedRef.current = true;
       // Set audio started for connected users to skip click-to-start screen
       setAudioStarted(true);
       playSequence();
@@ -87,6 +91,10 @@ export const GameBoard: React.FC = () => {
         userId: user.uniqueId,
         difficulty: user.preferredDifficulty 
       });
+    }
+    // Reset flag when user becomes guest (signs out)
+    if (isGuest) {
+      hasAutoStartedRef.current = false;
     }
   }, [isGuest, gameState, loading, user.uniqueId, user.preferredDifficulty, startGame, playSequence]);
 
