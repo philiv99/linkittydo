@@ -1,5 +1,16 @@
 import { useRef, useCallback, useEffect } from 'react';
 
+const withBaseUrl = (path: string) => {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  return `${normalizedBaseUrl}${path.replace(/^\//, '')}`;
+};
+
+const resolveAudioSrc = (src: string) => {
+  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  return withBaseUrl(src);
+};
+
 interface UseAudioOptions {
   loop?: boolean;
   volume?: number;
@@ -10,7 +21,7 @@ export const useAudio = (src: string, options: UseAudioOptions = {}) => {
   const { loop = false, volume = 1.0 } = options;
 
   useEffect(() => {
-    const audio = new Audio(src);
+    const audio = new Audio(resolveAudioSrc(src));
     audio.loop = loop;
     audio.volume = Math.max(0, Math.min(1, volume));
     audioRef.current = audio;
@@ -66,12 +77,12 @@ export const useAudioSequence = () => {
 
     // Create audio elements in useEffect to ensure we're in browser
     fanfareRef.current = new Audio();
-    fanfareRef.current.src = '/audio/fanfare.mp3';
+    fanfareRef.current.src = withBaseUrl('audio/fanfare.mp3');
     fanfareRef.current.volume = 0.7;
     fanfareRef.current.preload = 'auto';
 
     musicRef.current = new Audio();
-    musicRef.current.src = '/audio/ice-cream-truck.mp3';
+    musicRef.current.src = withBaseUrl('audio/ice-cream-truck.mp3');
     musicRef.current.loop = true;
     musicRef.current.volume = 0.4;
     musicRef.current.preload = 'auto';
@@ -94,10 +105,10 @@ export const useAudioSequence = () => {
     hasStartedRef.current = true;
 
     // Create fresh audio elements on play to avoid stale references
-    const fanfare = new Audio('/audio/fanfare.mp3');
+    const fanfare = new Audio(withBaseUrl('audio/fanfare.mp3'));
     fanfare.volume = 0.7;
     
-    const music = new Audio('/audio/ice-cream-truck.mp3');
+    const music = new Audio(withBaseUrl('audio/ice-cream-truck.mp3'));
     music.loop = true;
     music.volume = 0.4;
 

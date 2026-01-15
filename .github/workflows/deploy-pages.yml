@@ -35,6 +35,8 @@ jobs:
         run: npm ci
 
       - name: Debug env vars
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
         run: |
           echo "VITE_API_BASE_URL is set to: ${{ vars.VITE_API_BASE_URL }}"
           echo "Variable length: ${#VITE_API_BASE_URL}"

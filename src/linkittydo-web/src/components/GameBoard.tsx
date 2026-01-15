@@ -11,6 +11,7 @@ import { UserManageModal } from './UserManageModal';
 import './GameBoard.css';
 
 const POINTS_PER_WORD = 100;
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
 
 export const GameBoard: React.FC = () => {
   const { gameState, loading, error, startGame, submitGuess, getClue, giveUp } = useGame();
@@ -229,7 +230,7 @@ export const GameBoard: React.FC = () => {
   if (!gameState && !loading) {
     return (
       <div className="splash-screen">
-        <img src="/lounge.jpg" alt="LinkittyDo!" className="splash-logo" />
+        <img src={assetUrl('lounge.jpg')} alt="LinkittyDo!" className="splash-logo" />
         <div className="splash-overlay">
           <button className="play-button" onClick={handleNewGame}>
             <span className="play-icon">▶</span>
