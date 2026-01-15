@@ -16,7 +16,7 @@ import type {
   LlmTestResponse
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:5157/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5157/api').replace(/\/$/, '');
 
 export const api = {
   // Game endpoints
