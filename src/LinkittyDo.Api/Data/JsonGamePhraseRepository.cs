@@ -18,7 +18,8 @@ public class JsonGamePhraseRepository : IGamePhraseRepository
     {
         _logger = logger;
         
-        var baseDirectory = configuration["DataDirectory"] ?? Path.Combine(Directory.GetCurrentDirectory(), "Data");
+        // Use AppContext.BaseDirectory for Azure App Service compatibility
+        var baseDirectory = configuration["DataDirectory"] ?? Path.Combine(AppContext.BaseDirectory, "Data");
         _dataDirectory = Path.Combine(baseDirectory, "Phrases");
         
         // Ensure the data directory exists

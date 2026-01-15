@@ -2,7 +2,7 @@
   "uniqueId": "USR-1768152347005-E33D2E",
   "name": "Frank",
   "email": "frank@frank.com",
-  "lifetimePoints": 4000,
+  "lifetimePoints": 4500,
   "preferredDifficulty": 10,
   "games": [
     {
@@ -1095,8 +1095,120 @@
         }
       ],
       "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768493650795-A64622",
+      "playedAt": "2026-01-15T16:14:10.7948436Z",
+      "completedAt": "2026-01-15T16:14:30.8277839Z",
+      "score": 200,
+      "phraseId": 145276817,
+      "phraseText": "All that glitters is not gold",
+      "difficulty": 10,
+      "result": 1,
+      "events": [
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 2,
+          "guessText": "glitters",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-15T16:14:27.9393374Z"
+        },
+        {
+          "$type": "guess",
+          "eventType": "guess",
+          "wordIndex": 5,
+          "guessText": "gold",
+          "isCorrect": true,
+          "pointsAwarded": 100,
+          "timestamp": "2026-01-15T16:14:30.8277789Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "solved",
+          "timestamp": "2026-01-15T16:14:30.8277834Z"
+        }
+      ],
+      "isCompleted": true
+    },
+    {
+      "gameId": "GAME-1768493675675-18DDAA",
+      "playedAt": "2026-01-15T16:14:35.6753389Z",
+      "completedAt": "2026-01-15T16:15:22.9999161Z",
+      "score": 0,
+      "phraseId": 788155094,
+      "phraseText": "A picture is worth a thousand words",
+      "difficulty": 10,
+      "result": 2,
+      "events": [
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "picture show",
+          "url": "http://www.rockyhorror.com/participation/showtimes_listings.php?type=r",
+          "timestamp": "2026-01-15T16:14:41.6458954Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "figure",
+          "url": "https://en.wikipedia.org/wiki/figure",
+          "timestamp": "2026-01-15T16:14:50.1295083Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 1,
+          "searchTerm": "impression",
+          "url": "https://en.wikipedia.org/wiki/impression",
+          "timestamp": "2026-01-15T16:14:59.2566231Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "valuable",
+          "url": "https://en.wikipedia.org/wiki/valuable",
+          "timestamp": "2026-01-15T16:15:05.4084198Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "valued",
+          "url": "https://en.wikipedia.org/wiki/valued",
+          "timestamp": "2026-01-15T16:15:12.285686Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "valued at",
+          "url": "https://en.wikipedia.org/wiki/valued\u002Bat",
+          "timestamp": "2026-01-15T16:15:14.1856005Z"
+        },
+        {
+          "$type": "clue",
+          "eventType": "clue",
+          "wordIndex": 3,
+          "searchTerm": "decent",
+          "url": "https://en.wikipedia.org/wiki/decent",
+          "timestamp": "2026-01-15T16:15:15.9759583Z"
+        },
+        {
+          "$type": "gameend",
+          "eventType": "gameend",
+          "reason": "gaveup",
+          "timestamp": "2026-01-15T16:15:22.9999148Z"
+        }
+      ],
+      "isCompleted": true
     }
   ],
   "createdAt": "2026-01-11T17:25:47.0058248Z",
-  "updatedAt": "2026-01-13T12:48:37.7749487Z"
+  "updatedAt": "2026-01-15T16:15:23.0025587Z"
 }
