@@ -16,7 +16,14 @@ import type {
   LlmTestResponse
 } from '../types';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5157/api').replace(/\/$/, '');
+// Ensure the API base URL always ends with /api
+const getApiBaseUrl = (): string => {
+  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5157/api').replace(/\/$/, '');
+  // Append /api if not already present
+  return baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const api = {
   // Game endpoints
