@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/91235346-da5a-45fe-ad00-908b08ae182a/resourceGroups/Game1/providers/Microsoft.Web/sites/Infogoer",
+    "appService.deploySubpath": "src\\LinkittyDo.Api"
+}

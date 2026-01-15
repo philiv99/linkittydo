@@ -28,7 +28,19 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")
+        policy.WithOrigins(
+                "http://localhost:5173", 
+                "http://localhost:5174", 
+                "http://localhost:3000")
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+    
+    // Allow any origin in production (Azure) - you can restrict this later
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -45,8 +57,21 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger"; // Swagger UI at /swagger
 });
 
+// Add a root endpoint that redirects to Swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
+// Add a health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
+// Fallback to Swagger for any unmatched routes
+app.MapFallback(() => Results.Redirect("/swagger"));
+
 app.UseHttpsRedirection();
-app.UseCors("AllowReactApp");
+
+// Use AllowAll CORS policy for Azure deployment
+var env = app.Environment;
+app.UseCors(env.IsDevelopment() ? "AllowReactApp" : "AllowAll");
+
 app.MapControllers();
 
 app.Run();

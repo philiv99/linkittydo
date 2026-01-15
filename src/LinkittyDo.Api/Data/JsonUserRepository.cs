@@ -15,7 +15,9 @@ public class JsonUserRepository : IUserRepository
 
     public JsonUserRepository(IConfiguration configuration)
     {
-        _dataDirectory = configuration["DataDirectory"] ?? Path.Combine(Directory.GetCurrentDirectory(), "Data", "Users");
+        // Use AppContext.BaseDirectory for Azure App Service compatibility
+        var baseDir = configuration["DataDirectory"] ?? Path.Combine(AppContext.BaseDirectory, "Data");
+        _dataDirectory = Path.Combine(baseDir, "Users");
         
         // Ensure the data directory exists
         if (!Directory.Exists(_dataDirectory))
