@@ -22,3 +22,40 @@ Piece the clues together to guess: **"breaking news"**
 - Phrase-based puzzles with web links as clues
 - Each link points to a real web page hinting at a word or sub-phrase
 - Combine the clues to deduce the full phrase
+
+## Quick Start
+
+**Prerequisites**: [.NET 8 SDK](https://dotnet.microsoft.com/download), [Node.js 18+](https://nodejs.org/)
+
+**One command to start everything:**
+
+```
+start-app.bat
+```
+
+This will:
+1. Install frontend dependencies (if needed)
+2. Start the backend API on http://localhost:5157
+3. Start the frontend dev server on http://localhost:5173
+4. Open the app in your default browser
+
+**To stop:**
+
+```
+stop-app.bat
+```
+
+## Manual Setup
+
+**Backend:**
+```
+cd src/LinkittyDo.Api
+dotnet run
+```
+
+**Frontend:**
+```
+cd src/linkittydo-web
+npm install
+npm run dev
+```
