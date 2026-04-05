@@ -40,6 +40,23 @@ if not exist "%WEB_DIR%\node_modules" (
     echo.
 )
 
+:: Check if ports are already in use
+netstat -aon | findstr ":5157.*LISTENING" >nul 2>&1
+if not errorlevel 1 (
+    echo ERROR: Port 5157 is already in use. Backend may already be running.
+    echo Run stop-app.bat first, or check for other processes on that port.
+    pause
+    exit /b 1
+)
+
+netstat -aon | findstr ":5173.*LISTENING" >nul 2>&1
+if not errorlevel 1 (
+    echo ERROR: Port 5173 is already in use. Frontend may already be running.
+    echo Run stop-app.bat first, or check for other processes on that port.
+    pause
+    exit /b 1
+)
+
 :: Start backend API in a new minimized window
 echo Starting backend API on http://localhost:5157 ...
 start "LinkittyDo-API" /min cmd /c "cd /d "%API_DIR%" && dotnet run --launch-profile http"
