@@ -39,7 +39,7 @@ public class GameService : IGameService
         _logger.LogInformation("Starting new game for user: {UserId}, difficulty: {Difficulty}", 
             userId ?? "guest", difficulty);
         
-        var phrase = await _phraseService.GetPhraseForUserAsync(userId);
+        var phrase = await _phraseService.GetPhraseForUserAsync(userId, difficulty);
         var now = DateTime.UtcNow;
         
         var session = new GameSession
@@ -49,6 +49,7 @@ public class GameService : IGameService
             Phrase = phrase,
             RevealedWords = new Dictionary<int, bool>(),
             Score = 0,
+            Difficulty = difficulty,
             StartedAt = now,
             UserId = userId
         };
@@ -100,7 +101,14 @@ public class GameService : IGameService
 
         // Case-insensitive comparison
         var isCorrect = string.Equals(word.Text, request.Guess, StringComparison.OrdinalIgnoreCase);
-        var pointsAwarded = isCorrect ? 100 : 0;
+        
+        // Track guess count for this word
+        if (!session.GuessCountPerWord.ContainsKey(request.WordIndex))
+            session.GuessCountPerWord[request.WordIndex] = 0;
+        session.GuessCountPerWord[request.WordIndex]++;
+        
+        // Calculate points using enhanced scoring formula
+        var pointsAwarded = isCorrect ? CalculateWordScore(session, request.WordIndex) : 0;
 
         if (isCorrect)
         {
@@ -208,7 +216,17 @@ public class GameService : IGameService
     public void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url)
     {
         var session = GetGame(sessionId);
-        if (session == null || session.IsGuestSession || session.GameRecord == null)
+        if (session == null)
+        {
+            return;
+        }
+        
+        // Track clue count per word for scoring
+        if (!session.ClueCountPerWord.ContainsKey(wordIndex))
+            session.ClueCountPerWord[wordIndex] = 0;
+        session.ClueCountPerWord[wordIndex]++;
+
+        if (session.IsGuestSession || session.GameRecord == null)
         {
             return;
         }
@@ -220,5 +238,46 @@ public class GameService : IGameService
             Url = url,
             Timestamp = DateTime.UtcNow
         });
+    }
+
+    /// <summary>
+    /// Calculates the score for correctly guessing a word.
+    /// Formula: BasePoints / (clueCount * guessCount), with first-guess-no-clue bonus.
+    /// </summary>
+    internal static int CalculateWordScore(GameSession session, int wordIndex)
+    {
+        var difficulty = session.Difficulty;
+        var basePoints = GetBasePoints(difficulty);
+        
+        var clueCount = session.ClueCountPerWord.GetValueOrDefault(wordIndex, 0);
+        var guessCount = session.GuessCountPerWord.GetValueOrDefault(wordIndex, 1);
+        
+        // Minimum 1 for divisor components
+        var effectiveClueCount = Math.Max(1, clueCount);
+        var effectiveGuessCount = Math.Max(1, guessCount);
+        
+        var score = (double)basePoints / (effectiveClueCount * effectiveGuessCount);
+        
+        // First-guess bonus: 2x if correct on first guess with no clues
+        if (guessCount == 1 && clueCount == 0)
+        {
+            score *= 2;
+        }
+        
+        return (int)Math.Round(score);
+    }
+
+    /// <summary>
+    /// Returns base points scaled by difficulty tier.
+    /// </summary>
+    internal static int GetBasePoints(int difficulty)
+    {
+        return difficulty switch
+        {
+            <= 20 => 100,
+            <= 50 => 150,
+            <= 80 => 200,
+            _ => 300
+        };
     }
 }

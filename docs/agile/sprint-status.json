@@ -1,10 +1,10 @@
 {
   "current_sprint": {
-    "number": 2,
-    "status": "completed",
-    "branch": "feature/20260405-sprint-2",
+    "number": 3,
+    "status": "in-progress",
+    "branch": "feature/20260405-sprint-3",
     "plan_approved": true,
-    "pr_number": 12
+    "pr_number": null
   },
   "last_completed": {
     "number": 2,
@@ -15,7 +15,7 @@
     "key_lesson": "Scripts that start services must always check port availability before launching"
   },
   "test_metrics": {
-    "backend_tests_passing": 70,
+    "backend_tests_passing": 112,
     "frontend_tests_passing": 29,
     "lint_errors": 0
   }

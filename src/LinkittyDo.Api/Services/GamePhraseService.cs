@@ -58,9 +58,10 @@ public class GamePhraseService : IGamePhraseService
         _logger = logger;
     }
 
-    public async Task<Phrase> GetPhraseForUserAsync(string? userId)
+    public async Task<Phrase> GetPhraseForUserAsync(string? userId, int preferredDifficulty = 10)
     {
-        _logger.LogInformation("Getting phrase for user: {UserId}", userId ?? "guest");
+        _logger.LogInformation("Getting phrase for user: {UserId}, preferred difficulty: {Difficulty}", 
+            userId ?? "guest", preferredDifficulty);
 
         // Get phrases the user has already played
         var playedPhraseTexts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -94,9 +95,27 @@ public class GamePhraseService : IGamePhraseService
 
         if (unplayedPhrases.Count > 0)
         {
-            // Pick a random unplayed phrase
-            var selectedPhrase = unplayedPhrases[_random.Next(unplayedPhrases.Count)];
-            _logger.LogInformation("Selected existing unplayed phrase: {PhraseId}", selectedPhrase.UniqueId);
+            // Ensure all phrases have difficulty computed
+            foreach (var phrase in unplayedPhrases.Where(p => p.Difficulty == 0))
+            {
+                var tokens = TokenizePhrase(phrase.Text);
+                var hiddenIndices = tokens
+                    .Select((token, index) => new { Token = token, Index = index })
+                    .Where(t => !IsStopWord(t.Token) && !IsPunctuation(t.Token))
+                    .Select(t => t.Index)
+                    .ToHashSet();
+                phrase.Difficulty = ComputePhraseDifficulty(tokens, hiddenIndices);
+            }
+            
+            // Prefer phrases within ±20 of preferred difficulty
+            var nearDifficulty = unplayedPhrases
+                .Where(p => Math.Abs(p.Difficulty - preferredDifficulty) <= 20)
+                .ToList();
+            
+            var selectionPool = nearDifficulty.Count > 0 ? nearDifficulty : unplayedPhrases;
+            var selectedPhrase = selectionPool[_random.Next(selectionPool.Count)];
+            _logger.LogInformation("Selected existing unplayed phrase: {PhraseId} (difficulty: {Difficulty})", 
+                selectedPhrase.UniqueId, selectedPhrase.Difficulty);
             return CreatePhraseFromGamePhrase(selectedPhrase);
         }
 
@@ -338,6 +357,12 @@ Return only the phrase with no quotes or additional text.";
             .Select(t => t.Index)
             .ToHashSet();
 
+        // Compute difficulty if not already set
+        if (gamePhrase.Difficulty == 0)
+        {
+            gamePhrase.Difficulty = ComputePhraseDifficulty(tokens, hiddenIndices);
+        }
+
         // Generate a consistent ID from the phrase's unique ID
         var phraseId = Math.Abs(gamePhrase.UniqueId.GetHashCode());
 
@@ -345,6 +370,7 @@ Return only the phrase with no quotes or additional text.";
         {
             Id = phraseId,
             FullText = gamePhrase.Text,
+            Difficulty = gamePhrase.Difficulty,
             Words = tokens.Select((token, index) => new PhraseWord
             {
                 Index = index,
@@ -353,6 +379,38 @@ Return only the phrase with no quotes or additional text.";
                 ClueSearchTerm = hiddenIndices.Contains(index) ? token : null
             }).ToList()
         };
+    }
+
+    /// <summary>
+    /// Computes a difficulty score (0-100) for a phrase based on:
+    /// - Hidden word ratio (more hidden = harder)
+    /// - Phrase length (longer = harder)
+    /// - Average hidden word length (longer words = harder)
+    /// </summary>
+    internal static int ComputePhraseDifficulty(List<string> tokens, HashSet<int> hiddenIndices)
+    {
+        var contentTokens = tokens.Where((t, i) => !IsPunctuation(t)).ToList();
+        if (contentTokens.Count == 0) return 50;
+
+        // Factor 1: Hidden word ratio (0-1), higher = harder
+        var hiddenRatio = (double)hiddenIndices.Count / contentTokens.Count;
+        
+        // Factor 2: Phrase length score (0-1), longer = harder
+        // 2 words = 0.0, 7+ words = 1.0
+        var lengthScore = Math.Min(1.0, Math.Max(0.0, (contentTokens.Count - 2.0) / 5.0));
+        
+        // Factor 3: Average hidden word length score (0-1), longer words = harder
+        var hiddenWords = tokens.Where((t, i) => hiddenIndices.Contains(i)).ToList();
+        var avgWordLength = hiddenWords.Count > 0 
+            ? hiddenWords.Average(w => w.Length) 
+            : 3.0;
+        // 3 chars = 0.0, 8+ chars = 1.0
+        var wordLengthScore = Math.Min(1.0, Math.Max(0.0, (avgWordLength - 3.0) / 5.0));
+        
+        // Weighted combination
+        var rawScore = (hiddenRatio * 40) + (lengthScore * 30) + (wordLengthScore * 30);
+        
+        return (int)Math.Round(Math.Min(100, Math.Max(0, rawScore)));
     }
     
     /// <summary>

@@ -18,7 +18,7 @@ public interface IGamePhraseService
     /// </summary>
     /// <param name="userId">The user's unique ID (null for guest users)</param>
     /// <returns>A Phrase object ready for gameplay</returns>
-    Task<Phrase> GetPhraseForUserAsync(string? userId);
+    Task<Phrase> GetPhraseForUserAsync(string? userId, int preferredDifficulty = 10);
 
     /// <summary>
     /// Gets all phrases in the manager
