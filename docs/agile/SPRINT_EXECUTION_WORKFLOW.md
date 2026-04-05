@@ -40,6 +40,7 @@ There is no automatic trigger. The user decides when to start the next sprint.
   - [ ] Verify its PR was merged (or intentionally abandoned)
   - [ ] Verify its retrospective exists (`docs/agile/sprints/SPRINT_N_RETRO.md`)
   - [ ] Review retrospective for carry-over items and applied improvements
+  - [ ] **Verify previous retro's High-priority improvements were applied to process docs** (check the "Improvements Applied" table in the retro document against the actual files)
 - [ ] Check Copilot memory (`/memories/repo/`) for saved sprint context
 - [ ] Verify backend builds: `dotnet build`
 - [ ] Verify frontend builds: `npm run build`
@@ -47,7 +48,7 @@ There is no automatic trigger. The user decides when to start the next sprint.
 
 ### Gate
 
-All prerequisites pass before proceeding to planning.
+All prerequisites pass before proceeding to planning. If previous sprint's High-priority retro improvements were NOT applied, apply them now before starting the new sprint.
 
 ---
 
@@ -117,6 +118,8 @@ For each task:
 - [ ] Commit with descriptive message referencing the issue (e.g., `feat: add difficulty slider (#12)`)
 - [ ] Push to feature branch regularly
 
+**Commit after each task completes** - do not batch all commits to the end of the sprint. Per-task commits provide intermediate save points, better traceability, and smaller diffs that are easier to review.
+
 Cross-cutting:
 - [ ] Update `CHANGELOG.md` with user-facing changes as they are committed
 - [ ] Update GitHub issue comments with progress
@@ -126,6 +129,17 @@ Cross-cutting:
 Once the sprint plan is approved in Phase 1, proceed through all tasks without stopping to ask for per-task approval. Make best engineering judgment for implementation decisions and document them.
 
 **Only stop for reasons listed in [SPRINT_STOPPING_CRITERIA.md](SPRINT_STOPPING_CRITERIA.md).**
+
+### Test Failure Protocol
+
+All new tests introduced during the sprint MUST pass before the sprint can be marked complete.
+
+If a test fails and the fix is not straightforward:
+1. Attempt to fix (15-30 minutes)
+2. If still failing, try an alternative approach (15-30 minutes)
+3. If still failing, request user approval to defer with a documented reason
+
+Do NOT accept failing new tests. Do NOT mark the sprint complete with failing new tests unless the user explicitly approves deferral. See Criterion 7 in [SPRINT_STOPPING_CRITERIA.md](SPRINT_STOPPING_CRITERIA.md) for details.
 
 ### Context Limit Handling
 
@@ -153,11 +167,16 @@ If the conversation is approaching its context limit during execution:
 - [ ] Run code analysis (lint, type check)
 - [ ] Backend builds cleanly
 - [ ] Frontend builds cleanly
+- [ ] **All new tests pass** (see Test Failure Protocol in Phase 3)
 - [ ] Verify acceptance criteria for each sprint item
 - [ ] Push final changes to feature branch
 - [ ] Create Pull Request to `main` branch
   - Include: what changed, why, testing done, issue references
 - [ ] Request user review
+
+### Merge Gate
+
+**The PR cannot be merged until Phase 5 (Retrospective) is complete.** The retro may produce High-priority improvements that must be applied to the feature branch before merging. This ensures the merged code includes both sprint work AND process improvements.
 
 ---
 
@@ -186,9 +205,11 @@ User rates overall: Poor / Fair / Good / Very Good / Excellent
 ### Step 5.3: Identify Improvements
 
 Propose specific, actionable improvements categorized by priority:
-- **High (Apply Now)**: Caused real problems. Fix before merging.
-- **Medium (Next Sprint)**: Would help. Add to backlog.
-- **Low (Future)**: Nice to have. Defer.
+- **High (Apply Now)**: Caused real problems this sprint. These MUST be applied to the feature branch before the PR is merged. They are not optional.
+- **Medium (Next Sprint)**: Would help but did not block work. Add to backlog as `chore` items for the next sprint.
+- **Low (Future)**: Nice to have. Add to backlog for future prioritization.
+
+**Enforcement**: High-priority improvements are mandatory. They must be implemented on the feature branch and committed before the PR merge. The next sprint's Phase 0 will verify they were applied.
 
 ### Step 5.4: Apply Improvements (CRITICAL)
 

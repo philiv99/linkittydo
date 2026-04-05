@@ -458,9 +458,16 @@ Once the user approves a sprint plan (Phase 1), proceed through all tasks withou
 - All tasks complete (normal completion)
 - Blocked on external dependency
 - User requests scope change
-- Critical bug found
+- Bug discovery (severity-based triage: only Critical bugs pause work)
 - User requests early review
-- Context limit approaching
+- Context limit approaching (save state at 85%, stop at 95%)
+- Test failure escalation (new tests MUST pass; escalate if stuck)
+- Fundamental design failure (requires rethinking approach)
+- Time limit reached (sprint boundary)
+
+### Test Failure Protocol
+
+All new tests introduced during a sprint MUST pass before the sprint can be marked complete. If a test fails and the fix is not straightforward, attempt to fix (15-30 min), try an alternative approach (15-30 min), then request user approval to defer with a documented reason. Do NOT accept failing new tests without explicit user approval.
 
 ### The Learning Loop (Phase 5)
 
@@ -469,11 +476,12 @@ The retrospective is not just documentation - it is how the system improves:
 1. **Review**: Summarize what was delivered vs planned
 2. **Feedback**: User rates the sprint and provides input
 3. **Identify**: Propose specific improvements with priorities (High/Medium/Low)
-4. **Apply**: High-priority improvements are applied NOW by updating the relevant process docs (workflow, stopping criteria, agent files, copilot-instructions, etc.)
+4. **Apply**: High-priority improvements are MANDATORY - apply them to the feature branch before the PR is merged. They update the relevant process docs (workflow, stopping criteria, agent files, copilot-instructions, etc.)
 5. **Document**: Create `SPRINT_N_RETRO.md` recording findings and changes made
 6. **Persist**: Save sprint context to memory and update `sprint-status.json`
+7. **Verify**: The next sprint's Phase 0 verifies that previous retro improvements were actually applied
 
-This means each sprint's lessons are baked into the process docs. The next sprint runs the improved process.
+This means each sprint's lessons are baked into the process docs. The next sprint runs the improved process. The PR cannot merge until the retro is complete and High-priority improvements are applied.
 
 ### Memory and Context Persistence
 

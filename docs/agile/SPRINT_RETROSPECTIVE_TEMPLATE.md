@@ -65,9 +65,11 @@ Based on user feedback and observations during the sprint, propose specific impr
 ```
 
 **Priority definitions**:
-- **High**: Caused real problems this sprint. Apply before merging PR.
-- **Medium**: Would help but did not block work. Apply next sprint.
+- **High**: Caused real problems this sprint. These MUST be applied to the feature branch before the PR is merged.
+- **Medium**: Would help but did not block work. Add to backlog for next sprint.
 - **Low**: Nice to have. Add to backlog for future.
+
+**Enforcement**: High-priority improvements are mandatory and will be verified in the next sprint's Phase 0 prerequisites. If they were not applied, they must be applied before the new sprint begins.
 
 ---
 
