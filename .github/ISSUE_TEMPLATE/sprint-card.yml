@@ -1,0 +1,72 @@
+name: Sprint Card
+description: A work item for a LinkittyDo sprint
+title: "[Sprint N] "
+labels: ["sprint"]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Enhancement
+        - Bug
+        - Refactor
+        - Documentation
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P1 - Critical
+        - P2 - High
+        - P3 - Medium
+        - P4 - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to be done and why
+      placeholder: Describe the work item...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific, measurable criteria for completion
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Task Breakdown
+      description: Sub-tasks with estimates (from /plan-sprint skill)
+      placeholder: |
+        - A. Task description (~Xh)
+        - B. Task description (~Xh)
+
+  - type: textarea
+    id: test-plan
+    attributes:
+      label: Test Plan
+      description: How will this be tested?
+      placeholder: |
+        Automated: ...
+        Manual: ...
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Technical Notes
+      description: Implementation notes, risks, dependencies

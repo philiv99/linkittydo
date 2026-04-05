@@ -4,7 +4,7 @@ This document contains coding standards and patterns for the LinkittyDo project.
 
 ## IMPORTANT: Workspace Isolation
 
-**IMPORTANT**: Never change any files or folders in any other workspace folder except LinkittyDo. When working in this multi-root workspace (LinkittyDo and spamfilter-multi), restrict all modifications to the LinkittyDo workspace only.
+**IMPORTANT**: Never change any files or folders in any other workspace folder except LinkittyDo. When working in this multi-root workspace (LinkittyDo and spamfilter-multi), restrict all modifications to the LinkittyDo root only.
 
 ---
 
@@ -416,3 +416,132 @@ public enum GameResult
 - One component per file
 - CSS modules or separate CSS files
 - Props interfaces defined at top of file
+
+---
+
+## Sprint-Based Development
+
+All development follows sprint-based planning with structured execution phases. Each sprint includes a learning loop where retrospective findings are applied to the process documents, improving the system sprint-over-sprint.
+
+### Sprint Execution Documents
+
+| Document | Purpose | Location |
+|----------|---------|----------|
+| **BACKLOG.md** | Prioritized work items | `docs/agile/BACKLOG.md` |
+| **SPRINT_EXECUTION_WORKFLOW.md** | 5-phase execution checklist | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` |
+| **SPRINT_STOPPING_CRITERIA.md** | When/why to stop working | `docs/agile/SPRINT_STOPPING_CRITERIA.md` |
+| **SPRINT_RETROSPECTIVE_TEMPLATE.md** | Structured retrospective guide | `docs/agile/SPRINT_RETROSPECTIVE_TEMPLATE.md` |
+| **sprint-status.json** | Sprint state persistence | `docs/agile/sprint-status.json` |
+| **SPRINT_N_PLAN.md** | Per-sprint plan (created at planning) | `docs/agile/sprints/` |
+| **SPRINT_N_RETRO.md** | Per-sprint retrospective | `docs/agile/sprints/` |
+
+### Sprint Workflow (Phases 0-5)
+
+| Phase | Name | User Required |
+|-------|------|--------------|
+| 0 | Prerequisites | No |
+| 1 | Planning | **Yes** - approve plan |
+| 2 | Kickoff | No |
+| 3 | Execution | No (autonomous) |
+| 4 | Review & Testing | **Yes** - review PR |
+| 5 | Retrospective | **Yes** - provide feedback |
+
+### How a Sprint Starts
+
+A new sprint is triggered by the user saying "let's plan a sprint" or invoking `/plan-sprint`. There is no automatic trigger. Before planning, Phase 0 checks prerequisites (previous sprint merged, retro exists, builds pass).
+
+### Execution Autonomy
+
+Once the user approves a sprint plan (Phase 1), proceed through all tasks without stopping to ask for per-task approval. Make best engineering judgment for implementation decisions.
+
+**Only stop for valid reasons** defined in `docs/agile/SPRINT_STOPPING_CRITERIA.md`:
+- All tasks complete (normal completion)
+- Blocked on external dependency
+- User requests scope change
+- Critical bug found
+- User requests early review
+- Context limit approaching
+
+### The Learning Loop (Phase 5)
+
+The retrospective is not just documentation - it is how the system improves:
+
+1. **Review**: Summarize what was delivered vs planned
+2. **Feedback**: User rates the sprint and provides input
+3. **Identify**: Propose specific improvements with priorities (High/Medium/Low)
+4. **Apply**: High-priority improvements are applied NOW by updating the relevant process docs (workflow, stopping criteria, agent files, copilot-instructions, etc.)
+5. **Document**: Create `SPRINT_N_RETRO.md` recording findings and changes made
+6. **Persist**: Save sprint context to memory and update `sprint-status.json`
+
+This means each sprint's lessons are baked into the process docs. The next sprint runs the improved process.
+
+### Memory and Context Persistence
+
+Sprint context must survive across conversation sessions. Use these mechanisms:
+
+1. **`docs/agile/sprint-status.json`** (in repo): Tracks current sprint number, status, branch, approval state, and test metrics. Read this at the start of every sprint-related conversation.
+
+2. **Copilot Memory** (`/memories/repo/`): Save sprint summaries after each retrospective. Include: sprint number, goal, result, key lesson, process changes made, and top backlog candidates.
+
+3. **Context limit handling**: If approaching the context limit during execution:
+   - Save progress to `/memories/repo/` and `sprint-status.json`
+   - Commit and push all work in progress
+   - Notify the user that a new session is needed
+
+When resuming a sprint in a new session:
+- Read `docs/agile/sprint-status.json` for current state
+- Check `/memories/repo/` for saved context
+- Verify the feature branch and continue from where work stopped
+
+### Agents and Skills
+
+**Agents** (`.github/agents/`):
+- `build-validator` - Validates backend and frontend builds
+- `code-architect` - Architecture reviews and design decisions
+- `code-simplifier` - Code simplification without behavior changes
+- `verify-app` - Thorough application verification after changes
+
+**Skills** (`.github/skills/`):
+- `/plan-sprint` - Sprint planning and task breakdown
+- `/phase-check` - Verify phase completion before transitioning
+- `/full-test` - Run all tests and code analysis
+
+### Common Commands
+
+**Backend**:
+```powershell
+cd src/LinkittyDo.Api
+dotnet restore
+dotnet build
+dotnet test
+dotnet run
+```
+
+**Frontend**:
+```powershell
+cd src/linkittydo-web
+npm ci
+npm run dev      # Development server
+npm run build    # Production build
+npm test         # Run tests
+npx tsc --noEmit # Type check
+npx eslint src/  # Lint
+```
+
+### Changelog Policy
+
+Update `CHANGELOG.md` in the same commit as code changes during sprint execution:
+- Format: `- **type**: Description (Issue #N)`
+- Types: `feat`, `fix`, `chore`, `docs`, `test`
+- Add under `## [Unreleased]` section, grouped by date (newest first)
+
+### Git Branching
+
+```
+main (release branch)
+  └── feature/YYYYMMDD-sprint-N (sprint feature branches)
+```
+
+- Sprint work happens on feature branches
+- PRs target `main` after sprint review
+- Commit messages reference GitHub issues: `feat: add feature (#12)`

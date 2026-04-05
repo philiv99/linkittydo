@@ -1,0 +1,22 @@
+{
+  "current_sprint": {
+    "number": 0,
+    "status": "not-started",
+    "branch": null,
+    "plan_approved": false,
+    "pr_number": null
+  },
+  "last_completed": {
+    "number": 0,
+    "date": null,
+    "result": null,
+    "items_completed": 0,
+    "items_carried_over": 0,
+    "key_lesson": null
+  },
+  "test_metrics": {
+    "backend_tests_passing": 0,
+    "frontend_tests_passing": 0,
+    "lint_errors": 0
+  }
+}
