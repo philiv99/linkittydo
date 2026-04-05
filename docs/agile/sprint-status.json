@@ -12,7 +12,7 @@
     "result": "complete",
     "items_completed": 1,
     "items_carried_over": 0,
-    "key_lesson": "Simple bat scripts with named windows enable clean process management"
+    "key_lesson": "Scripts that start services must always check port availability before launching"
   },
   "test_metrics": {
     "backend_tests_passing": 70,
