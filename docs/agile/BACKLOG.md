@@ -78,6 +78,12 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 20 | Sound effects polish | P3 | 6 | Audio assets exist but integration is basic. Add difficulty-appropriate audio cues, volume control, mute toggle. |
 | 21 | Accessibility improvements | P2 | 6 | ARIA labels for word slots, keyboard shortcuts (C=clue, G=give-up, N=new-game), `prefers-reduced-motion`, high-contrast mode, screen reader announcements. |
 
+### Developer Experience
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 36 | One-click app launcher (bat file) | P1 | 2 | Create a single `.bat` file that starts both the backend API and frontend dev server and opens the app in a browser. Eliminates multi-step manual startup. |
+
 ### Security & Production Readiness
 
 | # | Item | Priority | Sprint | Notes |
