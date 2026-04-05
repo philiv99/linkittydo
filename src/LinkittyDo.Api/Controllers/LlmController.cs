@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 
 namespace LinkittyDo.Api.Controllers;
@@ -20,7 +21,7 @@ public class LlmController : ControllerBase
     /// Test endpoint for LLM completions
     /// </summary>
     [HttpPost("test")]
-    public async Task<ActionResult<LlmTestResponse>> TestCompletion([FromBody] LlmTestRequest request)
+    public async Task<ActionResult<ApiResponse<LlmTestResponse>>> TestCompletion([FromBody] LlmTestRequest request)
     {
         _logger.LogInformation("LLM Test endpoint called with prompt: {Prompt}", request.Prompt);
 
@@ -28,7 +29,7 @@ public class LlmController : ControllerBase
         {
             var response = await _llmService.GetCompletionAsync(request.Prompt, request.SystemPrompt);
             
-            return Ok(new LlmTestResponse
+            return Ok(new ApiResponse<LlmTestResponse>(new LlmTestResponse
             {
                 Success = true,
                 Content = response.Content,
@@ -36,7 +37,7 @@ public class LlmController : ControllerBase
                 PromptTokens = response.PromptTokens,
                 CompletionTokens = response.CompletionTokens,
                 TotalTokens = response.TotalTokens
-            });
+            }));
         }
         catch (Exception ex)
         {

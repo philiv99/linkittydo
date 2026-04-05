@@ -21,7 +21,7 @@ public class ClueController : ControllerBase
     /// Get a clue URL for a hidden word
     /// </summary>
     [HttpGet("{sessionId}/{wordIndex}")]
-    public async Task<ActionResult<ClueResponse>> GetClue(
+    public async Task<ActionResult<ApiResponse<ClueResponse>>> GetClue(
         Guid sessionId, 
         int wordIndex, 
         [FromQuery(Name = "excludeUrl")] List<string>? excludeUrls = null)
@@ -29,18 +29,39 @@ public class ClueController : ControllerBase
         var session = _gameService.GetGame(sessionId);
         if (session == null)
         {
-            return NotFound(new { message = "Game session not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game session not found"
+                }
+            });
         }
 
         var word = session.Phrase.Words.FirstOrDefault(w => w.Index == wordIndex);
         if (word == null)
         {
-            return NotFound(new { message = "Word not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "WORD_NOT_FOUND",
+                    Message = "Word not found"
+                }
+            });
         }
 
         if (!word.IsHidden)
         {
-            return BadRequest(new { message = "Word is not hidden, no clue needed" });
+            return BadRequest(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "Word is not hidden, no clue needed"
+                }
+            });
         }
 
         // Add client-excluded URLs to the session's used URLs
@@ -60,6 +81,6 @@ public class ClueController : ControllerBase
             _gameService.RecordClueEvent(sessionId, wordIndex, clue.SearchTerm, clue.Url);
         }
         
-        return Ok(clue);
+        return Ok(new ApiResponse<ClueResponse>(clue));
     }
 }

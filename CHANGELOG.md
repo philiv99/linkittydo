@@ -7,4 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-05
+- **feat**: Standardize all API responses with `ApiResponse<T>` wrapper and structured error responses (#3)
+- **test**: Add backend test suite with xUnit and Moq - 70 tests covering controllers and services (#1)
+- **test**: Add frontend test suite with Vitest and Testing Library - 29 tests covering API service and components (#2)
 - **chore**: Establish sprint-based agile framework with agents, skills, and workflow documentation
