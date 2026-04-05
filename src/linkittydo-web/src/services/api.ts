@@ -13,7 +13,8 @@ import type {
   StartGameRequest,
   GameRecord,
   LlmTestRequest,
-  LlmTestResponse
+  LlmTestResponse,
+  ApiResponse
 } from '../types';
 
 // Ensure the API base URL always ends with /api
@@ -34,13 +35,15 @@ export const api = {
       body: JSON.stringify(request ?? {}),
     });
     if (!response.ok) throw new Error('Failed to start game');
-    return response.json();
+    const wrapper: ApiResponse<GameState> = await response.json();
+    return wrapper.data;
   },
 
   async getGame(sessionId: string): Promise<GameState> {
     const response = await fetch(`${API_BASE_URL}/game/${sessionId}`);
     if (!response.ok) throw new Error('Failed to get game');
-    return response.json();
+    const wrapper: ApiResponse<GameState> = await response.json();
+    return wrapper.data;
   },
 
   async submitGuess(sessionId: string, request: GuessRequest): Promise<GuessResponse> {
@@ -50,7 +53,8 @@ export const api = {
       body: JSON.stringify(request),
     });
     if (!response.ok) throw new Error('Failed to submit guess');
-    return response.json();
+    const wrapper: ApiResponse<GuessResponse> = await response.json();
+    return wrapper.data;
   },
 
   async getClue(sessionId: string, wordIndex: number, excludedUrls: string[] = []): Promise<ClueResponse> {
@@ -61,7 +65,8 @@ export const api = {
     
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to get clue');
-    return response.json();
+    const wrapper: ApiResponse<ClueResponse> = await response.json();
+    return wrapper.data;
   },
 
   async giveUp(sessionId: string): Promise<GameState> {
@@ -70,21 +75,24 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
     });
     if (!response.ok) throw new Error('Failed to give up');
-    return response.json();
+    const wrapper: ApiResponse<GameState> = await response.json();
+    return wrapper.data;
   },
 
   async getGameRecord(sessionId: string): Promise<GameRecord | null> {
     const response = await fetch(`${API_BASE_URL}/game/${sessionId}/record`);
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to get game record');
-    return response.json();
+    const wrapper: ApiResponse<GameRecord> = await response.json();
+    return wrapper.data;
   },
 
   // User endpoints
   async getAllUsers(): Promise<UserResponse[]> {
     const response = await fetch(`${API_BASE_URL}/user`);
     if (!response.ok) throw new Error('Failed to get users');
-    return response.json();
+    const wrapper: ApiResponse<UserResponse[]> = await response.json();
+    return wrapper.data;
   },
 
   async createUser(request: CreateUserRequest): Promise<UserResponse> {
@@ -99,21 +107,24 @@ export const api = {
       throw new Error(errorData.error?.message || 'Failed to create user');
     }
     
-    return response.json();
+    const wrapper: ApiResponse<UserResponse> = await response.json();
+    return wrapper.data;
   },
 
   async getUser(uniqueId: string): Promise<UserResponse | null> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}`);
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to get user');
-    return response.json();
+    const wrapper: ApiResponse<UserResponse> = await response.json();
+    return wrapper.data;
   },
 
   async getUserByEmail(email: string): Promise<UserResponse | null> {
     const response = await fetch(`${API_BASE_URL}/user/by-email/${encodeURIComponent(email)}`);
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to get user');
-    return response.json();
+    const wrapper: ApiResponse<UserResponse> = await response.json();
+    return wrapper.data;
   },
 
   async updateUser(uniqueId: string, request: UpdateUserRequest): Promise<UserResponse> {
@@ -128,7 +139,8 @@ export const api = {
       throw new Error(errorData.error?.message || 'Failed to update user');
     }
     
-    return response.json();
+    const wrapper: ApiResponse<UserResponse> = await response.json();
+    return wrapper.data;
   },
 
   async deleteUser(uniqueId: string): Promise<void> {
@@ -152,7 +164,8 @@ export const api = {
       throw new Error(errorData.error?.message || 'Failed to update difficulty');
     }
     
-    return response.json();
+    const wrapper: ApiResponse<DifficultyResponse> = await response.json();
+    return wrapper.data;
   },
 
   async addPoints(uniqueId: string, points: number): Promise<PointsResponse> {
@@ -167,27 +180,29 @@ export const api = {
       throw new Error(errorData.error?.message || 'Failed to add points');
     }
     
-    return response.json();
+    const wrapper: ApiResponse<PointsResponse> = await response.json();
+    return wrapper.data;
   },
 
   async checkNameAvailability(name: string): Promise<boolean> {
     const response = await fetch(`${API_BASE_URL}/user/check-name/${encodeURIComponent(name)}`);
     if (!response.ok) throw new Error('Failed to check name availability');
-    const data: AvailabilityResponse = await response.json();
-    return data.available;
+    const wrapper: ApiResponse<AvailabilityResponse> = await response.json();
+    return wrapper.data.available;
   },
 
   async checkEmailAvailability(email: string): Promise<boolean> {
     const response = await fetch(`${API_BASE_URL}/user/check-email/${encodeURIComponent(email)}`);
     if (!response.ok) throw new Error('Failed to check email availability');
-    const data: AvailabilityResponse = await response.json();
-    return data.available;
+    const wrapper: ApiResponse<AvailabilityResponse> = await response.json();
+    return wrapper.data.available;
   },
 
   async getUserGames(uniqueId: string): Promise<GameRecord[]> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`);
     if (!response.ok) throw new Error('Failed to get user games');
-    return response.json();
+    const wrapper: ApiResponse<GameRecord[]> = await response.json();
+    return wrapper.data;
   },
 
   // LLM endpoints
@@ -202,7 +217,8 @@ export const api = {
       body: JSON.stringify(request),
     });
 
-    const data: LlmTestResponse = await response.json();
+    const wrapper: ApiResponse<LlmTestResponse> = await response.json();
+    const data = wrapper.data;
 
     console.log('=== LLM Test Response ===');
     console.log('Success:', data.success);

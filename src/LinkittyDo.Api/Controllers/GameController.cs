@@ -21,42 +21,56 @@ public class GameController : ControllerBase
     /// Start a new game session
     /// </summary>
     [HttpPost("start")]
-    public async Task<ActionResult<GameState>> StartGame([FromBody] StartGameRequest? request = null)
+    public async Task<ActionResult<ApiResponse<GameState>>> StartGame([FromBody] StartGameRequest? request = null)
     {
         var userId = request?.UserId;
         var difficulty = request?.Difficulty ?? 10;
         
         var session = await _gameService.StartNewGameAsync(userId, difficulty);
         var state = _gameService.GetGameState(session.SessionId);
-        return Ok(state);
+        return Ok(new ApiResponse<GameState>(state, "Game started successfully"));
     }
 
     /// <summary>
     /// Get the current state of a game
     /// </summary>
     [HttpGet("{sessionId}")]
-    public ActionResult<GameState> GetGame(Guid sessionId)
+    public ActionResult<ApiResponse<GameState>> GetGame(Guid sessionId)
     {
         var session = _gameService.GetGame(sessionId);
         if (session == null)
         {
-            return NotFound(new { message = "Game session not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game session not found"
+                }
+            });
         }
 
         var state = _gameService.GetGameState(sessionId);
-        return Ok(state);
+        return Ok(new ApiResponse<GameState>(state));
     }
 
     /// <summary>
     /// Submit a guess for a hidden word
     /// </summary>
     [HttpPost("{sessionId}/guess")]
-    public async Task<ActionResult<GuessResponse>> SubmitGuess(Guid sessionId, [FromBody] GuessRequest request)
+    public async Task<ActionResult<ApiResponse<GuessResponse>>> SubmitGuess(Guid sessionId, [FromBody] GuessRequest request)
     {
         var session = _gameService.GetGame(sessionId);
         if (session == null)
         {
-            return NotFound(new { message = "Game session not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game session not found"
+                }
+            });
         }
 
         var response = _gameService.SubmitGuess(sessionId, request);
@@ -67,19 +81,26 @@ public class GameController : ControllerBase
             await _userService.AddGameRecordAsync(session.UserId!, session.GameRecord);
         }
         
-        return Ok(response);
+        return Ok(new ApiResponse<GuessResponse>(response));
     }
 
     /// <summary>
     /// Give up and reveal the complete phrase
     /// </summary>
     [HttpPost("{sessionId}/give-up")]
-    public async Task<ActionResult<GameState>> GiveUp(Guid sessionId)
+    public async Task<ActionResult<ApiResponse<GameState>>> GiveUp(Guid sessionId)
     {
         var session = _gameService.GetGame(sessionId);
         if (session == null)
         {
-            return NotFound(new { message = "Game session not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game session not found"
+                }
+            });
         }
 
         var state = _gameService.GiveUp(sessionId);
@@ -90,26 +111,40 @@ public class GameController : ControllerBase
             await _userService.AddGameRecordAsync(session.UserId!, session.GameRecord);
         }
         
-        return Ok(state);
+        return Ok(new ApiResponse<GameState>(state));
     }
     
     /// <summary>
     /// Get game record for a completed game
     /// </summary>
     [HttpGet("{sessionId}/record")]
-    public ActionResult<GameRecord> GetGameRecord(Guid sessionId)
+    public ActionResult<ApiResponse<GameRecord>> GetGameRecord(Guid sessionId)
     {
         var session = _gameService.GetGame(sessionId);
         if (session == null)
         {
-            return NotFound(new { message = "Game session not found" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game session not found"
+                }
+            });
         }
 
         if (session.IsGuestSession || session.GameRecord == null)
         {
-            return NotFound(new { message = "No game record available for guest sessions" });
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "No game record available for guest sessions"
+                }
+            });
         }
 
-        return Ok(session.GameRecord);
+        return Ok(new ApiResponse<GameRecord>(session.GameRecord));
     }
 }

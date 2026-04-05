@@ -5,6 +5,11 @@ export interface WordState {
   isRevealed: boolean;
 }
 
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
+
 export interface GameState {
   sessionId: string;
   words: WordState[];

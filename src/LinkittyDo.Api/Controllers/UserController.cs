@@ -19,7 +19,7 @@ public class UserController : ControllerBase
     /// Create a new user
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] CreateUserRequest request)
+    public async Task<ActionResult<ApiResponse<UserResponse>>> CreateUser([FromBody] CreateUserRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -64,7 +64,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.CreateUserAsync(request);
-            var response = MapToResponse(user);
+            var response = new ApiResponse<UserResponse>(MapToResponse(user), "User created successfully");
             return CreatedAtAction(nameof(GetUser), new { uniqueId = user.UniqueId }, response);
         }
         catch (InvalidOperationException ex)
@@ -89,17 +89,17 @@ public class UserController : ControllerBase
     /// Get all users
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserResponse>>> GetAllUsers()
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponse>>>> GetAllUsers()
     {
         var users = await _userService.GetAllUsersAsync();
-        return Ok(users.Select(MapToResponse));
+        return Ok(new ApiResponse<IEnumerable<UserResponse>>(users.Select(MapToResponse), "Users retrieved successfully"));
     }
 
     /// <summary>
     /// Get a user by unique ID
     /// </summary>
     [HttpGet("{uniqueId}")]
-    public async Task<ActionResult<UserResponse>> GetUser(string uniqueId)
+    public async Task<ActionResult<ApiResponse<UserResponse>>> GetUser(string uniqueId)
     {
         var user = await _userService.GetUserByIdAsync(uniqueId);
         if (user == null)
@@ -114,14 +114,14 @@ public class UserController : ControllerBase
             });
         }
 
-        return Ok(MapToResponse(user));
+        return Ok(new ApiResponse<UserResponse>(MapToResponse(user)));
     }
 
     /// <summary>
     /// Get a user by email
     /// </summary>
     [HttpGet("by-email/{email}")]
-    public async Task<ActionResult<UserResponse>> GetUserByEmail(string email)
+    public async Task<ActionResult<ApiResponse<UserResponse>>> GetUserByEmail(string email)
     {
         var user = await _userService.GetUserByEmailAsync(email);
         if (user == null)
@@ -136,14 +136,14 @@ public class UserController : ControllerBase
             });
         }
 
-        return Ok(MapToResponse(user));
+        return Ok(new ApiResponse<UserResponse>(MapToResponse(user)));
     }
 
     /// <summary>
     /// Update a user
     /// </summary>
     [HttpPut("{uniqueId}")]
-    public async Task<ActionResult<UserResponse>> UpdateUser(string uniqueId, [FromBody] UpdateUserRequest request)
+    public async Task<ActionResult<ApiResponse<UserResponse>>> UpdateUser(string uniqueId, [FromBody] UpdateUserRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -202,7 +202,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.UpdateUserAsync(uniqueId, request);
-            return Ok(MapToResponse(user!));
+            return Ok(new ApiResponse<UserResponse>(MapToResponse(user!), "User updated successfully"));
         }
         catch (InvalidOperationException ex)
         {
@@ -248,27 +248,27 @@ public class UserController : ControllerBase
     /// Check if a name is available
     /// </summary>
     [HttpGet("check-name/{name}")]
-    public async Task<ActionResult<AvailabilityResponse>> CheckNameAvailability(string name)
+    public async Task<ActionResult<ApiResponse<AvailabilityResponse>>> CheckNameAvailability(string name)
     {
         var available = await _userService.IsNameAvailableAsync(name);
-        return Ok(new AvailabilityResponse { Available = available });
+        return Ok(new ApiResponse<AvailabilityResponse>(new AvailabilityResponse { Available = available }));
     }
 
     /// <summary>
     /// Check if an email is available
     /// </summary>
     [HttpGet("check-email/{email}")]
-    public async Task<ActionResult<AvailabilityResponse>> CheckEmailAvailability(string email)
+    public async Task<ActionResult<ApiResponse<AvailabilityResponse>>> CheckEmailAvailability(string email)
     {
         var available = await _userService.IsEmailAvailableAsync(email);
-        return Ok(new AvailabilityResponse { Available = available });
+        return Ok(new ApiResponse<AvailabilityResponse>(new AvailabilityResponse { Available = available }));
     }
 
     /// <summary>
     /// Update user's preferred difficulty
     /// </summary>
     [HttpPatch("{uniqueId}/difficulty")]
-    public async Task<ActionResult<DifficultyResponse>> UpdateDifficulty(string uniqueId, [FromBody] UpdateDifficultyRequest request)
+    public async Task<ActionResult<ApiResponse<DifficultyResponse>>> UpdateDifficulty(string uniqueId, [FromBody] UpdateDifficultyRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -299,11 +299,11 @@ public class UserController : ControllerBase
                 });
             }
 
-            return Ok(new DifficultyResponse
+            return Ok(new ApiResponse<DifficultyResponse>(new DifficultyResponse
             {
                 UniqueId = user.UniqueId,
                 PreferredDifficulty = user.PreferredDifficulty
-            });
+            }, "Difficulty updated successfully"));
         }
         catch (ArgumentOutOfRangeException ex)
         {
@@ -322,7 +322,7 @@ public class UserController : ControllerBase
     /// Add points to user's lifetime total
     /// </summary>
     [HttpPost("{uniqueId}/points")]
-    public async Task<ActionResult<PointsResponse>> AddPoints(string uniqueId, [FromBody] AddPointsRequest request)
+    public async Task<ActionResult<ApiResponse<PointsResponse>>> AddPoints(string uniqueId, [FromBody] AddPointsRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -353,12 +353,12 @@ public class UserController : ControllerBase
                 });
             }
 
-            return Ok(new PointsResponse
+            return Ok(new ApiResponse<PointsResponse>(new PointsResponse
             {
                 UniqueId = user.UniqueId,
                 LifetimePoints = user.LifetimePoints,
                 PointsAdded = request.Points
-            });
+            }, "Points added successfully"));
         }
         catch (ArgumentOutOfRangeException ex)
         {
@@ -377,7 +377,7 @@ public class UserController : ControllerBase
     /// Get a user's game history
     /// </summary>
     [HttpGet("{uniqueId}/games")]
-    public async Task<ActionResult<IEnumerable<GameRecord>>> GetUserGames(string uniqueId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<GameRecord>>>> GetUserGames(string uniqueId)
     {
         var user = await _userService.GetUserByIdAsync(uniqueId);
         if (user == null)
@@ -393,7 +393,7 @@ public class UserController : ControllerBase
         }
 
         var games = await _userService.GetUserGamesAsync(uniqueId);
-        return Ok(games);
+        return Ok(new ApiResponse<IEnumerable<GameRecord>>(games));
     }
 
     private static UserResponse MapToResponse(User user)
