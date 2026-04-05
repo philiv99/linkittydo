@@ -15,8 +15,8 @@
     "key_lesson": null
   },
   "test_metrics": {
-    "backend_tests_passing": 0,
-    "frontend_tests_passing": 0,
+    "backend_tests_passing": 70,
+    "frontend_tests_passing": 29,
     "lint_errors": 0
   }
 }
