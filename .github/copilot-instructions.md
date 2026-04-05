@@ -2,6 +2,12 @@
 
 This document contains coding standards and patterns for the LinkittyDo project.
 
+## IMPORTANT: Workspace Isolation
+
+**IMPORTANT**: Never change any files or folders in any other workspace folder except LinkittyDo. When working in this multi-root workspace (LinkittyDo and spamfilter-multi), restrict all modifications to the LinkittyDo workspace only.
+
+---
+
 ## Project Overview
 
 LinkittyDo is a word-guessing game with:
