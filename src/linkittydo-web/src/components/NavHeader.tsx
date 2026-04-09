@@ -42,6 +42,12 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
             History
           </Link>
         )}
+        <Link
+          to="/leaderboard"
+          className={`nav-link ${location.pathname === '/leaderboard' ? 'active' : ''}`}
+        >
+          Leaderboard
+        </Link>
       </nav>
       <div className="nav-user">
         <span

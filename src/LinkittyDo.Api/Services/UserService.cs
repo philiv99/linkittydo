@@ -18,6 +18,7 @@ public interface IUserService
     Task<User?> AddPointsAsync(string uniqueId, int points);
     Task<User?> AddGameRecordAsync(string uniqueId, GameRecord gameRecord);
     Task<IEnumerable<GameRecord>> GetUserGamesAsync(string uniqueId);
+    Task<IEnumerable<User>> GetLeaderboardAsync(int top = 10);
 }
 
 public class UserService : IUserService
@@ -191,5 +192,14 @@ public class UserService : IUserService
         }
 
         return user.Games.OrderByDescending(g => g.PlayedAt);
+    }
+
+    public async Task<IEnumerable<User>> GetLeaderboardAsync(int top = 10)
+    {
+        var users = await _repository.GetAllAsync();
+        return users
+            .OrderByDescending(u => u.LifetimePoints)
+            .ThenBy(u => u.Name)
+            .Take(top);
     }
 }

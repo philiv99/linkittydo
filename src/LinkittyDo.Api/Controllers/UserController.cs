@@ -96,6 +96,36 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Get leaderboard - top N users ranked by lifetime points
+    /// </summary>
+    [HttpGet("leaderboard")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<LeaderboardEntry>>>> GetLeaderboard([FromQuery] int top = 10)
+    {
+        if (top < 1 || top > 100)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "Top parameter must be between 1 and 100."
+                }
+            });
+        }
+
+        var users = await _userService.GetLeaderboardAsync(top);
+        var entries = users.Select((user, index) => new LeaderboardEntry
+        {
+            Rank = index + 1,
+            Name = user.Name,
+            LifetimePoints = user.LifetimePoints,
+            GamesPlayed = user.Games.Count
+        });
+
+        return Ok(new ApiResponse<IEnumerable<LeaderboardEntry>>(entries));
+    }
+
+    /// <summary>
     /// Get a user by unique ID
     /// </summary>
     [HttpGet("{uniqueId}")]

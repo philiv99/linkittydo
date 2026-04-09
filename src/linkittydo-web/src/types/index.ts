@@ -139,6 +139,13 @@ export interface AvailabilityResponse {
   available: boolean;
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  lifetimePoints: number;
+  gamesPlayed: number;
+}
+
 export interface ErrorResponse {
   error: {
     code: string;
