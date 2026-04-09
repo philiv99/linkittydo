@@ -17,6 +17,10 @@ public class LinkittyDoDbContext : DbContext
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
+    public DbSet<SiteConfig> SiteConfigs => Set<SiteConfig>();
+    public DbSet<PhraseCategory> PhraseCategories => Set<PhraseCategory>();
+    public DbSet<PhraseCategoryAssignment> PhraseCategoryAssignments => Set<PhraseCategoryAssignment>();
+    public DbSet<PhraseReview> PhraseReviews => Set<PhraseReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,6 +33,7 @@ public class LinkittyDoDbContext : DbContext
         ConfigureGameSession(modelBuilder);
         ConfigureRoles(modelBuilder);
         ConfigureAuditLog(modelBuilder);
+        ConfigureContentManagement(modelBuilder);
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -188,6 +193,69 @@ public class LinkittyDoDbContext : DbContext
 
             entity.HasIndex(e => new { e.EntityType, e.EntityId });
             entity.HasIndex(e => new { e.UserId, e.Timestamp });
+        });
+    }
+
+    private static void ConfigureContentManagement(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SiteConfig>(entity =>
+        {
+            entity.HasKey(e => e.Key);
+            entity.Property(e => e.Key).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Value).HasColumnType("TEXT").IsRequired();
+            entity.Property(e => e.ValueType).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(30);
+
+            entity.HasData(
+                new SiteConfig { Key = "MaxSessionTtlHours", Value = "24", ValueType = "int", Description = "Maximum session time-to-live in hours" },
+                new SiteConfig { Key = "DefaultDifficulty", Value = "10", ValueType = "int", Description = "Default difficulty for new games" },
+                new SiteConfig { Key = "ClueRetryLimit", Value = "5", ValueType = "int", Description = "Maximum clue retries per word" },
+                new SiteConfig { Key = "MaintenanceMode", Value = "false", ValueType = "bool", Description = "Enable maintenance mode" }
+            );
+        });
+
+        modelBuilder.Entity<PhraseCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.HasIndex(e => e.Name).IsUnique();
+
+            entity.HasData(
+                new PhraseCategory { Id = 1, Name = "Idioms", Description = "Common idiomatic expressions" },
+                new PhraseCategory { Id = 2, Name = "Proverbs", Description = "Traditional sayings and proverbs" },
+                new PhraseCategory { Id = 3, Name = "Quotes", Description = "Famous quotes and expressions" },
+                new PhraseCategory { Id = 4, Name = "Pop Culture", Description = "References from movies, TV, and music" },
+                new PhraseCategory { Id = 5, Name = "Science", Description = "Scientific terms and concepts" },
+                new PhraseCategory { Id = 6, Name = "Literature", Description = "Literary references and phrases" }
+            );
+        });
+
+        modelBuilder.Entity<PhraseCategoryAssignment>(entity =>
+        {
+            entity.HasKey(e => new { e.PhraseUniqueId, e.CategoryId });
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).IsRequired();
+            entity.HasOne(e => e.Phrase).WithMany().HasForeignKey(e => e.PhraseUniqueId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Category).WithMany().HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PhraseReview>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.SubmittedBy).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.ReviewedBy).HasMaxLength(30);
+            entity.Property(e => e.Status).HasMaxLength(20).IsRequired().HasDefaultValue("Pending");
+            entity.Property(e => e.ReviewNotes).HasColumnType("TEXT");
+            entity.Property(e => e.SubmittedAt).IsRequired();
+
+            entity.HasOne(e => e.Phrase).WithMany().HasForeignKey(e => e.PhraseUniqueId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(e => e.Status);
         });
     }
 }
