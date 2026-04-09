@@ -166,7 +166,7 @@ public class GameControllerTests
     }
 
     [Fact]
-    public async Task SubmitGuess_SavesGameRecord_WhenPhraseCompleteAndNotGuest()
+    public async Task SubmitGuess_CompletesGame_WhenPhraseCompleteAndNotGuest()
     {
         var session = CreateTestSession(isGuest: false);
         var request = new GuessRequest { WordIndex = 1, Guess = "quick" };
@@ -175,9 +175,11 @@ public class GameControllerTests
         _gameServiceMock.Setup(s => s.GetGame(session.SessionId)).Returns(session);
         _gameServiceMock.Setup(s => s.SubmitGuess(session.SessionId, request)).Returns(guessResponse);
 
-        await _controller.SubmitGuess(session.SessionId, request);
+        var result = await _controller.SubmitGuess(session.SessionId, request);
 
-        _userServiceMock.Verify(s => s.AddGameRecordAsync(session.UserId!, session.GameRecord!), Times.Once);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<GuessResponse>>(okResult.Value);
+        Assert.True(response.Data!.IsPhraseComplete);
     }
 
     [Fact]

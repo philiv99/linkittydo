@@ -12,6 +12,7 @@ public class GamePhraseService : IGamePhraseService
 {
     private readonly IGamePhraseRepository _phraseRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IGameRecordRepository _gameRecordRepository;
     private readonly ILlmService _llmService;
     private readonly ILogger<GamePhraseService> _logger;
     private readonly Random _random = new();
@@ -49,11 +50,13 @@ public class GamePhraseService : IGamePhraseService
     public GamePhraseService(
         IGamePhraseRepository phraseRepository,
         IUserRepository userRepository,
+        IGameRecordRepository gameRecordRepository,
         ILlmService llmService,
         ILogger<GamePhraseService> logger)
     {
         _phraseRepository = phraseRepository;
         _userRepository = userRepository;
+        _gameRecordRepository = gameRecordRepository;
         _llmService = llmService;
         _logger = logger;
     }
@@ -71,7 +74,8 @@ public class GamePhraseService : IGamePhraseService
             var user = await _userRepository.GetByIdAsync(userId);
             if (user != null)
             {
-                foreach (var game in user.Games)
+                var games = await _gameRecordRepository.GetByUserIdAsync(userId, 1, int.MaxValue);
+                foreach (var game in games)
                 {
                     playedPhraseTexts.Add(NormalizeText(game.PhraseText));
                 }
