@@ -19,12 +19,12 @@ describe('NavHeader', () => {
     expect(screen.getByText('LinkittyDo!')).toBeInTheDocument();
   });
 
-  it('renders Home and Play navigation links', () => {
+  it('renders Play and Leaderboard navigation links', () => {
     renderWithRouter(
       <NavHeader userName="Guest" isGuest={true} lifetimePoints={0} onUserClick={() => {}} />
     );
-    expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Play')).toBeInTheDocument();
+    expect(screen.getByText('Leaderboard')).toBeInTheDocument();
   });
 
   it('does not show History link for guest users', () => {

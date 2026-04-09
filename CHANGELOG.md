@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Remove dead HomePage component and hero section — game starts immediately on /play (#37)
+- **feat**: Scale phrase database from 26 to 110 phrases across difficulty bands (#7)
+- **feat**: Add sound effects for correct/incorrect guesses, game solve, and give up using Web Audio API (#20)
+- **feat**: Add mute toggle button in game footer with localStorage persistence (#20)
+- **feat**: Sound effects respect prefers-reduced-motion media query (#20)
+- **test**: Add 6 phrase database tests — count verification, duplicate detection, format validation (163 backend total)
+- **test**: Add 7 GameBoard layout tests — structure, footer content, loading state, mute toggle (57 frontend total)
 - **feat**: Add input sanitization with DataAnnotation validation on GuessRequest and StartGameRequest (#23)
 - **feat**: Add rate limiting middleware — game-start 10/min, clue 30/min, user 60/min, global 100/min per IP (#24)
 - **test**: Add 12 input validation tests covering XSS prevention, boundary checks, and format validation (157 backend total)

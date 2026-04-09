@@ -2,7 +2,7 @@
 
 Master backlog of all planned work for LinkittyDo. Items are prioritized and grouped by category. This is the single source of truth for what to build next.
 
-**Last Updated**: 2026-04-05
+**Last Updated**: 2026-04-09
 **Source Analysis**: See [DESIGN_CONTENT_ANALYSIS.md](DESIGN_CONTENT_ANALYSIS.md) for the full gap assessment that generated this backlog.
 
 ---
@@ -84,6 +84,17 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 |---|------|----------|--------|-------|
 | 36 | One-click app launcher (bat file) | P1 | 2 | Create a single `.bat` file that starts both the backend API and frontend dev server and opens the app in a browser. Eliminates multi-step manual startup. |
 
+### Game UI Overhaul
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 37 | Remove splash/click-to-start screens | P1 | 6 | Remove the audio click-to-start overlay, the splash screen with PLAY button, and the HomePage hero section. Game should start immediately on /play. |
+| 38 | Professional game layout structure | P1 | 6 | Redesign GameBoard: fixed header, compact phrase bar, maximized tabbed clue panel as primary content area, footer with version/status. No more 50/50 split. |
+| 39 | Compact phrase bar with action buttons | P1 | 6 | Top row showing phrase words with intuitive inline buttons for Get Clue, Clue History, and Guess. Phrase bar should be compact to maximize clue panel space. |
+| 40 | Tabbed clue display as primary content | P1 | 6 | CluePanel should occupy most screen real estate (70-80% of viewport). Professional tab strip with word position badges. |
+| 41 | App footer with version and status | P1 | 6 | Sticky footer showing app version, connection status, game timer, and keyboard shortcuts. Minimal height to preserve space. |
+| 42 | Default route to /play | P2 | 6 | Root route `/` should redirect to `/play` instead of the HomePage splash. Remove or simplify HomePage. |
+
 ### Security & Production Readiness
 
 | # | Item | Priority | Sprint | Notes |
@@ -92,36 +103,162 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 23 | Input sanitization audit | P2 | 7 | Review all API inputs for injection vectors. Validate guess text, user names, emails at API boundary. |
 | 24 | Rate limiting | P2 | 7 | Prevent brute-force guessing and API abuse. Add rate limits on clue requests (per session) and auth endpoints. |
 
-### Data Layer Evolution
+### Data Layer Evolution — MySQL Migration
+
+_Source: `docs/sources/Database/` ER diagrams, `docs/system/06-data-models-and-storage.md` migration path, original class diagrams, implementation analysis of current repository interfaces._
+
+#### Design Principles
+
+The migration follows these software design principles:
+
+1. **Repository per aggregate root** — Each top-level entity gets its own repository interface. GameRecord is currently embedded in User; it must be extracted to its own aggregate.
+2. **Unit of Work** — Cross-repository operations (e.g., completing a game updates GameRecord AND User.LifetimePoints) require transactional consistency via `IUnitOfWork`.
+3. **DI lifetime evolution** — Current Singleton repositories (for JSON + SemaphoreSlim) must become Scoped (EF Core DbContext is not thread-safe). Services that depend on repositories must also become Scoped.
+4. **Feature-flag switchover** — appsettings toggle (`DataProvider: "Json" | "MySql"`) allows running both providers during migration. No big-bang cutover.
+5. **Soft-delete by default** — Use `IsActive`/`DeletedAt` columns on Users and GamePhrases instead of hard deletes to preserve referential integrity in analytics.
+6. **Audit trail** — Track create/update/delete with `CreatedAt`, `UpdatedAt`, `DeletedAt` columns on all core tables.
+
+#### Phase A — EF Core Infrastructure & Repository Refactoring (Sprint 8a)
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 25 | SQL database migration | P2 | 8 | Repository pattern is ready. Implement SqlUserRepository + SqlGamePhraseRepository. Add EF Core migrations. Config switch in appsettings. |
-| 26 | Session persistence (Redis/DB) | P3 | 8 | Active game sessions lost on restart. Persist to Redis or database for production resilience. |
+| 25 | EF Core + MySQL infrastructure | P2 | 8a | Add `Pomelo.EntityFrameworkCore.MySql`. Create `LinkittyDoDbContext` with entity configurations (Fluent API, not attributes). Connection string in appsettings per environment. Docker Compose for local MySQL 8.0+. EF Core CLI tooling (`dotnet-ef`). Initial empty migration to validate setup. |
+| 26 | Repository interfaces refactoring | P2 | 8a | Extract `IGameRecordRepository` (currently GameRecords are embedded in User.Games). Add `IUnitOfWork` interface wrapping `SaveChangesAsync()` + `BeginTransactionAsync()`. Update `IUserRepository` to remove game-record concerns — User entity becomes a pure user profile aggregate. |
+| 43 | Users table + EF Core repository | P2 | 8a | `Users` table: `UniqueId VARCHAR(30) PK`, `Name VARCHAR(50) NOT NULL`, `Email VARCHAR(255) NOT NULL`, `LifetimePoints INT DEFAULT 0`, `PreferredDifficulty INT DEFAULT 10`, `IsActive BIT DEFAULT 1`, `CreatedAt DATETIME(3) NOT NULL`, `UpdatedAt DATETIME(3) NULL`, `DeletedAt DATETIME(3) NULL`. Unique indexes on `Name` (case-insensitive collation) and `Email`. Implement `EfUserRepository : IUserRepository`. |
+| 44 | GamePhrases table + EF Core repository | P2 | 8a | `GamePhrases` table: `UniqueId VARCHAR(30) PK`, `Text VARCHAR(500) NOT NULL UNIQUE`, `WordCount INT NOT NULL`, `Difficulty INT DEFAULT 0`, `GeneratedByLlm BIT DEFAULT 0`, `IsActive BIT DEFAULT 1`, `CreatedAt DATETIME(3) NOT NULL`. Implement `EfGamePhraseRepository : IGamePhraseRepository`. |
+| 63 | DI lifetime migration (Singleton → Scoped) | P2 | 8a | Refactor service registrations: repositories become Scoped, services that depend on them become Scoped. `GameService` session dictionary must move to a separate Singleton `ISessionStore` (in-memory `ConcurrentDictionary`) so it survives across Scoped lifetimes. Validate no Singleton depends on a Scoped service (captive dependency). |
+| 64 | Data provider feature flag | P2 | 8a | appsettings toggle `"DataProvider": "Json"` or `"MySql"`. Conditional DI registration selects Json or EF repositories. Both providers coexist in the codebase. Allows incremental rollout and easy rollback. |
+
+#### Phase B — Game Data Normalization (Sprint 8b)
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 45 | GameRecords table + IGameRecordRepository | P2 | 8b | Extract from embedded `User.Games`. `GameRecords` table: `GameId VARCHAR(30) PK`, `UserId VARCHAR(30) NOT NULL` (FK → Users ON DELETE RESTRICT), `PhraseUniqueId VARCHAR(30) NULL` (FK → GamePhrases ON DELETE SET NULL), `PhraseText VARCHAR(500) NOT NULL`, `PlayedAt DATETIME(3) NOT NULL`, `CompletedAt DATETIME(3) NULL`, `Score INT DEFAULT 0`, `Difficulty INT DEFAULT 0`, `Result VARCHAR(20) NOT NULL DEFAULT 'InProgress'`. Index on `(UserId, PlayedAt DESC)` for history queries. New `IGameRecordRepository` with: `GetByGameIdAsync`, `GetByUserIdAsync(paged)`, `CreateAsync`, `UpdateAsync`. |
+| 46 | GameEvents table (single-table inheritance) | P2 | 8b | `GameEvents` table: `Id BIGINT AUTO_INCREMENT PK`, `GameId VARCHAR(30) NOT NULL` (FK → GameRecords ON DELETE CASCADE), `SequenceNumber INT NOT NULL` (ordering within a game — Timestamp alone is not unique), `EventType VARCHAR(10) NOT NULL` (discriminator: 'clue' / 'guess' / 'gameend'), `WordIndex INT NULL`, `SearchTerm VARCHAR(200) NULL`, `Url VARCHAR(2048) NULL`, `GuessText VARCHAR(100) NULL`, `IsCorrect BIT NULL`, `PointsAwarded INT NULL`, `Reason VARCHAR(20) NULL`, `Timestamp DATETIME(3) NOT NULL`. Composite index `(GameId, SequenceNumber)`. Single-table inheritance is the right pattern here — the event types share enough columns and are always queried together per game. |
+| 65 | User model refactoring (decouple Games) | P2 | 8b | Remove `List<GameRecord> Games` from User domain model. GameRecords are now a separate aggregate accessed via `IGameRecordRepository`. Update `UserService`, `GameService`, and all API DTOs that previously relied on `User.Games`. The `/api/user/{id}/games` endpoint now queries `IGameRecordRepository.GetByUserIdAsync()` instead of reading from User object. |
+| 66 | JSON → MySQL data migration tool | P2 | 8b | CLI command (`dotnet run -- --migrate-data`) or EF Core data seed. Read all `Data/Users/*.json` (including embedded GameRecords and GameEvents) and `Data/Phrases/*.json`. Insert into normalized tables with FK relationships preserved. Idempotent (skip existing by PK). Verify row counts. Log any data integrity issues. Run as part of deployment, not at startup. |
+
+#### Phase C — Session Persistence & Operational Tables (Sprint 8c)
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 47 | Session persistence (DB-backed) | P3 | 8c | `GameSessions` table: `SessionId CHAR(36) PK`, `UserId VARCHAR(30) NULL` (FK → Users), `PhraseUniqueId VARCHAR(30) NOT NULL`, `Score INT DEFAULT 0`, `Difficulty INT DEFAULT 0`, `StateJson JSON NOT NULL` (RevealedWords, UsedClueTerms, UsedClueUrls, ClueCountPerWord, GuessCountPerWord — ephemeral state that doesn't need its own columns), `StartedAt DATETIME(3) NOT NULL`, `LastActivityAt DATETIME(3) NOT NULL`. `SessionCleanupService` changes from clearing in-memory dictionary to DELETE WHERE `LastActivityAt < cutoff`. Games survive API restart. |
+| 67 | MySQL health check endpoint | P3 | 8c | Extend `/health` to include MySQL connectivity check. Use ASP.NET Core `IHealthCheck` with `MySqlHealthCheck` that executes `SELECT 1`. Return degraded status if MySQL is unreachable but JSON fallback is active. |
+| 68 | Database seeding (admin user, test data) | P3 | 8c | EF Core `HasData()` seed or startup service. Create initial admin user. In Development environment, seed sample phrases and a test user with game history. Idempotent (check before insert). |
+
+#### Phase D — Authorization & Role Tables (Sprint 8d)
+
+_Depends on Sprint 7 (JWT authentication). Roles extend the auth system, not replace it._
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 48 | Roles & authorization tables | P2 | 8d | `Roles` table: `Id INT AUTO_INCREMENT PK`, `Name VARCHAR(50) NOT NULL UNIQUE` (seed: Player, Moderator, Admin). `UserRoles` junction: `UserId VARCHAR(30)` (FK → Users), `RoleId INT` (FK → Roles), `AssignedAt DATETIME(3)`, composite PK `(UserId, RoleId)`. Use ASP.NET Core claims-based authorization with custom `IClaimsTransformation` that reads roles from DB and adds as claims. Policy-based `[Authorize(Policy = "RequireAdmin")]` on admin endpoints. |
+| 69 | Audit log table | P3 | 8d | `AuditLog` table: `Id BIGINT AUTO_INCREMENT PK`, `UserId VARCHAR(30) NULL`, `Action VARCHAR(50) NOT NULL` (UserCreated, GameStarted, PhraseApproved, RoleChanged, etc.), `EntityType VARCHAR(50) NULL`, `EntityId VARCHAR(30) NULL`, `Details JSON NULL`, `IpAddress VARCHAR(45) NULL`, `Timestamp DATETIME(3) NOT NULL`. Index on `(EntityType, EntityId)` and `(UserId, Timestamp)`. Write-only append table for compliance and debugging. |
+
+#### Phase E — Content Management & Categorization (Sprint 9a)
+
+_Source: ER diagram "Games, Phrases, Parses & Profiles", wireframe "3 - Games Mgr"._
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 49 | Site configuration table | P3 | 9a | `SiteConfig` table: `Key VARCHAR(100) PK`, `Value TEXT NOT NULL`, `ValueType VARCHAR(20) NOT NULL` (string / int / bool / json), `Description VARCHAR(500) NULL`, `UpdatedAt DATETIME(3) NOT NULL`, `UpdatedBy VARCHAR(30) NULL` (FK → Users). Parameters: MaxSessionTtlHours, DefaultDifficulty, ClueRetryLimit, LlmBatchSize, MaintenanceMode. Accessed via `ISiteConfigService` with in-memory cache (refresh on update). |
+| 50 | Phrase categories & tagging | P3 | 9a | `PhraseCategories` table: `Id INT AUTO_INCREMENT PK`, `Name VARCHAR(100) NOT NULL UNIQUE`, `Description VARCHAR(500) NULL`, `IsActive BIT DEFAULT 1`. `PhraseCategoryAssignments` junction: `PhraseUniqueId VARCHAR(30)` (FK → GamePhrases), `CategoryId INT` (FK → PhraseCategories), composite PK. Seed categories: Idioms, Proverbs, Quotes, Pop Culture, Science, Literature. Add `CategoryId` filter to phrase selection in `GamePhraseService`. |
+| 51 | Phrase review workflow | P3 | 9a | `PhraseReviews` table: `Id INT AUTO_INCREMENT PK`, `PhraseUniqueId VARCHAR(30) NOT NULL` (FK → GamePhrases), `SubmittedBy VARCHAR(30) NOT NULL` (FK → Users), `ReviewedBy VARCHAR(30) NULL` (FK → Users), `Status VARCHAR(20) NOT NULL DEFAULT 'Pending'` (Pending / Approved / Rejected), `ReviewNotes TEXT NULL`, `SubmittedAt DATETIME(3) NOT NULL`, `ReviewedAt DATETIME(3) NULL`. Only Approved phrases enter the active game pool (add `Status` column to GamePhrases or filter via join). |
+
+#### Phase F — Analytics & Computed Tables (Sprint 9b)
+
+_Source: `docs/system/07-analytics-and-learning.md`. These are derived/computed tables, not raw storage — raw data lives in GameRecords + GameEvents._
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 52 | Clue effectiveness materialized table | P3 | 9b | `ClueEffectiveness` table: `Id BIGINT AUTO_INCREMENT PK`, `TargetWord VARCHAR(100) NOT NULL`, `SearchTerm VARCHAR(200) NOT NULL`, `UrlDomain VARCHAR(255) NOT NULL`, `TimesShown INT DEFAULT 0`, `TimesLedToCorrectGuess INT DEFAULT 0`, `AvgGuessesAfterClue DECIMAL(5,2) NULL`, `LastComputedAt DATETIME(3) NOT NULL`. Unique index `(TargetWord, SearchTerm, UrlDomain)`. Recomputed by scheduled background job (not realtime). Powers synonym affinity matrix from system doc 07. |
+| 53 | Player statistics computed table | P3 | 9b | `PlayerStats` table: `UserId VARCHAR(30) PK` (FK → Users), `GamesPlayed INT DEFAULT 0`, `GamesSolved INT DEFAULT 0`, `GamesGaveUp INT DEFAULT 0`, `AvgScore DECIMAL(8,2) DEFAULT 0`, `AvgCluesPerGame DECIMAL(5,2) DEFAULT 0`, `AvgGuessesPerGame DECIMAL(5,2) DEFAULT 0`, `BestScore INT DEFAULT 0`, `CurrentStreak INT DEFAULT 0`, `BestStreak INT DEFAULT 0`, `LastPlayedAt DATETIME(3) NULL`, `ComputedAt DATETIME(3) NOT NULL`. Refreshed incrementally on game completion (update counters) + full recompute nightly. Powers leaderboard and profile pages. |
+| 54 | Phrase play statistics table | P3 | 9b | `PhrasePlayStats` table: `PhraseUniqueId VARCHAR(30) PK` (FK → GamePhrases), `TimesPlayed INT DEFAULT 0`, `TimesSolved INT DEFAULT 0`, `TimesGaveUp INT DEFAULT 0`, `SolveRate DECIMAL(5,4) DEFAULT 0`, `AvgCluesToSolve DECIMAL(5,2) NULL`, `AvgTimeToSolveSeconds DECIMAL(10,2) NULL`, `GiveUpRate DECIMAL(5,4) DEFAULT 0`, `CalibratedDifficulty INT NULL`, `LastComputedAt DATETIME(3) NOT NULL`. Auto-recomputed from GameRecords. Feeds back into phrase selection: `GamePhraseService` uses `CalibratedDifficulty` when matching player's `PreferredDifficulty`. |
+
+### Admin & Management (Database-Backed)
+
+_Source: Wireframes "6 - Admin.docx", "3 - Games Mgr_.docx", class diagram "Users, Players, Admin, Society"._
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 56 | Admin dashboard API | P3 | 10 | Endpoints: `GET /api/admin/dashboard` (total users, active sessions, phrase count, games today, top players). `GET /api/admin/users?page=&search=` (paginated, filterable). `PATCH /api/admin/users/{id}/role` (assign/remove roles). `GET /api/admin/audit-log?entity=&user=&from=&to=` (paginated audit trail). All require `[Authorize(Policy = "RequireAdmin")]`. |
+| 57 | Admin user management UI | P3 | 10 | Frontend admin page: user list with search/filter, view/edit user details, change roles, soft-deactivate accounts (sets `IsActive = false`). Protected route requiring admin role. Source: wireframe "6 - Admin". |
+| 58 | Games Manager API | P3 | 10 | Endpoints: `GET /api/admin/phrases?page=&category=&difficulty=&status=` (paginated, multi-filter). `POST /api/admin/phrases` (create with category assignment). `PUT /api/admin/phrases/{id}` (edit text, difficulty, categories). `POST /api/admin/phrases/{id}/evaluate` (starts a test-play session). `GET /api/admin/phrases/{id}/stats` (play statistics from #54). `POST /api/admin/phrases/{id}/review` (approve/reject from review queue). |
+| 59 | Games Manager UI | P3 | 10 | Frontend phrase management: browse/search/filter phrases by category and difficulty, create new phrases manually or trigger LLM batch generation, edit existing, assign categories, view per-phrase play statistics (#54), review queue for community submissions (#51). Source: wireframe "3 - Games Mgr". |
+| 60 | Site configuration admin UI | P4 | 10 | Frontend page to manage `SiteConfig` key-value pairs. Form with appropriate input types per `ValueType` (toggle for bool, slider for int ranges, textarea for json). Validation per parameter. Changes take effect after cache refresh. |
 
 ### Analytics & Intelligence
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 27 | Clue effectiveness tracking | P3 | 9 | Log clue → outcome pairs. Compute P(correct | synonym, URL domain). Build synonym affinity matrix over time. |
-| 28 | User behavior analytics | P3 | 9 | Track play patterns, session lengths, difficulty progression, give-up rates. Dashboard for insights. |
-| 29 | Phrase difficulty calibration | P3 | 9 | Use gameplay data (solve rate, avg clues, avg time) to auto-calibrate phrase difficulty scores. |
+| 27 | Clue effectiveness tracking service | P3 | 9b | Background service that periodically recomputes `ClueEffectiveness` (#52) from `GameEvents`. Computes P(correct | synonym, URL domain) per word. Builds synonym affinity matrix per system doc 07. Optional: expose via `GET /api/analytics/clue-effectiveness?word=`. |
+| 28 | Player analytics dashboard | P3 | 10 | Frontend dashboard showing aggregated player behavior from `PlayerStats` (#53): play frequency, difficulty progression over time, solve rates. Admin-only initially; later expose per-user stats on profile page. |
+| 29 | Phrase difficulty auto-calibration | P3 | 9b | Background job that recomputes `PhrasePlayStats` (#54) and writes `CalibratedDifficulty` back to `GamePhrases.Difficulty`. Triggered after every N games or nightly. Closes the feedback loop: phrases that players find hard/easy auto-adjust. |
+
+### Simulated Computer Player
+
+_Purpose: Generate realistic gameplay data at scale to seed analytics, stress-test the system, calibrate phrase difficulty, and validate clue effectiveness — all without requiring real players. Simulation data is always distinguishable from real player data._
+
+#### Design Principles
+
+1. **Server-side only** — The simulator runs as a backend service, not through the public API. It has direct access to phrase answers (the API never exposes hidden words until guessed/given-up, making API-level simulation impractical).
+2. **Clearly tagged data** — All simulated users use a `SIM-` prefix on their UniqueId (e.g., `SIM-1736588400000-A1B2C3`). All simulated GameRecords carry an `IsSimulated BIT` flag. Analytics queries can include or exclude simulated data with a simple WHERE clause.
+3. **Configurable behavior profiles** — Simulated players have tunable parameters (skill level, clue usage patterns, give-up threshold) to generate diverse, realistic gameplay distributions.
+4. **Non-destructive** — Simulation never modifies real user data. Simulated users and games can be purged independently without affecting real data.
+
+#### Phase A — Simulation Infrastructure (Sprint 9c)
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 70 | IsSimulated flag on data models | P2 | 9c | Add `IsSimulated BIT NOT NULL DEFAULT 0` to `Users`, `GameRecords`, and `GameSessions` tables. Add matching property to C# domain models. Update `IUserRepository` and `IGameRecordRepository` with `bool includeSimulated = false` parameter on list/query methods so simulated data is excluded by default. All existing data gets `IsSimulated = 0`. EF Core migration. Depends on #43 (Users table), #45 (GameRecords table). |
+| 71 | Simulated user ID format (SIM- prefix) | P2 | 9c | Simulated users use `SIM-{timestamp}-{random}` instead of `USR-`. Add `GenerateSimulatedUserId()` alongside existing `GenerateUniqueId()`. Frontend display logic shows a "Bot" badge or icon when rendering SIM- prefixed users on leaderboards or game history. Depends on #43 (Users table). |
+| 72 | Simulation behavior profiles | P2 | 9c | Define `SimulationProfile` model with tunable parameters: `SkillLevel` (0.0–1.0, probability of guessing correctly given a clue), `ClueRequestRate` (avg clues before guessing, 1–5), `GiveUpThreshold` (max failed guesses before giving up, 1–10), `GuessAccuracy` (probability of correct guess per attempt), `PlaySpeed` (simulated delay between events for realistic timestamps). Seed default profiles: Novice (skill 0.3), Average (skill 0.6), Expert (skill 0.9), Impatient (low give-up threshold), Methodical (high clue usage). Stored as JSON config or in `SimulationProfiles` table. |
+
+#### Phase B — Simulation Engine (Sprint 9c)
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 73 | ISimulationService + game simulation engine | P2 | 9c | Core service that plays a complete game programmatically. Flow: (1) Select phrase via `IGamePhraseService`, (2) For each hidden word: decide clue count from profile, generate clue events via `IClueService` (real synonym + URL lookup), decide guess outcome from profile's `SkillLevel`, record GuessEvent (correct answer from Phrase.Words — server-side access only), (3) Decide solve vs give-up based on profile. Produces a complete `GameRecord` with realistic `GameEvent` sequence. All records tagged `IsSimulated = true`. Depends on #70, #72, existing `IClueService`, `IGamePhraseService`. |
+| 74 | Batch simulation runner | P2 | 9c | `ISimulationRunner` service that executes N games across M profiles. Configurable via appsettings or CLI arguments: `SimulationBatchSize` (games per run), `ProfileDistribution` (percentage per profile type), `DifficultyRange` (min-max difficulty to simulate). Can run as: (a) CLI command (`dotnet run -- --simulate --count=100`), (b) Admin API endpoint `POST /api/admin/simulation/run` with body `{ count, profiles, difficultyRange }`, (c) Background scheduled job (e.g., nightly). Logs progress and summary stats. Depends on #73. |
+| 75 | Simulation data purge tool | P3 | 9c | Admin endpoint `DELETE /api/admin/simulation/data` to purge all simulated data: delete GameEvents → GameRecords → Users where `IsSimulated = true`. Also `DELETE /api/admin/simulation/data?olderThan=30d` for time-bounded cleanup. Cascading deletes handle FK relationships. Recompute `PlayerStats` and `PhrasePlayStats` after purge. Requires Admin role (#48). |
+
+#### Phase C — Simulation Analytics Integration (Sprint 9c)
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 76 | Analytics dual-mode (real vs simulated vs combined) | P3 | 9c | Update all analytics computed tables (#52, #53, #54) and their recompute jobs to support three modes: `real-only` (exclude IsSimulated), `simulated-only`, `combined`. Admin dashboard (#56) exposes a toggle control. Default for player-facing views (leaderboard, profile): real-only. Default for admin analytics: combined. Stored as `SiteConfig` parameter. Depends on #70, #52, #53, #54. |
+| 77 | Simulation summary dashboard | P3 | 10 | Admin UI section showing: total simulated games, distribution by profile type, simulated solve/give-up rates, comparison charts (simulated vs real player distributions). Helps validate that simulation profiles produce realistic data. Also shows per-phrase simulated statistics to identify phrases that are too easy/hard before real players encounter them. Depends on #74, #76, #56 (admin dashboard). |
+
+### Admin Data Explorer (Database-Backed)
+
+_Extends the Admin & Management section (#56-#60) with detailed data exploration views for players, games, and gameplay data. Source: Wireframes "6 - Admin.docx"._
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 78 | Player detail view API & UI | P3 | 10 | `GET /api/admin/users/{id}/detail` returns: user profile, role assignments, `PlayerStats` (#53), recent game history (last 20 games with scores/results), account status, audit log entries for this user. Frontend: dedicated player detail page accessible from admin user list (#57). Shows profile card, stats summary, game history table with drill-down, role management, account actions (deactivate, reset password). |
+| 79 | Game detail view API & UI | P3 | 10 | `GET /api/admin/games/{gameId}` returns: full `GameRecord` with all `GameEvents` in sequence, related user info, phrase info with play stats. Frontend: game detail page showing event timeline (visual sequence of clue → guess → clue → guess → ... → gameend), scoring breakdown per word, time between events, clue effectiveness for this game. Accessible from player detail (#78) or game browser (#80). Depends on #45, #46 (GameRecords + GameEvents tables). |
+| 80 | Game browser API & UI | P3 | 10 | `GET /api/admin/games?page=&user=&phrase=&result=&from=&to=&simulated=` — paginated game list with multi-filter. Filter by user, phrase, result (Solved/GaveUp), date range, and simulated flag. Sortable by date, score, duration. Frontend: game browser page with filter sidebar, sortable table, row click navigates to game detail (#79). Depends on #45 (GameRecords table), #70 (IsSimulated flag). |
+| 81 | Data summary & system overview | P3 | 10 | Extends admin dashboard (#56) with: total games (real vs simulated), games per day chart, phrase usage heatmap (most/least played phrases), average scores by difficulty band, active session count, database size. Powers the admin landing page. Depends on #53, #54 (computed stats tables), #70 (IsSimulated). |
 
 ### Advanced Linguistic Features
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 30 | POS tagging integration | P3 | 10 | Replace stop-word list with real POS tagger for phrase decomposition. Consider spaCy API or cloud NLP service. |
-| 31 | Reinforcement learning (LinUCB) | P4 | 10 | Contextual bandit for clue selection. Requires analytics data from Sprint 9. See system doc 07 for full spec. |
+| 30 | POS tagging integration | P3 | 11 | Replace stop-word list with real POS tagger for phrase decomposition. Consider spaCy API or cloud NLP service. |
+| 31 | Reinforcement learning (LinUCB) | P4 | 11 | Contextual bandit for clue selection. Requires `ClueEffectiveness` data (#52) with sufficient volume. Feature vector per system doc 07. Store learned weights in MySQL. |
 
 ### Social & Community (Future)
 
+_Source: Wireframes "4 - Society.docx", ER diagram "Users, Societies & Roles", class diagram "Users, Players, Admin, Society"._
+
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 32 | Share game results | P4 | 11+ | Social sharing cards, copy-to-clipboard results format. |
-| 33 | Games Manager UI | P4 | 11+ | Browse/create/evaluate phrases. Admin + community phrase submission. |
-| 34 | Social features (groups, comments) | P4 | 11+ | From original wireframes (Society section). Community features. |
-| 35 | Admin panel | P4 | 11+ | Content management, site parameters, user management. |
+| 32 | Share game results | P4 | 12+ | Social sharing cards, copy-to-clipboard results format (Wordle-style grid). No database changes needed. |
+| 33 | Societies/groups tables & API | P4 | 12+ | Source: ER diagram "Users, Societies & Roles". `Societies` table: `Id INT AUTO_INCREMENT PK`, `Name VARCHAR(100) NOT NULL UNIQUE`, `Description TEXT NULL`, `CreatedBy VARCHAR(30)` (FK → Users), `IsActive BIT DEFAULT 1`, `CreatedAt DATETIME(3)`. `SocietyMembers` junction: `SocietyId INT` (FK), `UserId VARCHAR(30)` (FK), `Role VARCHAR(20) DEFAULT 'Member'` (Member / Officer / Owner), `JoinedAt DATETIME(3)`, composite PK. API: CRUD societies, join/leave, member list, transfer ownership. |
+| 34 | Society leaderboards & activity feed | P4 | 12+ | Per-society leaderboard ranked by `PlayerStats.LifetimePoints` within group. Activity feed: recent games/achievements by members (query `GameRecords + SocietyMembers` join). Source: wireframe "4 - Society". |
+| 61 | Community phrase submission | P4 | 12+ | `POST /api/phrases/submit` for registered users. Creates GamePhrase with `Status = Pending` + PhraseReview record (#51). Rate-limited (max 5/day per user). Moderators/Admins review via Games Manager (#59). |
+| 62 | Player achievements & badges | P4 | 12+ | `Achievements` table: `Id INT AUTO_INCREMENT PK`, `Name VARCHAR(100) NOT NULL`, `Description TEXT`, `CriteriaType VARCHAR(50)` (GamesPlayed / ScoreReached / StreakReached / etc.), `CriteriaValue INT`, `BadgeIcon VARCHAR(100) NULL`. `UserAchievements` junction: `UserId VARCHAR(30)` (FK), `AchievementId INT` (FK), `EarnedAt DATETIME(3)`, composite PK. Checked on game completion. Seed: First Win, 10-Game Streak, 1000 Points, Speed Demon (under 60s), Perfectionist (no wrong guesses). |
+| 35 | Admin panel (full) | P4 | 12+ | Complete admin panel integrating: user management (#57), phrase management (#59), site config (#60), analytics dashboards (#28), audit log viewer (#69), society moderation. |
 
 ---
 
@@ -136,12 +273,18 @@ Sprints are sequenced by dependencies and priority. Each sprint builds on the pr
 | **3** | **Frontend Architecture & History** | #8, #9, #10 | Sprint 1 (tests) |
 | **4** | **Responsive, CI/CD, Infrastructure** | #11, #15, #16, #17 | Sprint 1 (tests), Sprint 3 (routing) |
 | **5** | **Clue Quality & Linguistic Engine** | #12, #13, #14 | Sprint 2 (difficulty system) |
-| **6** | **Engagement & Accessibility** | #18, #19, #20, #21 | Sprint 3 (routing), Sprint 2 (scoring) |
+| **6** | **Engagement & Accessibility** | #18, #19, #20, #21, #37-#42 | Sprint 3 (routing), Sprint 2 (scoring) |
 | **7** | **Security & Authentication** | #22, #23, #24 | Sprint 1 (tests), Sprint 3 (routing) |
-| **8** | **Data Layer Migration** | #25, #26 | Sprint 7 (auth), Sprint 4 (infra) |
-| **9** | **Analytics & Intelligence** | #27, #28, #29 | Sprint 8 (database), Sprint 5 (clue tracking) |
-| **10** | **Advanced NLP & RL** | #30, #31 | Sprint 9 (analytics data), Sprint 5 (xnym) |
-| **11+** | **Social & Community** | #32, #33, #34, #35 | Sprint 7 (auth), Sprint 8 (database) |
+| **8a** | **MySQL Infrastructure & Core Tables** | #25, #26, #43, #44, #63, #64 | Sprint 7 (auth), Sprint 4 (infra) |
+| **8b** | **Game Data Normalization** | #45, #46, #65, #66 | Sprint 8a (EF Core + repositories) |
+| **8c** | **Session Persistence & Operations** | #47, #67, #68 | Sprint 8b (normalized schema) |
+| **8d** | **Authorization & Roles** | #48, #69 | Sprint 7 (JWT), Sprint 8a (MySQL) |
+| **9a** | **Content Management Schema** | #49, #50, #51 | Sprint 8b (game data tables) |
+| **9b** | **Analytics Computed Tables** | #27, #29, #52, #53, #54 | Sprint 8b (GameRecords + GameEvents) |
+| **9c** | **Simulated Computer Player** | #70, #71, #72, #73, #74, #75, #76 | Sprint 8b (game data), Sprint 9b (analytics tables) |
+| **10** | **Admin, Games Manager & Data Explorer** | #28, #56, #57, #58, #59, #60, #77, #78, #79, #80, #81 | Sprint 8d (roles), Sprint 9a-9c (all schemas + simulation) |
+| **11** | **Advanced NLP & RL** | #30, #31 | Sprint 9b (analytics data), Sprint 5 (xnym) |
+| **12+** | **Social & Community** | #32, #33, #34, #35, #61, #62 | Sprint 7 (auth), Sprint 8b (MySQL) |
 
 ### Sprint Dependency Graph
 
@@ -152,17 +295,41 @@ Sprint 1 (Tests + API) ────────┬──────────
 Sprint 2 (Difficulty)    Sprint 3 (Routing)                    Sprint 7 (Auth)
        │                    │       │                              │
        ▼                    ▼       ▼                              ▼
-Sprint 5 (Clue Quality) Sprint 4 (Responsive/CI)          Sprint 8 (Database)
-       │                    │                                      │
-       ▼                    ▼                                      ▼
-Sprint 6 (Engagement) ◄────┘                               Sprint 9 (Analytics)
-                                                                   │
-                                                                   ▼
-                                                           Sprint 10 (NLP/RL)
-                                                                   │
-                                                                   ▼
-                                                           Sprint 11+ (Social)
+Sprint 5 (Clue Quality) Sprint 4 (Responsive/CI)     Sprint 8a (MySQL Infrastructure)
+       │                    │                              │
+       ▼                    ▼                              ▼
+Sprint 6 (Engagement) ◄────┘                    Sprint 8b (Game Data Normalization)
+                                                   │              │
+                                                   ▼              ▼
+                                          Sprint 8c (Sessions) Sprint 8d (Roles)
+                                                   │              │
+                                                   ▼              ▼
+                                          Sprint 9a (Content)  Sprint 9b (Analytics)
+                                                   │              │
+                                                   │              ▼
+                                                   │       Sprint 9c (Simulation)
+                                                   │              │
+                                                   └──────┬───────┘
+                                                          ▼
+                                               Sprint 10 (Admin & Data Explorer)
+                                                          │
+                                                          ▼
+                                                  Sprint 11 (NLP/RL)
+                                                          │
+                                                          ▼
+                                                  Sprint 12+ (Social)
 ```
+
+### Sprint 8 Sub-Sprint Rationale
+
+Sprint 8 is split into 4 sub-sprints (8a-8d) because the MySQL migration is too large for a single sprint and has internal dependencies:
+
+- **8a** establishes EF Core infrastructure, refactors DI lifetimes, and creates core tables (Users, GamePhrases). This is the riskiest phase — validates the entire migration approach.
+- **8b** normalizes game data (GameRecords, GameEvents) which requires the User model refactoring from 8a. The JSON → MySQL migration tool runs here because it needs all tables to exist.
+- **8c** adds operational features (session persistence, health check, seeding) that build on the normalized schema.
+- **8d** adds roles/authorization tables that extend the JWT system from Sprint 7 and require MySQL from 8a.
+
+Each sub-sprint is independently deployable. If the migration is paused after 8a, the system still works (feature flag falls back to JSON).
 
 ---
 
@@ -172,4 +339,25 @@ _Move items here after sprint completion. Include sprint number._
 
 | Item | Sprint | Date |
 |------|--------|------|
-| (none yet) | - | - |
+| #1 Backend test suite (xUnit) | 1 | 2026-04-05 |
+| #2 Frontend test suite (Vitest + Testing Library) | 1 | 2026-04-05 |
+| #3 API response standardization | 1 | 2026-04-05 |
+| #36 One-click app launcher | 2 | 2026-04-05 |
+| #4 Difficulty-aware clue selection | 3 | 2026-04-09 |
+| #5 Enhanced scoring model | 3 | 2026-04-09 |
+| #6 Phrase difficulty computation | 3 | 2026-04-09 |
+| #8 React Router + page structure | 4 | 2026-04-09 |
+| #9 Home page | 4 | 2026-04-09 |
+| #10 Game history UI | 4 | 2026-04-09 |
+| #11 Responsive mobile layout | 5 | 2026-04-09 |
+| #15 CI/CD pipeline (GitHub Actions) | 5 | 2026-04-09 |
+| #16 Session TTL and cleanup | 5 | 2026-04-09 |
+| #17 Health check improvements | 5 | 2026-04-09 |
+| #12 Xnym taxonomy expansion | 6 | 2026-04-09 |
+| #13 Contextual synonym selection | 6 | 2026-04-09 |
+| #14 Clue caching layer | 6 | 2026-04-09 |
+| #18 Leaderboard page | 7 | 2026-04-09 |
+| #19 Timer and streak mechanics | 7 | 2026-04-09 |
+| #21 Accessibility improvements | 7 | 2026-04-09 |
+| #23 Input sanitization audit | 8 | 2026-04-09 |
+| #24 Rate limiting | 8 | 2026-04-09 |
