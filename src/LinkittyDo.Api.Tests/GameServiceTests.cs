@@ -1,3 +1,4 @@
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.Extensions.Logging;
@@ -8,13 +9,23 @@ namespace LinkittyDo.Api.Tests;
 public class GameServiceTests
 {
     private readonly Mock<IGamePhraseService> _phraseServiceMock;
+    private readonly Mock<IGameRecordRepository> _gameRecordRepoMock;
+    private readonly Mock<IUserService> _userServiceMock;
     private readonly GameService _service;
 
     public GameServiceTests()
     {
         _phraseServiceMock = new Mock<IGamePhraseService>();
+        _gameRecordRepoMock = new Mock<IGameRecordRepository>();
+        _userServiceMock = new Mock<IUserService>();
         var loggerMock = new Mock<ILogger<GameService>>();
-        _service = new GameService(_phraseServiceMock.Object, loggerMock.Object);
+        var sessionStore = new InMemorySessionStore();
+        _service = new GameService(
+            sessionStore,
+            _phraseServiceMock.Object,
+            _gameRecordRepoMock.Object,
+            _userServiceMock.Object,
+            loggerMock.Object);
     }
 
     private static Phrase CreateTestPhrase()

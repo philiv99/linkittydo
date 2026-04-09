@@ -1,3 +1,4 @@
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,15 @@ public class SessionManagementTests
     {
         _phraseServiceMock = new Mock<IGamePhraseService>();
         var loggerMock = new Mock<ILogger<GameService>>();
-        _service = new GameService(_phraseServiceMock.Object, loggerMock.Object);
+        var sessionStore = new InMemorySessionStore();
+        var gameRecordRepoMock = new Mock<IGameRecordRepository>();
+        var userServiceMock = new Mock<IUserService>();
+        _service = new GameService(
+            sessionStore,
+            _phraseServiceMock.Object,
+            gameRecordRepoMock.Object,
+            userServiceMock.Object,
+            loggerMock.Object);
     }
 
     private static Phrase CreateTestPhrase()

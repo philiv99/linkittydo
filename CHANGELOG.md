@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Extract ISessionStore from GameService — ConcurrentDictionary-backed Singleton (#63)
+- **feat**: GameService now uses ISessionStore + IGameRecordRepository for session management (#63, #45)
+- **feat**: Game completion persists GameRecord via IGameRecordRepository + updates user points (#45)
+- **feat**: GameEvents populated with GameId and SequenceNumber for STI storage (#46)
+- **feat**: GameService Scoped-compatible when using MySql data provider (#63)
+- **feat**: Add GetGameRecordAsync to IGameService for retrieving session game records (#45)
 - **feat**: Add EF Core infrastructure with MySQL support via Pomelo provider (#25)
 - **feat**: Add LinkittyDoDbContext with Fluent API entity configurations for Users, GamePhrases, GameRecords, GameEvents (#25)
 - **feat**: Extract IGameRecordRepository — GameRecords as separate aggregate from User.Games (#26)

@@ -76,8 +76,19 @@ else
     builder.Services.AddSingleton<IAuthService, AuthService>();
 }
 
-// GameService uses in-memory session dictionary — always Singleton
-builder.Services.AddSingleton<IGameService, GameService>();
+// Session store is always Singleton (survives across Scoped lifetimes)
+builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
+
+// GameService uses ISessionStore + repositories
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IGameService, GameService>();
+}
+else
+{
+    builder.Services.AddSingleton<IGameService, GameService>();
+}
+
 builder.Services.AddHttpClient<IClueService, ClueService>();
 builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 
