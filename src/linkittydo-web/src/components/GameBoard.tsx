@@ -12,6 +12,11 @@ import './GameBoard.css';
 
 const POINTS_PER_WORD = 100;
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+const formatTime = (seconds: number): string => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
 
 export const GameBoard: React.FC = () => {
   const { gameState, loading, error, startGame, submitGuess, getClue, giveUp } = useGame();
@@ -38,6 +43,9 @@ export const GameBoard: React.FC = () => {
   const [gaveUp, setGaveUp] = useState(false);
   const [activePanel, setActivePanel] = useState<'game' | 'clues'>('game');
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [showStreakAnimation, setShowStreakAnimation] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const { playSequence, stopAll } = useAudioSequence();
 
   // Track if we've auto-started a game for a connected user
@@ -80,6 +88,39 @@ export const GameBoard: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Keyboard shortcuts: G = give up, N = new game (only when not typing in input)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'g' || e.key === 'G') {
+        if (gameState && !gameState.isComplete && !gaveUp) {
+          e.preventDefault();
+          handleGiveUp();
+        }
+      } else if (e.key === 'n' || e.key === 'N') {
+        if (gameState?.isComplete) {
+          e.preventDefault();
+          handleNewGame();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, gaveUp]);
+
+  // Game timer - ticks every second while game is active
+  useEffect(() => {
+    if (!gameState || gameState.isComplete) return;
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gameState, gameState?.isComplete]);
+
   // Auto-start game for connected (non-guest) users
   useEffect(() => {
     if (!isGuest && !gameState && !loading && !hasAutoStartedRef.current) {
@@ -117,6 +158,9 @@ export const GameBoard: React.FC = () => {
   const handleGuess = async (wordIndex: number, guess: string): Promise<boolean> => {
     const response = await submitGuess(wordIndex, guess);
     if (response?.isCorrect) {
+      setStreak(prev => prev + 1);
+      setShowStreakAnimation(true);
+      setTimeout(() => setShowStreakAnimation(false), 1000);
       // Add points for correct guess
       await addPoints(POINTS_PER_WORD);
       
@@ -127,6 +171,8 @@ export const GameBoard: React.FC = () => {
         const bonusPoints = guessableWords * POINTS_PER_WORD;
         await addPoints(bonusPoints);
       }
+    } else {
+      setStreak(0);
     }
     return response?.isCorrect ?? false;
   };
@@ -166,6 +212,8 @@ export const GameBoard: React.FC = () => {
     setClueTabs([]);
     setActiveTabId(null);
     setGaveUp(false);
+    setStreak(0);
+    setElapsedSeconds(0);
     stopAll();
     // Pass userId for non-guest users so game events are tracked
     // Guest users (no email) don't have their games saved
@@ -276,7 +324,19 @@ export const GameBoard: React.FC = () => {
               <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
             </div>
           </div>
-          <ScoreDisplay score={gameState.score} />
+          <div className="game-stats-bar">
+            <div className="game-timer" aria-label={`Time elapsed: ${formatTime(elapsedSeconds)}`}>
+              <span className="timer-icon">⏱️</span>
+              <span className="timer-value">{formatTime(elapsedSeconds)}</span>
+            </div>
+            {streak > 1 && (
+              <div className={`streak-indicator ${showStreakAnimation ? 'streak-pop' : ''}`} aria-label={`${streak} correct guesses in a row`}>
+                <span className="streak-icon">🔥</span>
+                <span className="streak-value">{streak}x streak!</span>
+              </div>
+            )}
+            <ScoreDisplay score={gameState.score} />
+          </div>
         </header>
 
         {/* Mobile panel navigation tabs */}
@@ -324,12 +384,24 @@ export const GameBoard: React.FC = () => {
                     <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
                   </div>
                 </div>
-                <ScoreDisplay score={gameState.score} />
+                <div className="game-stats-bar">
+                  <div className="game-timer" aria-label={`Time elapsed: ${formatTime(elapsedSeconds)}`}>
+                    <span className="timer-icon">⏱️</span>
+                    <span className="timer-value">{formatTime(elapsedSeconds)}</span>
+                  </div>
+                  {streak > 1 && (
+                    <div className={`streak-indicator ${showStreakAnimation ? 'streak-pop' : ''}`} aria-label={`${streak} correct guesses in a row`}>
+                      <span className="streak-icon">🔥</span>
+                      <span className="streak-value">{streak}x streak!</span>
+                    </div>
+                  )}
+                  <ScoreDisplay score={gameState.score} />
+                </div>
               </header>
 
-              <main className="game-main">
+              <main className="game-main" role="main" aria-label="Game area">
                 {gameState.isComplete ? (
-                  <div className="victory">
+                  <div className="victory" role="status" aria-live="polite">
                     <h2>{gaveUp ? 'Better luck next time!' : 'Congratulations!'}</h2>
                     <p>{gaveUp ? 'The phrase was:' : 'You completed the phrase!'}</p>
                     <PhraseDisplay 
@@ -354,6 +426,9 @@ export const GameBoard: React.FC = () => {
 
               <footer className="game-footer">
                 <p>Type your guess and press Enter • Click the clue button for hints!</p>
+                <p className="keyboard-hints" aria-label="Keyboard shortcuts">
+                  Shortcuts: <kbd>G</kbd> Give up • <kbd>N</kbd> New game (after game ends)
+                </p>
               </footer>
             </div>
 

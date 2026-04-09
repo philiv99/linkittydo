@@ -1,22 +1,22 @@
 {
   "current_sprint": {
-    "number": 6,
+    "number": 7,
     "status": "complete",
-    "branch": "feature/20260409-sprint-6",
+    "branch": "feature/20260409-sprint-7",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 6,
+    "number": 7,
     "date": "2026-04-09",
     "result": "complete",
     "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "Progressive xnym difficulty thresholds map cleanly to taxonomic distance; ConcurrentDictionary provides simple thread-safe caching"
+    "key_lesson": "ARIA labels and reduced-motion support are low-effort accessibility wins; keyboard shortcuts need input scoping"
   },
   "test_metrics": {
-    "backend_tests_passing": 130,
-    "frontend_tests_passing": 49,
+    "backend_tests_passing": 136,
+    "frontend_tests_passing": 55,
     "lint_errors": 0
   }
 }

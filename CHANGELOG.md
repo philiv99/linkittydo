@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add leaderboard page with backend API GET /api/user/leaderboard and ranked table UI (#18)
+- **feat**: Add game timer displaying elapsed time during gameplay (#19)
+- **feat**: Add consecutive correct guess streak indicator with visual animation (#19)
+- **feat**: Add keyboard shortcuts — G for give up, N for new game after completion (#21)
+- **feat**: Add ARIA labels for word slots, game area, leaderboard table, and victory announcements (#21)
+- **feat**: Add prefers-reduced-motion support to disable all animations globally (#21)
+- **feat**: Add keyboard shortcut hints in game footer (#21)
+- **test**: Add 6 backend leaderboard tests (136 backend total)
+- **test**: Add 6 frontend leaderboard tests (55 frontend total)
 - **feat**: Add xnym taxonomy expansion — antonyms (rel_ant) for difficulty>60, homophones (rel_hom) for difficulty>80 (#12)
 - **feat**: Add contextual synonym disambiguation — left/right context (lc=/rc=) params for Datamuse ml queries (#13)
 - **feat**: Add in-memory clue caching with 7-day TTL — ConcurrentDictionary cache for synonym lookups (#14)

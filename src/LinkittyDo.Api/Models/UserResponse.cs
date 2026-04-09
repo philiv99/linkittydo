@@ -29,6 +29,14 @@ public class AvailabilityResponse
     public bool Available { get; set; }
 }
 
+public class LeaderboardEntry
+{
+    public int Rank { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int LifetimePoints { get; set; }
+    public int GamesPlayed { get; set; }
+}
+
 public class ErrorResponse
 {
     public ErrorDetail Error { get; set; } = new();

@@ -12,6 +12,7 @@ import type {
   PointsResponse,
   StartGameRequest,
   GameRecord,
+  LeaderboardEntry,
   LlmTestRequest,
   LlmTestResponse,
   ApiResponse
@@ -202,6 +203,13 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`);
     if (!response.ok) throw new Error('Failed to get user games');
     const wrapper: ApiResponse<GameRecord[]> = await response.json();
+    return wrapper.data;
+  },
+
+  async getLeaderboard(top: number = 10): Promise<LeaderboardEntry[]> {
+    const response = await fetch(`${API_BASE_URL}/user/leaderboard?top=${top}`);
+    if (!response.ok) throw new Error('Failed to get leaderboard');
+    const wrapper: ApiResponse<LeaderboardEntry[]> = await response.json();
     return wrapper.data;
   },
 

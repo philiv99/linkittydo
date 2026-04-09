@@ -28,7 +28,10 @@ export const WordSlot: React.FC<WordSlotProps> = ({ word, words, onGuess, onClue
   // If word is not hidden, or is revealed, show the text
   if (!word.isHidden || word.isRevealed) {
     return (
-      <span className={`word-slot revealed ${word.isHidden ? 'was-hidden' : ''}`}>
+      <span
+        className={`word-slot revealed ${word.isHidden ? 'was-hidden' : ''}`}
+        aria-label={word.isHidden ? `Revealed word: ${word.displayText}` : undefined}
+      >
         {word.displayText}
       </span>
     );
@@ -52,8 +55,8 @@ export const WordSlot: React.FC<WordSlotProps> = ({ word, words, onGuess, onClue
   const position = getGuessablePosition(word.index, words);
 
   return (
-    <span className="word-slot hidden">
-      <span className="word-position">#{position}</span>
+    <span className="word-slot hidden" role="group" aria-label={`Hidden word ${position} of ${words.filter(w => w.isHidden).length}. Type your guess or press the clue button.`}>
+      <span className="word-position" aria-hidden="true">#{position}</span>
       <GuessInput onGuess={handleGuess} isIncorrect={isIncorrect} />
       <ClueButton onClick={handleClue} />
     </span>
