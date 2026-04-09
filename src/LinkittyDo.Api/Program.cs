@@ -1,4 +1,5 @@
 using DotNetEnv;
+using LinkittyDo.Api;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
 
@@ -22,6 +23,9 @@ builder.Services.AddSingleton<IGameService, GameService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddHttpClient<IClueService, ClueService>();
 builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
+
+// Register background services
+builder.Services.AddHostedService<SessionCleanupService>();
 
 // Configure CORS for React frontend
 builder.Services.AddCors(options =>
@@ -61,7 +65,25 @@ app.UseSwaggerUI(c =>
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Add a health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/health", (IGameService gameService, IConfiguration configuration) =>
+{
+    var dataDir = configuration.GetValue<string>("DataDirectory") ?? "Data";
+    var dataDirectoryExists = Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), dataDir));
+    var startTime = System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
+    var uptime = DateTime.UtcNow - startTime;
+
+    return Results.Ok(new
+    {
+        status = "healthy",
+        timestamp = DateTime.UtcNow,
+        uptime = $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m",
+        activeSessions = gameService.ActiveSessionCount,
+        dependencies = new
+        {
+            dataDirectory = dataDirectoryExists ? "ok" : "missing",
+        }
+    });
+});
 
 // Fallback to Swagger for any unmatched routes
 app.MapFallback(() => Results.Redirect("/swagger"));

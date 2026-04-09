@@ -73,3 +73,31 @@
   color: var(--yellow);
   font-weight: 600;
 }
+
+@media (max-width: 600px) {
+  .nav-header {
+    padding: 0.4rem 0.8rem;
+    gap: 0.3rem;
+  }
+
+  .nav-brand .nav-logo {
+    font-size: 1.1rem;
+  }
+
+  .nav-links {
+    gap: 0.4rem;
+  }
+
+  .nav-link {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .nav-user-name {
+    font-size: 0.75rem;
+  }
+
+  .nav-points {
+    font-size: 0.7rem;
+  }
+}

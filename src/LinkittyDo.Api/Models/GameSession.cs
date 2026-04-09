@@ -48,4 +48,9 @@ public class GameSession
     /// Indicates if this is a guest session (no events/game record saved)
     /// </summary>
     public bool IsGuestSession => string.IsNullOrEmpty(UserId);
+
+    /// <summary>
+    /// Timestamp of the last activity on this session (start, guess, clue, etc.)
+    /// </summary>
+    public DateTime LastActivityAt { get; set; }
 }

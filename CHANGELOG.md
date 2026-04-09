@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **feat**: Add navigation header with active route highlighting, user display, and guest detection
 - **feat**: Create home page with hero section, how-to-play guide, and user stats for registered users (#9)
 - **feat**: Add game history page with expandable event timeline, game results, and score display (#10)
+- **feat**: Add GitHub Actions CI/CD pipeline for backend build/test and frontend lint/test/build (#15)
+- **feat**: Add session TTL with configurable expiry (default 24h) and background cleanup service (#16)
+- **feat**: Enhance health endpoint with uptime, active session count, and data directory status (#17)
+- **feat**: Add responsive mobile layout for NavHeader on small screens (#11)
+- **test**: Add 8 new backend tests for session management (120 backend total)
 - **test**: Add 20 new frontend tests for NavHeader, HomePage, and GameHistoryPage (49 frontend total)
 
 ### 2026-04-05
