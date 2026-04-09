@@ -1,21 +1,21 @@
 {
   "current_sprint": {
-    "number": 10,
+    "number": 11,
     "status": "complete",
-    "branch": "feature/20260409-sprint-10",
+    "branch": "feature/20260409-sprint-11",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 10,
+    "number": 11,
     "date": "2026-04-09",
     "result": "complete",
-    "items_completed": 1,
+    "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "JWT auth requires updating both API protection and frontend token management simultaneously"
+    "key_lesson": "EF Core InMemory provider does not enforce unique indexes; use shadow discriminator for abstract properties"
   },
   "test_metrics": {
-    "backend_tests_passing": 173,
+    "backend_tests_passing": 188,
     "frontend_tests_passing": 57,
     "lint_errors": 0
   }

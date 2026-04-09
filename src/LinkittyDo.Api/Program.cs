@@ -6,6 +6,7 @@ using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 // Load .env file if it exists
@@ -42,15 +43,41 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
-// Register data repositories
-builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
-builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>();
+// Data provider feature flag: "Json" (default) or "MySql"
+var dataProvider = builder.Configuration.GetValue<string>("DataProvider") ?? "Json";
 
-// Register application services
-builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+{
+    // EF Core + MySQL provider
+    var connectionString = builder.Configuration.GetConnectionString("MySql")
+        ?? throw new InvalidOperationException("MySql connection string not configured");
+    builder.Services.AddDbContext<LinkittyDoDbContext>(options =>
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+    builder.Services.AddScoped<IUserRepository, EfUserRepository>();
+    builder.Services.AddScoped<IGamePhraseRepository, EfGamePhraseRepository>();
+    builder.Services.AddScoped<IGameRecordRepository, EfGameRecordRepository>();
+    builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+
+    // Services must be Scoped when repositories are Scoped
+    builder.Services.AddScoped<IGamePhraseService, GamePhraseService>();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IAuthService, AuthService>();
+}
+else
+{
+    // JSON file provider (default)
+    builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
+    builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>();
+    builder.Services.AddSingleton<IGameRecordRepository, JsonGameRecordRepository>();
+
+    builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
+    builder.Services.AddSingleton<IUserService, UserService>();
+    builder.Services.AddSingleton<IAuthService, AuthService>();
+}
+
+// GameService uses in-memory session dictionary — always Singleton
 builder.Services.AddSingleton<IGameService, GameService>();
-builder.Services.AddSingleton<IUserService, UserService>();
-builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddHttpClient<IClueService, ClueService>();
 builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 

@@ -11,6 +11,11 @@ public class GameRecord
     public string GameId { get; set; } = string.Empty;
     
     /// <summary>
+    /// The user who played this game (FK to Users)
+    /// </summary>
+    public string UserId { get; set; } = string.Empty;
+    
+    /// <summary>
     /// When the game was started
     /// </summary>
     public DateTime PlayedAt { get; set; }
