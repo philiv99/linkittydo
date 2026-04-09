@@ -1,21 +1,21 @@
 {
   "current_sprint": {
-    "number": 7,
+    "number": 8,
     "status": "complete",
-    "branch": "feature/20260409-sprint-7",
+    "branch": "feature/20260409-sprint-8",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 7,
+    "number": 8,
     "date": "2026-04-09",
     "result": "complete",
-    "items_completed": 3,
-    "items_carried_over": 0,
-    "key_lesson": "ARIA labels and reduced-motion support are low-effort accessibility wins; keyboard shortcuts need input scoping"
+    "items_completed": 2,
+    "items_carried_over": 1,
+    "key_lesson": "ASP.NET Core 8 built-in rate limiting and [ApiController] auto-validation make security features low-friction to add"
   },
   "test_metrics": {
-    "backend_tests_passing": 136,
+    "backend_tests_passing": 157,
     "frontend_tests_passing": 55,
     "lint_errors": 0
   }

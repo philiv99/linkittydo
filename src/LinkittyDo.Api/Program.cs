@@ -1,7 +1,9 @@
+using System.Threading.RateLimiting;
 using DotNetEnv;
 using LinkittyDo.Api;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 // Load .env file if it exists
 Env.Load();
@@ -26,6 +28,47 @@ builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 
 // Register background services
 builder.Services.AddHostedService<SessionCleanupService>();
+
+// Configure rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Game start: 10 requests per minute per IP
+    options.AddFixedWindowLimiter("game-start", opt =>
+    {
+        opt.PermitLimit = 10;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+
+    // Clue requests: 30 requests per minute per IP
+    options.AddFixedWindowLimiter("clue", opt =>
+    {
+        opt.PermitLimit = 30;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+
+    // User endpoints: 60 requests per minute per IP
+    options.AddFixedWindowLimiter("user", opt =>
+    {
+        opt.PermitLimit = 60;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+
+    // Global fallback: 100 requests per minute per IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
 // Configure CORS for React frontend
 builder.Services.AddCors(options =>
@@ -93,6 +136,8 @@ app.UseHttpsRedirection();
 // Use AllowAll CORS policy for Azure deployment
 var env = app.Environment;
 app.UseCors(env.IsDevelopment() ? "AllowReactApp" : "AllowAll");
+
+app.UseRateLimiter();
 
 app.MapControllers();
 
