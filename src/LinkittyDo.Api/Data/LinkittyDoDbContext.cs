@@ -21,6 +21,9 @@ public class LinkittyDoDbContext : DbContext
     public DbSet<PhraseCategory> PhraseCategories => Set<PhraseCategory>();
     public DbSet<PhraseCategoryAssignment> PhraseCategoryAssignments => Set<PhraseCategoryAssignment>();
     public DbSet<PhraseReview> PhraseReviews => Set<PhraseReview>();
+    public DbSet<ClueEffectiveness> ClueEffectiveness => Set<ClueEffectiveness>();
+    public DbSet<PlayerStats> PlayerStats => Set<PlayerStats>();
+    public DbSet<PhrasePlayStats> PhrasePlayStats => Set<PhrasePlayStats>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +37,7 @@ public class LinkittyDoDbContext : DbContext
         ConfigureRoles(modelBuilder);
         ConfigureAuditLog(modelBuilder);
         ConfigureContentManagement(modelBuilder);
+        ConfigureAnalytics(modelBuilder);
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -256,6 +260,54 @@ public class LinkittyDoDbContext : DbContext
 
             entity.HasOne(e => e.Phrase).WithMany().HasForeignKey(e => e.PhraseUniqueId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(e => e.Status);
+        });
+    }
+
+    private static void ConfigureAnalytics(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ClueEffectiveness>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.TargetWord).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.SearchTerm).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.UrlDomain).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.TimesShown).HasDefaultValue(0);
+            entity.Property(e => e.TimesLedToCorrectGuess).HasDefaultValue(0);
+            entity.Property(e => e.AvgGuessesAfterClue).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.LastComputedAt).IsRequired();
+
+            entity.HasIndex(e => new { e.TargetWord, e.SearchTerm, e.UrlDomain }).IsUnique();
+        });
+
+        modelBuilder.Entity<PlayerStats>(entity =>
+        {
+            entity.HasKey(e => e.UserId);
+            entity.Property(e => e.UserId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.GamesPlayed).HasDefaultValue(0);
+            entity.Property(e => e.GamesSolved).HasDefaultValue(0);
+            entity.Property(e => e.GamesGaveUp).HasDefaultValue(0);
+            entity.Property(e => e.AvgScore).HasColumnType("decimal(8,2)").HasDefaultValue(0m);
+            entity.Property(e => e.AvgCluesPerGame).HasColumnType("decimal(5,2)").HasDefaultValue(0m);
+            entity.Property(e => e.AvgGuessesPerGame).HasColumnType("decimal(5,2)").HasDefaultValue(0m);
+            entity.Property(e => e.BestScore).HasDefaultValue(0);
+            entity.Property(e => e.CurrentStreak).HasDefaultValue(0);
+            entity.Property(e => e.BestStreak).HasDefaultValue(0);
+            entity.Property(e => e.ComputedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<PhrasePlayStats>(entity =>
+        {
+            entity.HasKey(e => e.PhraseUniqueId);
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.TimesPlayed).HasDefaultValue(0);
+            entity.Property(e => e.TimesSolved).HasDefaultValue(0);
+            entity.Property(e => e.TimesGaveUp).HasDefaultValue(0);
+            entity.Property(e => e.SolveRate).HasColumnType("decimal(5,4)").HasDefaultValue(0m);
+            entity.Property(e => e.AvgCluesToSolve).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.AvgTimeToSolveSeconds).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.GiveUpRate).HasColumnType("decimal(5,4)").HasDefaultValue(0m);
+            entity.Property(e => e.LastComputedAt).IsRequired();
         });
     }
 }
