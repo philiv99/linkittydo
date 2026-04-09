@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add xnym taxonomy expansion — antonyms (rel_ant) for difficulty>60, homophones (rel_hom) for difficulty>80 (#12)
+- **feat**: Add contextual synonym disambiguation — left/right context (lc=/rc=) params for Datamuse ml queries (#13)
+- **feat**: Add in-memory clue caching with 7-day TTL — ConcurrentDictionary cache for synonym lookups (#14)
+- **test**: Add 10 new backend tests for xnym expansion, contextual synonyms, and clue caching (130 backend total)
 - **feat**: Add React Router with page structure - routes for home (/), play (/play), and history (/history) (#8)
 - **feat**: Add navigation header with active route highlighting, user display, and guest detection
 - **feat**: Create home page with hero section, how-to-play guide, and user stats for registered users (#9)

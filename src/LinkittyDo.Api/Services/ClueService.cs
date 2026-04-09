@@ -1,4 +1,5 @@
 using LinkittyDo.Api.Models;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -15,6 +16,8 @@ public class ClueService : IClueService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ClueService> _logger;
     private readonly Random _random = new();
+    private static readonly ConcurrentDictionary<string, CachedSynonyms> _synonymCache = new();
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromDays(7);
 
     // URL domains considered "transparent" (easy to deduce meaning from)
     private static readonly HashSet<string> TransparentDomains = new(StringComparer.OrdinalIgnoreCase)
@@ -50,7 +53,12 @@ public class ClueService : IClueService
         // Get a synonym that hasn't been used yet, considering difficulty
         _logger.LogInformation("Getting clue for word '{Word}' at index {WordIndex}, difficulty {Difficulty}", 
             word.Text, wordIndex, session.Difficulty);
-        var searchTerm = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex], session.Difficulty);
+        
+        // Build context from neighboring words for disambiguation
+        var leftContext = GetLeftContext(session.Phrase.Words, wordIndex);
+        var rightContext = GetRightContext(session.Phrase.Words, wordIndex);
+        
+        var searchTerm = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex], session.Difficulty, leftContext, rightContext);
         
         // Track that we've used this term
         session.UsedClueTerms[wordIndex].Add(searchTerm);
@@ -212,11 +220,11 @@ public class ClueService : IClueService
         return true;
     }
 
-    private async Task<string> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms, int difficulty = 10)
+    private async Task<string> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms, int difficulty = 10, string? leftContext = null, string? rightContext = null)
     {
         try
         {
-            var synonyms = await GetSynonymsFromDatamuseAsync(word, difficulty);
+            var synonyms = await GetSynonymsFromDatamuseAsync(word, difficulty, leftContext, rightContext);
             _logger.LogDebug("Datamuse returned {SynonymCount} synonyms for '{Word}' at difficulty {Difficulty}", 
                 synonyms.Count, word, difficulty);
             
@@ -330,26 +338,53 @@ public class ClueService : IClueService
         return TransparentDomains.Any(domain => url.Contains(domain, StringComparison.OrdinalIgnoreCase));
     }
 
-    private async Task<List<ScoredWord>> GetSynonymsFromDatamuseAsync(string word, int difficulty = 10)
+    private async Task<List<ScoredWord>> GetSynonymsFromDatamuseAsync(string word, int difficulty = 10, string? leftContext = null, string? rightContext = null)
     {
+        // Check cache first
+        var cacheKey = $"{word}|{difficulty}|{leftContext}|{rightContext}";
+        if (_synonymCache.TryGetValue(cacheKey, out var cached) && cached.ExpiresAt > DateTime.UtcNow)
+        {
+            _logger.LogDebug("Cache hit for synonym lookup: {CacheKey}", cacheKey);
+            return cached.Synonyms;
+        }
+
         var results = new List<ScoredWord>();
         var encodedWord = HttpUtility.UrlEncode(word);
         
         // Always fetch close synonyms
-        var synonymTask = FetchDatamuseScoredWordsAsync(
-            $"https://api.datamuse.com/words?rel_syn={encodedWord}&max=15");
+        var synonymUrl = $"https://api.datamuse.com/words?rel_syn={encodedWord}&max=15";
         
-        // Always fetch meaning-similar words
-        var similarTask = FetchDatamuseScoredWordsAsync(
-            $"https://api.datamuse.com/words?ml={encodedWord}&max=15");
+        // Add context parameters for disambiguation if available
+        var contextualMlUrl = $"https://api.datamuse.com/words?ml={encodedWord}&max=15";
+        if (!string.IsNullOrEmpty(leftContext))
+            contextualMlUrl += $"&lc={HttpUtility.UrlEncode(leftContext)}";
+        if (!string.IsNullOrEmpty(rightContext))
+            contextualMlUrl += $"&rc={HttpUtility.UrlEncode(rightContext)}";
+        
+        var synonymTask = FetchDatamuseScoredWordsAsync(synonymUrl);
+        var similarTask = FetchDatamuseScoredWordsAsync(contextualMlUrl);
         
         var tasks = new List<Task<List<ScoredWord>>> { synonymTask, similarTask };
         
-        // For hard/expert: also fetch triggers (associated words) for more distant clues
+        // For medium+ difficulty: add triggers (associated words)
         if (difficulty > 50)
         {
             tasks.Add(FetchDatamuseScoredWordsAsync(
                 $"https://api.datamuse.com/words?rel_trg={encodedWord}&max=10"));
+        }
+        
+        // For hard difficulty: add antonyms (opposite meaning = harder clue)
+        if (difficulty > 60)
+        {
+            tasks.Add(FetchDatamuseScoredWordsAsync(
+                $"https://api.datamuse.com/words?rel_ant={encodedWord}&max=8"));
+        }
+        
+        // For expert difficulty: add homophones (sound-alike = tricky clue)
+        if (difficulty > 80)
+        {
+            tasks.Add(FetchDatamuseScoredWordsAsync(
+                $"https://api.datamuse.com/words?rel_hom={encodedWord}&max=5"));
         }
 
         await Task.WhenAll(tasks);
@@ -360,10 +395,16 @@ public class ClueService : IClueService
         }
 
         // Deduplicate by word, keeping highest score
-        return results
+        var deduped = results
             .GroupBy(w => w.Word, StringComparer.OrdinalIgnoreCase)
             .Select(g => new ScoredWord { Word = g.Key, Score = g.Max(x => x.Score) })
             .ToList();
+        
+        // Cache the result
+        _synonymCache[cacheKey] = new CachedSynonyms { Synonyms = deduped, ExpiresAt = DateTime.UtcNow.Add(CacheTtl) };
+        _logger.LogDebug("Cached {Count} synonyms for '{Word}' (key: {CacheKey})", deduped.Count, word, cacheKey);
+        
+        return deduped;
     }
 
     private async Task<List<ScoredWord>> FetchDatamuseScoredWordsAsync(string url)
@@ -398,4 +439,41 @@ public class ClueService : IClueService
         public string Word { get; set; } = string.Empty;
         public int Score { get; set; }
     }
+
+    private class CachedSynonyms
+    {
+        public List<ScoredWord> Synonyms { get; set; } = new();
+        public DateTime ExpiresAt { get; set; }
+    }
+
+    private static string? GetLeftContext(List<PhraseWord> words, int wordIndex)
+    {
+        var sorted = words.OrderBy(w => w.Index).ToList();
+        var idx = sorted.FindIndex(w => w.Index == wordIndex);
+        if (idx > 0)
+            return sorted[idx - 1].Text.ToLowerInvariant();
+        return null;
+    }
+
+    private static string? GetRightContext(List<PhraseWord> words, int wordIndex)
+    {
+        var sorted = words.OrderBy(w => w.Index).ToList();
+        var idx = sorted.FindIndex(w => w.Index == wordIndex);
+        if (idx >= 0 && idx < sorted.Count - 1)
+            return sorted[idx + 1].Text.ToLowerInvariant();
+        return null;
+    }
+
+    /// <summary>
+    /// Clears the synonym cache. Used for testing.
+    /// </summary>
+    internal static void ClearCache()
+    {
+        _synonymCache.Clear();
+    }
+
+    /// <summary>
+    /// Gets the current cache count. Used for testing.
+    /// </summary>
+    internal static int CacheCount => _synonymCache.Count;
 }
