@@ -13,6 +13,7 @@ public class LinkittyDoDbContext : DbContext
     public DbSet<GamePhrase> GamePhrases => Set<GamePhrase>();
     public DbSet<GameRecord> GameRecords => Set<GameRecord>();
     public DbSet<GameEvent> GameEvents => Set<GameEvent>();
+    public DbSet<GameSessionRecord> GameSessions => Set<GameSessionRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +23,7 @@ public class LinkittyDoDbContext : DbContext
         ConfigureGamePhrase(modelBuilder);
         ConfigureGameRecord(modelBuilder);
         ConfigureGameEvent(modelBuilder);
+        ConfigureGameSession(modelBuilder);
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -118,6 +120,24 @@ public class LinkittyDoDbContext : DbContext
         modelBuilder.Entity<GameEndEvent>(entity =>
         {
             entity.Property(e => e.Reason).HasMaxLength(20);
+        });
+    }
+
+    private static void ConfigureGameSession(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GameSessionRecord>(entity =>
+        {
+            entity.HasKey(e => e.SessionId);
+            entity.Property(e => e.SessionId).HasMaxLength(36).IsRequired();
+            entity.Property(e => e.UserId).HasMaxLength(30);
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.Score).HasDefaultValue(0);
+            entity.Property(e => e.Difficulty).HasDefaultValue(10);
+            entity.Property(e => e.StateJson).HasColumnType("TEXT").IsRequired();
+            entity.Property(e => e.StartedAt).IsRequired();
+            entity.Property(e => e.LastActivityAt).IsRequired();
+
+            entity.HasIndex(e => e.LastActivityAt);
         });
     }
 }
