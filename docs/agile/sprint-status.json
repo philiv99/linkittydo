@@ -1,18 +1,18 @@
 {
   "current_sprint": {
-    "number": 11,
+    "number": 12,
     "status": "complete",
-    "branch": "feature/20260409-sprint-11",
+    "branch": "feature/20260409-sprint-12",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 11,
+    "number": 12,
     "date": "2026-04-09",
     "result": "complete",
     "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "EF Core InMemory provider does not enforce unique indexes; use shadow discriminator for abstract properties"
+    "key_lesson": "Extract stateful Singleton (ISessionStore) before migrating dependent services to Scoped"
   },
   "test_metrics": {
     "backend_tests_passing": 188,

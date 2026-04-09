@@ -1,3 +1,4 @@
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 
 namespace LinkittyDo.Api.Services;
@@ -12,17 +13,28 @@ public interface IGameService
     void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url);
     int RemoveExpiredSessions(TimeSpan maxAge);
     int ActiveSessionCount { get; }
+    Task<GameRecord?> GetGameRecordAsync(Guid sessionId);
 }
 
 public class GameService : IGameService
 {
-    private readonly Dictionary<Guid, GameSession> _sessions = new();
+    private readonly ISessionStore _sessionStore;
     private readonly IGamePhraseService _phraseService;
+    private readonly IGameRecordRepository _gameRecordRepository;
+    private readonly IUserService _userService;
     private readonly ILogger<GameService> _logger;
 
-    public GameService(IGamePhraseService phraseService, ILogger<GameService> logger)
+    public GameService(
+        ISessionStore sessionStore,
+        IGamePhraseService phraseService,
+        IGameRecordRepository gameRecordRepository,
+        IUserService userService,
+        ILogger<GameService> logger)
     {
+        _sessionStore = sessionStore;
         _phraseService = phraseService;
+        _gameRecordRepository = gameRecordRepository;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -69,6 +81,7 @@ public class GameService : IGameService
             session.GameRecord = new GameRecord
             {
                 GameId = GenerateGameId(),
+                UserId = userId!,
                 PlayedAt = now,
                 PhraseId = phrase.Id,
                 PhraseText = phrase.FullText,
@@ -79,13 +92,13 @@ public class GameService : IGameService
             };
         }
 
-        _sessions[session.SessionId] = session;
+        _sessionStore.Set(session.SessionId, session);
         return session;
     }
 
     public GameSession? GetGame(Guid sessionId)
     {
-        return _sessions.GetValueOrDefault(sessionId);
+        return _sessionStore.Get(sessionId);
     }
 
     public GuessResponse SubmitGuess(Guid sessionId, GuessRequest request)
@@ -126,6 +139,8 @@ public class GameService : IGameService
         {
             session.GameRecord.Events.Add(new GuessEvent
             {
+                GameId = session.GameRecord.GameId,
+                SequenceNumber = session.GameRecord.Events.Count,
                 WordIndex = request.WordIndex,
                 GuessText = request.Guess,
                 IsCorrect = isCorrect,
@@ -137,16 +152,20 @@ public class GameService : IGameService
 
         var isComplete = session.RevealedWords.All(kv => kv.Value);
         
-        // If phrase is complete, mark game as solved
+        // If phrase is complete, mark game as solved and persist
         if (isComplete && !session.IsGuestSession && session.GameRecord != null)
         {
             session.GameRecord.Events.Add(new GameEndEvent
             {
+                GameId = session.GameRecord.GameId,
+                SequenceNumber = session.GameRecord.Events.Count,
                 Reason = "solved",
                 Timestamp = DateTime.UtcNow
             });
             session.GameRecord.Result = GameResult.Solved;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
+
+            _ = PersistGameRecordAsync(session);
         }
 
         return new GuessResponse
@@ -207,12 +226,16 @@ public class GameService : IGameService
         {
             session.GameRecord.Events.Add(new GameEndEvent
             {
+                GameId = session.GameRecord.GameId,
+                SequenceNumber = session.GameRecord.Events.Count,
                 Reason = "gaveup",
                 Timestamp = DateTime.UtcNow
             });
             session.GameRecord.Result = GameResult.GaveUp;
             session.GameRecord.Score = 0;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
+
+            _ = PersistGameRecordAsync(session);
         }
 
         return GetGameState(sessionId);
@@ -240,6 +263,8 @@ public class GameService : IGameService
 
         session.GameRecord.Events.Add(new ClueEvent
         {
+            GameId = session.GameRecord.GameId,
+            SequenceNumber = session.GameRecord.Events.Count,
             WordIndex = wordIndex,
             SearchTerm = searchTerm,
             Url = url,
@@ -288,19 +313,19 @@ public class GameService : IGameService
         };
     }
 
-    public int ActiveSessionCount => _sessions.Count;
+    public int ActiveSessionCount => _sessionStore.Count;
 
     public int RemoveExpiredSessions(TimeSpan maxAge)
     {
         var cutoff = DateTime.UtcNow - maxAge;
-        var expired = _sessions
+        var expired = _sessionStore.GetAll()
             .Where(kv => kv.Value.LastActivityAt < cutoff)
             .Select(kv => kv.Key)
             .ToList();
 
         foreach (var key in expired)
         {
-            _sessions.Remove(key);
+            _sessionStore.Remove(key);
         }
 
         if (expired.Count > 0)
@@ -309,5 +334,37 @@ public class GameService : IGameService
         }
 
         return expired.Count;
+    }
+
+    public async Task<GameRecord?> GetGameRecordAsync(Guid sessionId)
+    {
+        var session = _sessionStore.Get(sessionId);
+        if (session == null || session.IsGuestSession || session.GameRecord == null)
+            return null;
+
+        return session.GameRecord;
+    }
+
+    private async Task PersistGameRecordAsync(GameSession session)
+    {
+        if (session.GameRecord == null || session.IsGuestSession) return;
+
+        try
+        {
+            await _gameRecordRepository.CreateAsync(session.GameRecord);
+            
+            // Also update user's lifetime points
+            if (session.UserId != null && session.GameRecord.Score > 0)
+            {
+                await _userService.AddPointsAsync(session.UserId, session.GameRecord.Score);
+            }
+
+            _logger.LogInformation("Persisted game record {GameId} for user {UserId}",
+                session.GameRecord.GameId, session.UserId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to persist game record {GameId}", session.GameRecord.GameId);
+        }
     }
 }
