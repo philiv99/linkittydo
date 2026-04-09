@@ -79,6 +79,7 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddScoped<ISimulationService, SimulationService>();
     builder.Services.AddScoped<IAdminService, AdminService>();
     builder.Services.AddScoped<IGamesManagerService, GamesManagerService>();
+    builder.Services.AddScoped<IDataExplorerService, DataExplorerService>();
 }
 else
 {
