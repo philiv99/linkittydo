@@ -24,6 +24,7 @@ public class LinkittyDoDbContext : DbContext
     public DbSet<ClueEffectiveness> ClueEffectiveness => Set<ClueEffectiveness>();
     public DbSet<PlayerStats> PlayerStats => Set<PlayerStats>();
     public DbSet<PhrasePlayStats> PhrasePlayStats => Set<PhrasePlayStats>();
+    public DbSet<SimulationProfile> SimulationProfiles => Set<SimulationProfile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +39,7 @@ public class LinkittyDoDbContext : DbContext
         ConfigureAuditLog(modelBuilder);
         ConfigureContentManagement(modelBuilder);
         ConfigureAnalytics(modelBuilder);
+        ConfigureSimulation(modelBuilder);
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -309,5 +311,33 @@ public class LinkittyDoDbContext : DbContext
             entity.Property(e => e.GiveUpRate).HasColumnType("decimal(5,4)").HasDefaultValue(0m);
             entity.Property(e => e.LastComputedAt).IsRequired();
         });
+    }
+
+    private static void ConfigureSimulation(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SimulationProfile>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.ClueProbability).HasColumnType("decimal(3,2)");
+            entity.Property(e => e.CorrectGuessProbability).HasColumnType("decimal(3,2)");
+            entity.Property(e => e.GiveUpProbability).HasColumnType("decimal(3,2)");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+
+            entity.HasData(
+                new SimulationProfile { Id = 1, Name = "Beginner", Description = "Simulates a beginner player", ClueProbability = 0.8m, CorrectGuessProbability = 0.3m, GiveUpProbability = 0.2m, PreferredDifficulty = 20 },
+                new SimulationProfile { Id = 2, Name = "Average", Description = "Simulates an average player", ClueProbability = 0.5m, CorrectGuessProbability = 0.6m, GiveUpProbability = 0.1m, PreferredDifficulty = 50 },
+                new SimulationProfile { Id = 3, Name = "Expert", Description = "Simulates an expert player", ClueProbability = 0.2m, CorrectGuessProbability = 0.9m, GiveUpProbability = 0.02m, PreferredDifficulty = 80 }
+            );
+        });
+
+        modelBuilder.Entity<User>()
+            .Property(e => e.IsSimulated).HasDefaultValue(false);
+
+        modelBuilder.Entity<GameRecord>()
+            .Property(e => e.IsSimulated).HasDefaultValue(false);
     }
 }

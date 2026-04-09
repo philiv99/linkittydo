@@ -13,6 +13,7 @@ public class User
     public int LifetimePoints { get; set; } = 0;
     public int PreferredDifficulty { get; set; } = 10;
     public bool IsActive { get; set; } = true;
+    public bool IsSimulated { get; set; } = false;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
