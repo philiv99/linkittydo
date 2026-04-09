@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
-import type { User, CreateUserRequest, UserResponse } from '../types';
+import { api, clearTokens, getStoredToken } from '../services/api';
+import type { User, UserResponse, RegisterRequest, LoginRequest } from '../types';
 
 const STORAGE_KEY = 'linkittydo_user';
 
@@ -114,18 +114,53 @@ export const useUser = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const registerUser = useCallback(async (request: CreateUserRequest): Promise<boolean> => {
+  const registerUser = useCallback(async (request: RegisterRequest): Promise<boolean> => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await api.createUser(request);
-      const newUser = mapResponseToUser(response);
+      const authResponse = await api.register(request);
+      const newUser: User = {
+        uniqueId: authResponse.uniqueId,
+        name: authResponse.name,
+        email: authResponse.email,
+        lifetimePoints: 0,
+        preferredDifficulty: 10,
+      };
       setUser(newUser);
-      await fetchAllUsers(); // Refresh user list
+      await fetchAllUsers();
       return true;
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to register user';
+      setError(message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAllUsers]);
+
+  const loginUser = useCallback(async (request: LoginRequest): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const authResponse = await api.login(request);
+      const serverUser = await api.getUser(authResponse.uniqueId);
+      if (serverUser) {
+        setUser(mapResponseToUser(serverUser));
+      } else {
+        setUser({
+          uniqueId: authResponse.uniqueId,
+          name: authResponse.name,
+          email: authResponse.email,
+          lifetimePoints: 0,
+          preferredDifficulty: 10,
+        });
+      }
+      await fetchAllUsers();
+      return true;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Failed to login';
       setError(message);
       return false;
     } finally {
@@ -234,6 +269,7 @@ export const useUser = () => {
   }, []);
 
   const signOut = useCallback(() => {
+    clearTokens();
     resetToGuest();
   }, [resetToGuest]);
 
@@ -248,6 +284,7 @@ export const useUser = () => {
     loading,
     error,
     registerUser,
+    loginUser,
     updateUser,
     switchUser,
     updateDifficulty,

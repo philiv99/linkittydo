@@ -17,6 +17,7 @@ function App() {
     loading: userLoading,
     error: userError,
     registerUser,
+    loginUser,
     switchUser,
     checkNameAvailability,
     checkEmailAvailability,
@@ -56,18 +57,18 @@ function App() {
           setShowUserModal(false);
           clearError();
         }}
-        onSubmit={async (name, email) => {
-          const success = await registerUser({ name, email });
+        onRegister={async (name, email, password) => {
+          const success = await registerUser({ name, email, password });
+          if (success) setShowUserModal(false);
+          return success;
+        }}
+        onLogin={async (email, password) => {
+          const success = await loginUser({ email, password });
           if (success) setShowUserModal(false);
           return success;
         }}
         onCheckName={checkNameAvailability}
         onCheckEmail={checkEmailAvailability}
-        onSelectExistingUser={async (uniqueId) => {
-          const success = await switchUser(uniqueId);
-          if (success) setShowUserModal(false);
-          return success;
-        }}
         allUsers={allUsers}
         loading={userLoading}
         error={userError}

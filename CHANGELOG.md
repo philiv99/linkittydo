@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add JWT authentication — register, login, and refresh token endpoints (#22)
+- **feat**: Add BCrypt password hashing for secure credential storage (#22)
+- **feat**: Protect user-specific endpoints (update, delete, difficulty, points, games) with [Authorize] (#22)
+- **feat**: Add frontend login/register with password, token storage in localStorage (#22)
+- **feat**: Add auth tab UI (Sign In / Register) replacing old datalist user picker (#22)
+- **test**: Add 10 AuthService tests — register, login, refresh, revoke, JWT validation (173 backend total)
 - **feat**: Remove dead HomePage component and hero section — game starts immediately on /play (#37)
 - **feat**: Scale phrase database from 26 to 110 phrases across difficulty bands (#7)
 - **feat**: Add sound effects for correct/incorrect guesses, game solve, and give up using Web Audio API (#20)

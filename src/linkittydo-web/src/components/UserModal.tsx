@@ -5,10 +5,10 @@ import './UserModal.css';
 interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string) => Promise<boolean>;
+  onRegister: (name: string, email: string, password: string) => Promise<boolean>;
+  onLogin: (email: string, password: string) => Promise<boolean>;
   onCheckName: (name: string) => Promise<boolean>;
   onCheckEmail: (email: string) => Promise<boolean>;
-  onSelectExistingUser: (uniqueId: string) => Promise<boolean>;
   allUsers: User[];
   loading: boolean;
   error: string | null;
@@ -17,64 +17,43 @@ interface UserModalProps {
 export const UserModal: React.FC<UserModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
+  onRegister,
+  onLogin,
   onCheckName,
   onCheckEmail,
-  onSelectExistingUser,
   allUsers,
   loading,
   error,
 }) => {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
-  const [selectedExistingUser, setSelectedExistingUser] = useState<User | null>(null);
-  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setName('');
       setEmail('');
+      setPassword('');
       setNameError(null);
       setEmailError(null);
-      setSelectedExistingUser(null);
-      setIsSigningIn(false);
+      setPasswordError(null);
+      setMode('login');
     }
   }, [isOpen]);
 
-  // Check if name matches an existing user
+  // Debounced name availability check (register only)
   useEffect(() => {
-    if (!name) {
-      setSelectedExistingUser(null);
-      return;
-    }
-
-    const matchedUser = allUsers.find(
-      u => u.name.toLowerCase() === name.toLowerCase()
-    );
-
-    if (matchedUser) {
-      setSelectedExistingUser(matchedUser);
-      setEmail(matchedUser.email);
+    if (mode !== 'register' || !name || name.length < 2) {
       setNameError(null);
-      setEmailError(null);
-    } else {
-      setSelectedExistingUser(null);
-    }
-  }, [name, allUsers]);
-
-  // Debounced name availability check (only for new users)
-  useEffect(() => {
-    if (!name || name.length < 2 || selectedExistingUser) {
-      if (!selectedExistingUser) setNameError(null);
       return;
     }
 
-    // Validate format first
     const nameRegex = /^[a-zA-Z0-9\s_-]+$/;
     if (!nameRegex.test(name)) {
       setNameError('Name can only contain letters, numbers, spaces, underscores, and hyphens');
@@ -98,16 +77,15 @@ export const UserModal: React.FC<UserModalProps> = ({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [name, onCheckName, selectedExistingUser]);
+  }, [name, onCheckName, mode]);
 
-  // Debounced email availability check (only for new users)
+  // Debounced email availability check (register only)
   useEffect(() => {
-    if (!email || selectedExistingUser) {
-      if (!selectedExistingUser) setEmailError(null);
+    if (mode !== 'register' || !email) {
+      setEmailError(null);
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Please enter a valid email address');
@@ -126,52 +104,49 @@ export const UserModal: React.FC<UserModalProps> = ({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [email, onCheckEmail, selectedExistingUser]);
+  }, [email, onCheckEmail, mode]);
+
+  // Password validation
+  useEffect(() => {
+    if (!password) {
+      setPasswordError(null);
+      return;
+    }
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+    } else {
+      setPasswordError(null);
+    }
+  }, [password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // If an existing user is selected, sign in as that user
-    if (selectedExistingUser) {
-      setIsSigningIn(true);
-      const success = await onSelectExistingUser(selectedExistingUser.uniqueId);
-      setIsSigningIn(false);
-      if (success) {
-        onClose();
+    if (mode === 'login') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setEmailError('Please enter a valid email address');
+        return;
       }
-      return;
-    }
-
-    // Otherwise, create new user
-    if (nameError || emailError || isCheckingName || isCheckingEmail) {
-      return;
-    }
-
-    if (name.length < 2) {
-      setNameError('Name must be at least 2 characters');
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
-    const success = await onSubmit(name.trim(), email.trim());
-    if (success) {
-      onClose();
+      if (!password) {
+        setPasswordError('Password is required');
+        return;
+      }
+      const success = await onLogin(email.trim(), password);
+      if (success) onClose();
+    } else {
+      if (nameError || emailError || passwordError || isCheckingName || isCheckingEmail) return;
+      if (name.length < 2) { setNameError('Name must be at least 2 characters'); return; }
+      if (password.length < 8) { setPasswordError('Password must be at least 8 characters'); return; }
+      const success = await onRegister(name.trim(), email.trim(), password);
+      if (success) onClose();
     }
   };
 
-  const isFormValid = selectedExistingUser 
-    ? true 
-    : (name.length >= 2 && 
-       email.length > 0 && 
-       !nameError && 
-       !emailError && 
-       !isCheckingName && 
-       !isCheckingEmail);
+  const isFormValid = mode === 'login'
+    ? email.length > 0 && password.length > 0
+    : (name.length >= 2 && email.length > 0 && password.length >= 8 &&
+       !nameError && !emailError && !passwordError && !isCheckingName && !isCheckingEmail);
 
   if (!isOpen) return null;
 
@@ -182,41 +157,42 @@ export const UserModal: React.FC<UserModalProps> = ({
           ×
         </button>
         
-        <h2>{selectedExistingUser ? 'Welcome Back!' : 'Create Your Profile'}</h2>
-        <p className="modal-subtitle">
-          {selectedExistingUser 
-            ? `Sign in as ${selectedExistingUser.name}` 
-            : 'Enter your details or select an existing user'}
-        </p>
+        <div className="auth-tabs">
+          <button
+            className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
+            onClick={() => setMode('login')}
+            type="button"
+          >
+            Sign In
+          </button>
+          <button
+            className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+            onClick={() => setMode('register')}
+            type="button"
+          >
+            Register
+          </button>
+        </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              id="name"
-              type="text"
-              list="existing-users"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter name or select existing user"
-              maxLength={50}
-              disabled={loading || isSigningIn}
-              className={nameError ? 'error' : selectedExistingUser ? 'matched' : ''}
-              autoComplete="off"
-            />
-            <datalist id="existing-users">
-              {allUsers.map((user) => (
-                <option key={user.uniqueId} value={user.name}>
-                  {user.email}
-                </option>
-              ))}
-            </datalist>
-            {isCheckingName && <span className="checking">Checking availability...</span>}
-            {nameError && <span className="error-message">{nameError}</span>}
-            {selectedExistingUser && (
-              <span className="matched-message">✓ Existing user found</span>
-            )}
-          </div>
+          {mode === 'register' && (
+            <div className="form-group">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Choose a display name"
+                maxLength={50}
+                disabled={loading}
+                className={nameError ? 'error' : ''}
+                autoComplete="off"
+              />
+              {isCheckingName && <span className="checking">Checking availability...</span>}
+              {nameError && <span className="error-message">{nameError}</span>}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -224,17 +200,28 @@ export const UserModal: React.FC<UserModalProps> = ({
               id="email"
               type="email"
               value={email}
-              onChange={(e) => {
-                if (!selectedExistingUser) {
-                  setEmail(e.target.value);
-                }
-              }}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              disabled={loading || isSigningIn || !!selectedExistingUser}
-              className={emailError ? 'error' : selectedExistingUser ? 'matched' : ''}
+              disabled={loading}
+              className={emailError ? 'error' : ''}
             />
             {isCheckingEmail && <span className="checking">Checking availability...</span>}
             {emailError && <span className="error-message">{emailError}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={mode === 'register' ? 'At least 8 characters' : 'Enter your password'}
+              disabled={loading}
+              className={passwordError ? 'error' : ''}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
+            {passwordError && <span className="error-message">{passwordError}</span>}
           </div>
 
           {error && <div className="form-error">{error}</div>}
@@ -244,22 +231,18 @@ export const UserModal: React.FC<UserModalProps> = ({
               type="button"
               className="btn-secondary"
               onClick={onClose}
-              disabled={loading || isSigningIn}
+              disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="btn-primary"
-              disabled={!isFormValid || loading || isSigningIn}
+              disabled={!isFormValid || loading}
             >
-              {isSigningIn 
-                ? 'Signing In...' 
-                : loading 
-                  ? 'Creating...' 
-                  : selectedExistingUser 
-                    ? 'Sign In' 
-                    : 'Create Profile'}
+              {loading
+                ? (mode === 'login' ? 'Signing In...' : 'Creating...')
+                : (mode === 'login' ? 'Sign In' : 'Create Account')}
             </button>
           </div>
         </form>

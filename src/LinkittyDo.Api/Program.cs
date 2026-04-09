@@ -1,9 +1,12 @@
+using System.Text;
 using System.Threading.RateLimiting;
 using DotNetEnv;
 using LinkittyDo.Api;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.IdentityModel.Tokens;
 
 // Load .env file if it exists
 Env.Load();
@@ -15,6 +18,30 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.FromMinutes(1)
+    };
+});
+builder.Services.AddAuthorization();
+
 // Register data repositories
 builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
 builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>();
@@ -23,6 +50,7 @@ builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>()
 builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
 builder.Services.AddSingleton<IGameService, GameService>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddHttpClient<IClueService, ClueService>();
 builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 
@@ -136,6 +164,9 @@ app.UseHttpsRedirection();
 // Use AllowAll CORS policy for Azure deployment
 var env = app.Environment;
 app.UseCors(env.IsDevelopment() ? "AllowReactApp" : "AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseRateLimiter();
 
