@@ -1,12 +1,15 @@
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 using DotNetEnv;
 using LinkittyDo.Api;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 
 // Load .env file if it exists
@@ -94,6 +97,18 @@ builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
 
 // Register background services
 builder.Services.AddHostedService<SessionCleanupService>();
+builder.Services.AddHostedService<DatabaseSeedService>();
+
+// Configure health checks
+var healthChecksBuilder = builder.Services.AddHealthChecks();
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+{
+    healthChecksBuilder.AddCheck<MySqlHealthCheck>("mysql", tags: new[] { "db", "ready" });
+}
+else
+{
+    healthChecksBuilder.AddCheck<JsonStorageHealthCheck>("json-storage", tags: new[] { "storage", "ready" });
+}
 
 // Configure rate limiting
 builder.Services.AddRateLimiter(options =>
@@ -174,24 +189,34 @@ app.UseSwaggerUI(c =>
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Add a health check endpoint
-app.MapGet("/health", (IGameService gameService, IConfiguration configuration) =>
+app.MapHealthChecks("/health", new HealthCheckOptions
 {
-    var dataDir = configuration.GetValue<string>("DataDirectory") ?? "Data";
-    var dataDirectoryExists = Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), dataDir));
-    var startTime = System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
-    var uptime = DateTime.UtcNow - startTime;
-
-    return Results.Ok(new
+    ResponseWriter = async (context, report) =>
     {
-        status = "healthy",
-        timestamp = DateTime.UtcNow,
-        uptime = $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m",
-        activeSessions = gameService.ActiveSessionCount,
-        dependencies = new
+        context.Response.ContentType = "application/json";
+        var startTime = System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
+        var uptime = DateTime.UtcNow - startTime;
+
+        var gameService = context.RequestServices.GetRequiredService<IGameService>();
+
+        var result = new
         {
-            dataDirectory = dataDirectoryExists ? "ok" : "missing",
-        }
-    });
+            status = report.Status.ToString().ToLowerInvariant(),
+            timestamp = DateTime.UtcNow,
+            uptime = $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m",
+            activeSessions = gameService.ActiveSessionCount,
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString().ToLowerInvariant(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds + "ms"
+            })
+        };
+
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
+    }
 });
 
 // Fallback to Swagger for any unmatched routes

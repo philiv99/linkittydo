@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add ASP.NET Core health check infrastructure with JSON/MySQL provider checks (#67)
+- **feat**: Add DatabaseSeedService — admin user in all environments, test data in Development (#68)
+- **test**: Add 7 health check and database seeding tests (195 backend total)
 - **feat**: Decouple GameRecords from User model — Games property removed, separate JSON file storage (#65)
 - **feat**: JsonGameRecordRepository now stores records as individual JSON files in Data/GameRecords/ (#65)
 - **feat**: Add GetGameCountAsync to IUserService for leaderboard game counts (#65)
