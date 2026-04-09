@@ -1,0 +1,12 @@
+using LinkittyDo.Api.Models;
+
+namespace LinkittyDo.Api.Services;
+
+public interface IAdminService
+{
+    Task<DashboardStats> GetDashboardStatsAsync();
+    Task<IReadOnlyList<User>> GetUsersAsync(int page = 1, int pageSize = 20, bool? isSimulated = null);
+    Task<int> GetUserCountAsync(bool? isSimulated = null);
+    Task<bool> SetUserActiveStatusAsync(string uniqueId, bool isActive);
+    Task<PlayerStats?> GetPlayerAnalyticsAsync(string userId);
+}

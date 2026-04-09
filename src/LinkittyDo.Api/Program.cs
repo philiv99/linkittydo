@@ -77,6 +77,7 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddSingleton<ISiteConfigService, SiteConfigService>();
     builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
     builder.Services.AddScoped<ISimulationService, SimulationService>();
+    builder.Services.AddScoped<IAdminService, AdminService>();
 }
 else
 {
