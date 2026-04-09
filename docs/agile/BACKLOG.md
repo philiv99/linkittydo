@@ -361,3 +361,19 @@ _Move items here after sprint completion. Include sprint number._
 | #21 Accessibility improvements | 7 | 2026-04-09 |
 | #23 Input sanitization audit | 8 | 2026-04-09 |
 | #24 Rate limiting | 8 | 2026-04-09 |
+| #37 Remove splash/click-to-start screens | 9 | 2026-04-09 |
+| #38 Professional game layout structure | 9 | 2026-04-09 |
+| #39 Compact phrase bar with action buttons | 9 | 2026-04-09 |
+| #40 Tabbed clue display as primary content | 9 | 2026-04-09 |
+| #41 App footer with version and status | 9 | 2026-04-09 |
+| #42 Default route to /play | 9 | 2026-04-09 |
+| #22 User authentication (JWT) | 10 | 2026-04-09 |
+| #25 EF Core infrastructure with MySQL (Pomelo) | 11 | 2026-04-09 |
+| #26 Repository interfaces refactoring (IGameRecordRepository, IUnitOfWork) | 11 | 2026-04-09 |
+| #64 Data provider feature flag (Json/MySql) | 11 | 2026-04-09 |
+| #63 DI lifetime migration (Scoped-compatible services) | 12 | 2026-04-09 |
+| #45 GameRecords table + IGameRecordRepository | 12 | 2026-04-09 |
+| #46 GameEvents table (single-table inheritance) | 12 | 2026-04-09 |
+| #65 User model refactoring (decouple Games) | 13 | 2026-04-09 |
+| #67 MySQL health check endpoint | 14 | 2026-04-09 |
+| #68 Database seeding (admin user, test data) | 14 | 2026-04-09 |

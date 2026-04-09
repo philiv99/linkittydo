@@ -1,21 +1,21 @@
 {
   "current_sprint": {
-    "number": 12,
+    "number": 14,
     "status": "complete",
-    "branch": "feature/20260409-sprint-12",
+    "branch": "feature/20260409-sprint-14",
     "plan_approved": true,
-    "pr_number": null
+    "pr_number": 25
   },
   "last_completed": {
-    "number": 12,
+    "number": 14,
     "date": "2026-04-09",
     "result": "complete",
-    "items_completed": 3,
+    "items_completed": 2,
     "items_carried_over": 0,
-    "key_lesson": "Extract stateful Singleton (ISessionStore) before migrating dependent services to Scoped"
+    "key_lesson": "Test projects targeting net10.0 need explicit FrameworkReference for Microsoft.AspNetCore.App"
   },
   "test_metrics": {
-    "backend_tests_passing": 188,
+    "backend_tests_passing": 195,
     "frontend_tests_passing": 57,
     "lint_errors": 0
   }
