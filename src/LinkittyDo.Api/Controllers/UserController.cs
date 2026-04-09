@@ -1,5 +1,6 @@
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -174,6 +175,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Update a user
     /// </summary>
+    [Authorize]
     [HttpPut("{uniqueId}")]
     public async Task<ActionResult<ApiResponse<UserResponse>>> UpdateUser(string uniqueId, [FromBody] UpdateUserRequest request)
     {
@@ -257,6 +259,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Delete a user
     /// </summary>
+    [Authorize]
     [HttpDelete("{uniqueId}")]
     public async Task<IActionResult> DeleteUser(string uniqueId)
     {
@@ -299,6 +302,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Update user's preferred difficulty
     /// </summary>
+    [Authorize]
     [HttpPatch("{uniqueId}/difficulty")]
     public async Task<ActionResult<ApiResponse<DifficultyResponse>>> UpdateDifficulty(string uniqueId, [FromBody] UpdateDifficultyRequest request)
     {
@@ -353,6 +357,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Add points to user's lifetime total
     /// </summary>
+    [Authorize]
     [HttpPost("{uniqueId}/points")]
     public async Task<ActionResult<ApiResponse<PointsResponse>>> AddPoints(string uniqueId, [FromBody] AddPointsRequest request)
     {
@@ -408,6 +413,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// Get a user's game history
     /// </summary>
+    [Authorize]
     [HttpGet("{uniqueId}/games")]
     public async Task<ActionResult<ApiResponse<IEnumerable<GameRecord>>>> GetUserGames(string uniqueId)
     {

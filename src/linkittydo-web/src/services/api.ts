@@ -15,7 +15,10 @@ import type {
   LeaderboardEntry,
   LlmTestRequest,
   LlmTestResponse,
-  ApiResponse
+  ApiResponse,
+  AuthResponse,
+  RegisterRequest,
+  LoginRequest,
 } from '../types';
 
 // Ensure the API base URL always ends with /api
@@ -27,7 +30,78 @@ const getApiBaseUrl = (): string => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+const TOKEN_KEY = 'linkittydo_token';
+const REFRESH_TOKEN_KEY = 'linkittydo_refresh_token';
+
+export const getStoredToken = (): string | null => localStorage.getItem(TOKEN_KEY);
+export const getStoredRefreshToken = (): string | null => localStorage.getItem(REFRESH_TOKEN_KEY);
+export const storeTokens = (accessToken: string, refreshToken: string): void => {
+  localStorage.setItem(TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+};
+export const clearTokens = (): void => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
+const authHeaders = (): Record<string, string> => {
+  const token = getStoredToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 export const api = {
+  // Auth endpoints
+  async register(request: RegisterRequest): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      const errorData: ErrorResponse = await response.json();
+      throw new Error(errorData.error?.message || 'Registration failed');
+    }
+    const wrapper: ApiResponse<AuthResponse> = await response.json();
+    storeTokens(wrapper.data.accessToken, wrapper.data.refreshToken);
+    return wrapper.data;
+  },
+
+  async login(request: LoginRequest): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      const errorData: ErrorResponse = await response.json();
+      throw new Error(errorData.error?.message || 'Login failed');
+    }
+    const wrapper: ApiResponse<AuthResponse> = await response.json();
+    storeTokens(wrapper.data.accessToken, wrapper.data.refreshToken);
+    return wrapper.data;
+  },
+
+  async refreshToken(): Promise<AuthResponse | null> {
+    const refreshToken = getStoredRefreshToken();
+    if (!refreshToken) return null;
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) {
+      clearTokens();
+      return null;
+    }
+    const wrapper: ApiResponse<AuthResponse> = await response.json();
+    storeTokens(wrapper.data.accessToken, wrapper.data.refreshToken);
+    return wrapper.data;
+  },
+
+  logout(): void {
+    clearTokens();
+  },
+
   // Game endpoints
   async startGame(request?: StartGameRequest): Promise<GameState> {
     const response = await fetch(`${API_BASE_URL}/game/start`, {
@@ -131,7 +205,7 @@ export const api = {
   async updateUser(uniqueId: string, request: UpdateUserRequest): Promise<UserResponse> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(request),
     });
     
@@ -147,6 +221,7 @@ export const api = {
   async deleteUser(uniqueId: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}`, {
       method: 'DELETE',
+      headers: { ...authHeaders() },
     });
     if (!response.ok && response.status !== 204) {
       throw new Error('Failed to delete user');
@@ -156,7 +231,7 @@ export const api = {
   async updateDifficulty(uniqueId: string, difficulty: number): Promise<DifficultyResponse> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/difficulty`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ difficulty }),
     });
     
@@ -172,7 +247,7 @@ export const api = {
   async addPoints(uniqueId: string, points: number): Promise<PointsResponse> {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/points`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ points }),
     });
     
@@ -200,7 +275,9 @@ export const api = {
   },
 
   async getUserGames(uniqueId: string): Promise<GameRecord[]> {
-    const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`);
+    const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`, {
+      headers: { ...authHeaders() },
+    });
     if (!response.ok) throw new Error('Failed to get user games');
     const wrapper: ApiResponse<GameRecord[]> = await response.json();
     return wrapper.data;

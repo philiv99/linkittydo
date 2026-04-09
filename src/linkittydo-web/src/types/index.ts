@@ -168,3 +168,24 @@ export interface LlmTestResponse {
   totalTokens: number;
   error?: string;
 }
+
+// Auth types
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  uniqueId: string;
+  name: string;
+  email: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+}
