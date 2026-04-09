@@ -41,9 +41,6 @@ public class LinkittyDoDbContext : DbContext
 
             entity.HasIndex(e => e.Name).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
-
-            // Ignore the embedded Games collection — GameRecords are a separate table
-            entity.Ignore(e => e.Games);
         });
     }
 

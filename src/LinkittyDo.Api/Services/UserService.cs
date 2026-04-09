@@ -16,18 +16,20 @@ public interface IUserService
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<User?> UpdateDifficultyAsync(string uniqueId, int difficulty);
     Task<User?> AddPointsAsync(string uniqueId, int points);
-    Task<User?> AddGameRecordAsync(string uniqueId, GameRecord gameRecord);
     Task<IEnumerable<GameRecord>> GetUserGamesAsync(string uniqueId);
+    Task<int> GetGameCountAsync(string uniqueId);
     Task<IEnumerable<User>> GetLeaderboardAsync(int top = 10);
 }
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _repository;
+    private readonly IGameRecordRepository _gameRecordRepository;
 
-    public UserService(IUserRepository repository)
+    public UserService(IUserRepository repository, IGameRecordRepository gameRecordRepository)
     {
         _repository = repository;
+        _gameRecordRepository = gameRecordRepository;
     }
 
     /// <summary>
@@ -60,7 +62,6 @@ public class UserService : IUserService
             Email = request.Email.Trim().ToLowerInvariant(),
             LifetimePoints = 0,
             PreferredDifficulty = 10,
-            Games = new List<GameRecord>(),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -169,20 +170,6 @@ public class UserService : IUserService
         return await _repository.UpdateAsync(user);
     }
 
-    public async Task<User?> AddGameRecordAsync(string uniqueId, GameRecord gameRecord)
-    {
-        var user = await _repository.GetByIdAsync(uniqueId);
-        if (user == null)
-        {
-            return null;
-        }
-
-        user.Games.Add(gameRecord);
-        user.UpdatedAt = DateTime.UtcNow;
-
-        return await _repository.UpdateAsync(user);
-    }
-
     public async Task<IEnumerable<GameRecord>> GetUserGamesAsync(string uniqueId)
     {
         var user = await _repository.GetByIdAsync(uniqueId);
@@ -191,7 +178,12 @@ public class UserService : IUserService
             return Enumerable.Empty<GameRecord>();
         }
 
-        return user.Games.OrderByDescending(g => g.PlayedAt);
+        return await _gameRecordRepository.GetByUserIdAsync(uniqueId);
+    }
+
+    public async Task<int> GetGameCountAsync(string uniqueId)
+    {
+        return await _gameRecordRepository.GetCountByUserIdAsync(uniqueId);
     }
 
     public async Task<IEnumerable<User>> GetLeaderboardAsync(int top = 10)

@@ -116,14 +116,18 @@ public class UserController : ControllerBase
             });
         }
 
-        var users = await _userService.GetLeaderboardAsync(top);
-        var entries = users.Select((user, index) => new LeaderboardEntry
+        var users = (await _userService.GetLeaderboardAsync(top)).ToList();
+        var entries = new List<LeaderboardEntry>();
+        for (int i = 0; i < users.Count; i++)
         {
-            Rank = index + 1,
-            Name = user.Name,
-            LifetimePoints = user.LifetimePoints,
-            GamesPlayed = user.Games.Count
-        });
+            entries.Add(new LeaderboardEntry
+            {
+                Rank = i + 1,
+                Name = users[i].Name,
+                LifetimePoints = users[i].LifetimePoints,
+                GamesPlayed = await _userService.GetGameCountAsync(users[i].UniqueId)
+            });
+        }
 
         return Ok(new ApiResponse<IEnumerable<LeaderboardEntry>>(entries));
     }
@@ -434,7 +438,7 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<IEnumerable<GameRecord>>(games));
     }
 
-    private static UserResponse MapToResponse(User user)
+    private static UserResponse MapToResponse(User user, int gamesPlayed = 0)
     {
         return new UserResponse
         {
@@ -443,7 +447,7 @@ public class UserController : ControllerBase
             Email = user.Email,
             LifetimePoints = user.LifetimePoints,
             PreferredDifficulty = user.PreferredDifficulty,
-            GamesPlayed = user.Games.Count,
+            GamesPlayed = gamesPlayed,
             CreatedAt = user.CreatedAt
         };
     }

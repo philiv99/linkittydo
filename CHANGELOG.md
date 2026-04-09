@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Decouple GameRecords from User model — Games property removed, separate JSON file storage (#65)
+- **feat**: JsonGameRecordRepository now stores records as individual JSON files in Data/GameRecords/ (#65)
+- **feat**: Add GetGameCountAsync to IUserService for leaderboard game counts (#65)
+- **feat**: GamePhraseService uses IGameRecordRepository for played-phrase lookup (#65)
+- **feat**: UserController leaderboard and MapToResponse no longer depend on User.Games (#65)
+- **feat**: Remove AddGameRecordAsync from IUserService — persistence handled by GameService (#66)
 - **feat**: Extract ISessionStore from GameService — ConcurrentDictionary-backed Singleton (#63)
 - **feat**: GameService now uses ISessionStore + IGameRecordRepository for session management (#63, #45)
 - **feat**: Game completion persists GameRecord via IGameRecordRepository + updates user points (#45)

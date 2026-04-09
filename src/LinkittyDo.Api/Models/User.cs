@@ -13,7 +13,6 @@ public class User
     public int LifetimePoints { get; set; } = 0;
     public int PreferredDifficulty { get; set; } = 10;
     public bool IsActive { get; set; } = true;
-    public List<GameRecord> Games { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

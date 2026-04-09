@@ -10,12 +10,14 @@ namespace LinkittyDo.Api.Tests;
 public class LeaderboardTests
 {
     private readonly Mock<IUserRepository> _repoMock;
+    private readonly Mock<IGameRecordRepository> _gameRecordRepoMock;
     private readonly UserService _service;
 
     public LeaderboardTests()
     {
         _repoMock = new Mock<IUserRepository>();
-        _service = new UserService(_repoMock.Object);
+        _gameRecordRepoMock = new Mock<IGameRecordRepository>();
+        _service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object);
     }
 
     [Fact]
@@ -23,9 +25,9 @@ public class LeaderboardTests
     {
         var users = new List<User>
         {
-            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 500, Games = new() },
-            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 1000, Games = new() },
-            new() { UniqueId = "USR-3", Name = "Charlie", LifetimePoints = 750, Games = new() }
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 500 },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 1000 },
+            new() { UniqueId = "USR-3", Name = "Charlie", LifetimePoints = 750 }
         };
         _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
 
@@ -44,8 +46,7 @@ public class LeaderboardTests
         {
             UniqueId = $"USR-{i}",
             Name = $"Player{i}",
-            LifetimePoints = i * 100,
-            Games = new()
+            LifetimePoints = i * 100
         }).ToList();
         _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
 
@@ -60,8 +61,8 @@ public class LeaderboardTests
     {
         var users = new List<User>
         {
-            new() { UniqueId = "USR-1", Name = "Zara", LifetimePoints = 500, Games = new() },
-            new() { UniqueId = "USR-2", Name = "Alice", LifetimePoints = 500, Games = new() }
+            new() { UniqueId = "USR-1", Name = "Zara", LifetimePoints = 500 },
+            new() { UniqueId = "USR-2", Name = "Alice", LifetimePoints = 500 }
         };
         _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
 
@@ -98,17 +99,19 @@ public class LeaderboardTests
         var serviceMock = new Mock<IUserService>();
         var users = new List<User>
         {
-            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000, Games = new List<GameRecord> { new(), new() } },
-            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500, Games = new List<GameRecord> { new() } }
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000 },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500 }
         };
         serviceMock.Setup(s => s.GetLeaderboardAsync(10)).ReturnsAsync(users);
+        serviceMock.Setup(s => s.GetGameCountAsync("USR-1")).ReturnsAsync(2);
+        serviceMock.Setup(s => s.GetGameCountAsync("USR-2")).ReturnsAsync(1);
         var controller = new UserController(serviceMock.Object);
 
         var result = await controller.GetLeaderboard(10);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ApiResponse<IEnumerable<LeaderboardEntry>>>(okResult.Value);
-        var entries = response.Data.ToList();
+        var entries = response.Data!.ToList();
         Assert.Equal(2, entries.Count);
         Assert.Equal(1, entries[0].Rank);
         Assert.Equal("Alice", entries[0].Name);

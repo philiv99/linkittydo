@@ -77,12 +77,6 @@ public class GameController : ControllerBase
 
         var response = _gameService.SubmitGuess(sessionId, request);
         
-        // If phrase is complete and this is not a guest, save the game record
-        if (response.IsPhraseComplete && !session.IsGuestSession && session.GameRecord != null)
-        {
-            await _userService.AddGameRecordAsync(session.UserId!, session.GameRecord);
-        }
-        
         return Ok(new ApiResponse<GuessResponse>(response));
     }
 
@@ -106,12 +100,6 @@ public class GameController : ControllerBase
         }
 
         var state = _gameService.GiveUp(sessionId);
-        
-        // Save the game record for non-guest users
-        if (!session.IsGuestSession && session.GameRecord != null)
-        {
-            await _userService.AddGameRecordAsync(session.UserId!, session.GameRecord);
-        }
         
         return Ok(new ApiResponse<GameState>(state));
     }

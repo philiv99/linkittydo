@@ -1,76 +1,115 @@
+using System.Text.Json;
 using LinkittyDo.Api.Models;
 
 namespace LinkittyDo.Api.Data;
 
 /// <summary>
 /// JSON file-based implementation of IGameRecordRepository.
-/// GameRecords are currently embedded in User JSON files under the Games property.
-/// This adapter delegates to IUserRepository for persistence.
+/// Stores game records as individual JSON files in Data/GameRecords/.
 /// </summary>
 public class JsonGameRecordRepository : IGameRecordRepository
 {
-    private readonly IUserRepository _userRepository;
-
-    public JsonGameRecordRepository(IUserRepository userRepository)
+    private readonly string _dataDirectory;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        _userRepository = userRepository;
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    public JsonGameRecordRepository(IConfiguration configuration)
+    {
+        var baseDir = configuration.GetValue<string>("DataDirectory") ?? "Data";
+        _dataDirectory = Path.Combine(baseDir, "GameRecords");
+        Directory.CreateDirectory(_dataDirectory);
     }
 
     public async Task<GameRecord?> GetByGameIdAsync(string gameId)
     {
-        var users = await _userRepository.GetAllAsync();
-        foreach (var user in users)
+        var filePath = GetFilePath(gameId);
+        if (!File.Exists(filePath)) return null;
+
+        await _semaphore.WaitAsync();
+        try
         {
-            var record = user.Games.FirstOrDefault(g => g.GameId == gameId);
-            if (record != null)
-            {
-                record.UserId = user.UniqueId;
-                return record;
-            }
+            var json = await File.ReadAllTextAsync(filePath);
+            return JsonSerializer.Deserialize<GameRecord>(json, JsonOptions);
         }
-        return null;
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<IEnumerable<GameRecord>> GetByUserIdAsync(string userId, int page = 1, int pageSize = 20)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
-        if (user == null) return Enumerable.Empty<GameRecord>();
+        await _semaphore.WaitAsync();
+        try
+        {
+            var records = new List<GameRecord>();
+            if (!Directory.Exists(_dataDirectory)) return records;
 
-        return user.Games
-            .OrderByDescending(g => g.PlayedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(g => { g.UserId = userId; return g; });
+            foreach (var file in Directory.GetFiles(_dataDirectory, "*.json"))
+            {
+                var json = await File.ReadAllTextAsync(file);
+                var record = JsonSerializer.Deserialize<GameRecord>(json, JsonOptions);
+                if (record != null && record.UserId == userId)
+                    records.Add(record);
+            }
+
+            return records
+                .OrderByDescending(r => r.PlayedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<GameRecord> CreateAsync(GameRecord record)
     {
-        var user = await _userRepository.GetByIdAsync(record.UserId);
-        if (user == null) throw new InvalidOperationException("USER_NOT_FOUND");
-
-        user.Games.Add(record);
-        user.UpdatedAt = DateTime.UtcNow;
-        await _userRepository.UpdateAsync(user);
-        return record;
+        await _semaphore.WaitAsync();
+        try
+        {
+            var filePath = GetFilePath(record.GameId);
+            var json = JsonSerializer.Serialize(record, JsonOptions);
+            await File.WriteAllTextAsync(filePath, json);
+            return record;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<GameRecord?> UpdateAsync(GameRecord record)
     {
-        var user = await _userRepository.GetByIdAsync(record.UserId);
-        if (user == null) return null;
+        var filePath = GetFilePath(record.GameId);
+        if (!File.Exists(filePath)) return null;
 
-        var index = user.Games.FindIndex(g => g.GameId == record.GameId);
-        if (index < 0) return null;
-
-        user.Games[index] = record;
-        user.UpdatedAt = DateTime.UtcNow;
-        await _userRepository.UpdateAsync(user);
-        return record;
+        await _semaphore.WaitAsync();
+        try
+        {
+            var json = JsonSerializer.Serialize(record, JsonOptions);
+            await File.WriteAllTextAsync(filePath, json);
+            return record;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<int> GetCountByUserIdAsync(string userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
-        return user?.Games.Count ?? 0;
+        var records = await GetByUserIdAsync(userId, 1, int.MaxValue);
+        return records.Count();
+    }
+
+    private string GetFilePath(string gameId)
+    {
+        return Path.Combine(_dataDirectory, $"{gameId}.json");
     }
 }

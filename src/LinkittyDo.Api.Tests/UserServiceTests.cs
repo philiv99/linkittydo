@@ -8,12 +8,14 @@ namespace LinkittyDo.Api.Tests;
 public class UserServiceTests
 {
     private readonly Mock<IUserRepository> _repoMock;
+    private readonly Mock<IGameRecordRepository> _gameRecordRepoMock;
     private readonly UserService _service;
 
     public UserServiceTests()
     {
         _repoMock = new Mock<IUserRepository>();
-        _service = new UserService(_repoMock.Object);
+        _gameRecordRepoMock = new Mock<IGameRecordRepository>();
+        _service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object);
     }
 
     private static User CreateTestUser(string id = "USR-1234567890123-ABC123")
@@ -25,7 +27,6 @@ public class UserServiceTests
             Email = "test@example.com",
             LifetimePoints = 0,
             PreferredDifficulty = 10,
-            Games = new List<GameRecord>(),
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -187,31 +188,27 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task AddGameRecordAsync_AddsRecord()
+    public async Task GetGameCountAsync_ReturnsCount()
     {
-        var user = CreateTestUser();
-        var record = new GameRecord { GameId = "GAME-1-ABC", PhraseText = "test", Score = 100 };
-        _repoMock.Setup(r => r.GetByIdAsync("USR-1234567890123-ABC123")).ReturnsAsync(user);
-        _repoMock.Setup(r => r.UpdateAsync(It.IsAny<User>())).ReturnsAsync((User u) => u);
+        _gameRecordRepoMock.Setup(r => r.GetCountByUserIdAsync("USR-1234567890123-ABC123")).ReturnsAsync(5);
 
-        var result = await _service.AddGameRecordAsync("USR-1234567890123-ABC123", record);
+        var result = await _service.GetGameCountAsync("USR-1234567890123-ABC123");
 
-        Assert.NotNull(result);
-        Assert.Single(result!.Games);
-        Assert.Equal("GAME-1-ABC", result.Games[0].GameId);
+        Assert.Equal(5, result);
     }
 
     [Fact]
     public async Task GetUserGamesAsync_ReturnsGamesDescending()
     {
         var user = CreateTestUser();
-        user.Games = new List<GameRecord>
+        var games = new List<GameRecord>
         {
-            new() { GameId = "G1", PlayedAt = DateTime.UtcNow.AddHours(-2) },
+            new() { GameId = "G3", PlayedAt = DateTime.UtcNow },
             new() { GameId = "G2", PlayedAt = DateTime.UtcNow.AddHours(-1) },
-            new() { GameId = "G3", PlayedAt = DateTime.UtcNow }
+            new() { GameId = "G1", PlayedAt = DateTime.UtcNow.AddHours(-2) }
         };
         _repoMock.Setup(r => r.GetByIdAsync("USR-1234567890123-ABC123")).ReturnsAsync(user);
+        _gameRecordRepoMock.Setup(r => r.GetByUserIdAsync("USR-1234567890123-ABC123", 1, 20)).ReturnsAsync(games);
 
         var result = (await _service.GetUserGamesAsync("USR-1234567890123-ABC123")).ToList();
 

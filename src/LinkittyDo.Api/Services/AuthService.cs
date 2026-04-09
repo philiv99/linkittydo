@@ -43,7 +43,6 @@ public class AuthService : IAuthService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             LifetimePoints = 0,
             PreferredDifficulty = 10,
-            Games = new List<GameRecord>(),
             CreatedAt = DateTime.UtcNow
         };
 
