@@ -1,0 +1,63 @@
+import { Link, useLocation } from 'react-router-dom';
+import './NavHeader.css';
+
+interface NavHeaderProps {
+  userName: string;
+  isGuest: boolean;
+  lifetimePoints: number;
+  onUserClick: () => void;
+}
+
+export const NavHeader: React.FC<NavHeaderProps> = ({
+  userName,
+  isGuest,
+  lifetimePoints,
+  onUserClick,
+}) => {
+  const location = useLocation();
+
+  return (
+    <header className="nav-header">
+      <div className="nav-brand">
+        <Link to="/" className="nav-logo">LinkittyDo!</Link>
+      </div>
+      <nav className="nav-links">
+        <Link
+          to="/"
+          className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+        >
+          Home
+        </Link>
+        <Link
+          to="/play"
+          className={`nav-link ${location.pathname === '/play' ? 'active' : ''}`}
+        >
+          Play
+        </Link>
+        {!isGuest && (
+          <Link
+            to="/history"
+            className={`nav-link ${location.pathname === '/history' ? 'active' : ''}`}
+          >
+            History
+          </Link>
+        )}
+      </nav>
+      <div className="nav-user">
+        <span
+          className="nav-user-name"
+          onClick={onUserClick}
+          title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
+        >
+          {userName}
+          {isGuest && <span className="nav-guest-badge">(Guest)</span>}
+        </span>
+        {!isGuest && (
+          <span className="nav-points" title="Lifetime Points">
+            {lifetimePoints.toLocaleString()} pts
+          </span>
+        )}
+      </div>
+    </header>
+  );
+};

@@ -1,18 +1,18 @@
 {
   "current_sprint": {
-    "number": 3,
+    "number": 4,
     "status": "in-progress",
-    "branch": "feature/20260405-sprint-3",
+    "branch": "feature/20260409-sprint-4",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 2,
-    "date": "2026-04-05",
+    "number": 3,
+    "date": "2026-04-09",
     "result": "complete",
-    "items_completed": 1,
+    "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "Scripts that start services must always check port availability before launching"
+    "key_lesson": "InternalsVisibleTo needed for testing internal static methods; scoring formula changes cascade across many test assertions"
   },
   "test_metrics": {
     "backend_tests_passing": 112,

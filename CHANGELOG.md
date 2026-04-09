@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-09
+- **feat**: Add React Router with page structure - routes for home (/), play (/play), and history (/history) (#8)
+- **feat**: Add navigation header with active route highlighting, user display, and guest detection
+- **feat**: Create home page with hero section, how-to-play guide, and user stats for registered users (#9)
+- **feat**: Add game history page with expandable event timeline, game results, and score display (#10)
+- **test**: Add 20 new frontend tests for NavHeader, HomePage, and GameHistoryPage (49 frontend total)
+
 ### 2026-04-05
 - **feat**: Implement difficulty-aware clue selection - synonym ranking and URL preference vary by difficulty tier (#4)
 - **feat**: Implement enhanced scoring formula - BasePoints/(clues×guesses) with difficulty scaling and first-guess bonus (#5)
