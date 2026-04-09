@@ -10,6 +10,8 @@ public interface IGameService
     GameState GetGameState(Guid sessionId);
     GameState GiveUp(Guid sessionId);
     void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url);
+    int RemoveExpiredSessions(TimeSpan maxAge);
+    int ActiveSessionCount { get; }
 }
 
 public class GameService : IGameService
@@ -51,6 +53,7 @@ public class GameService : IGameService
             Score = 0,
             Difficulty = difficulty,
             StartedAt = now,
+            LastActivityAt = now,
             UserId = userId
         };
 
@@ -98,6 +101,8 @@ public class GameService : IGameService
         {
             return new GuessResponse { IsCorrect = false, CurrentScore = session.Score };
         }
+
+        session.LastActivityAt = DateTime.UtcNow;
 
         // Case-insensitive comparison
         var isCorrect = string.Equals(word.Text, request.Guess, StringComparison.OrdinalIgnoreCase);
@@ -221,6 +226,8 @@ public class GameService : IGameService
             return;
         }
         
+        session.LastActivityAt = DateTime.UtcNow;
+
         // Track clue count per word for scoring
         if (!session.ClueCountPerWord.ContainsKey(wordIndex))
             session.ClueCountPerWord[wordIndex] = 0;
@@ -279,5 +286,28 @@ public class GameService : IGameService
             <= 80 => 200,
             _ => 300
         };
+    }
+
+    public int ActiveSessionCount => _sessions.Count;
+
+    public int RemoveExpiredSessions(TimeSpan maxAge)
+    {
+        var cutoff = DateTime.UtcNow - maxAge;
+        var expired = _sessions
+            .Where(kv => kv.Value.LastActivityAt < cutoff)
+            .Select(kv => kv.Key)
+            .ToList();
+
+        foreach (var key in expired)
+        {
+            _sessions.Remove(key);
+        }
+
+        if (expired.Count > 0)
+        {
+            _logger.LogInformation("Removed {Count} expired sessions (older than {MaxAge})", expired.Count, maxAge);
+        }
+
+        return expired.Count;
     }
 }
