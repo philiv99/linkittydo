@@ -36,6 +36,11 @@ public class GamePhrase
     public int Difficulty { get; set; }
     
     /// <summary>
+    /// Whether this phrase is active (soft delete support)
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+    
+    /// <summary>
     /// Generates a unique phrase ID following the format: PHR-{timestamp}-{random}
     /// </summary>
     public static string GenerateUniqueId()

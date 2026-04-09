@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add EF Core infrastructure with MySQL support via Pomelo provider (#25)
+- **feat**: Add LinkittyDoDbContext with Fluent API entity configurations for Users, GamePhrases, GameRecords, GameEvents (#25)
+- **feat**: Extract IGameRecordRepository — GameRecords as separate aggregate from User.Games (#26)
+- **feat**: Add IUnitOfWork interface for transactional consistency across repositories (#26)
+- **feat**: Add EfUserRepository, EfGamePhraseRepository, EfGameRecordRepository implementations (#25)
+- **feat**: Add DataProvider feature flag — "Json" or "MySql" toggle in appsettings (#64)
+- **feat**: Add conditional DI registration — switches between Json/Scoped EF repositories (#64)
+- **feat**: Add soft-delete support (IsActive, DeletedAt) on User and GamePhrase models (#25)
+- **test**: Add 15 EF Core infrastructure tests — schema, repositories, STI events (188 backend total)
 - **feat**: Add JWT authentication — register, login, and refresh token endpoints (#22)
 - **feat**: Add BCrypt password hashing for secure credential storage (#22)
 - **feat**: Protect user-specific endpoints (update, delete, difficulty, points, games) with [Authorize] (#22)

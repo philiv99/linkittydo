@@ -11,6 +11,21 @@ namespace LinkittyDo.Api.Models;
 public abstract class GameEvent
 {
     /// <summary>
+    /// Auto-increment primary key for EF Core
+    /// </summary>
+    public long Id { get; set; }
+    
+    /// <summary>
+    /// The game this event belongs to (FK to GameRecords)
+    /// </summary>
+    public string GameId { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Ordering within a game (0-based sequence)
+    /// </summary>
+    public int SequenceNumber { get; set; }
+    
+    /// <summary>
     /// Type of event for serialization
     /// </summary>
     public abstract string EventType { get; }
