@@ -399,50 +399,133 @@ Step 4: Delete JSON files (after verification)
 ### Suggested Schema
 
 ```sql
+-- Core tables (Sprint 8a)
+
 CREATE TABLE Users (
-    UniqueId        VARCHAR(30) PRIMARY KEY,
-    Name            VARCHAR(50) NOT NULL UNIQUE,
-    Email           VARCHAR(255) NOT NULL UNIQUE,
-    LifetimePoints  INT DEFAULT 0,
-    PreferredDifficulty INT DEFAULT 10,
-    CreatedAt       DATETIME NOT NULL,
-    UpdatedAt       DATETIME
-);
-
-CREATE TABLE GameRecords (
-    GameId      VARCHAR(30) PRIMARY KEY,
-    UserId      VARCHAR(30) REFERENCES Users(UniqueId),
-    PlayedAt    DATETIME NOT NULL,
-    CompletedAt DATETIME,
-    Score       INT DEFAULT 0,
-    PhraseId    INT,
-    PhraseText  VARCHAR(200),
-    Difficulty  INT,
-    Result      VARCHAR(20)
-);
-
-CREATE TABLE GameEvents (
-    Id          INT IDENTITY PRIMARY KEY,
-    GameId      VARCHAR(30) REFERENCES GameRecords(GameId),
-    EventType   VARCHAR(10),  -- 'clue', 'guess', 'gameend'
-    WordIndex   INT,
-    SearchTerm  VARCHAR(100),
-    Url         VARCHAR(2000),
-    GuessText   VARCHAR(100),
-    IsCorrect   BIT,
-    PointsAwarded INT,
-    Reason      VARCHAR(20),
-    Timestamp   DATETIME
-);
+    UniqueId            VARCHAR(30) PRIMARY KEY,
+    Name                VARCHAR(50) NOT NULL,
+    Email               VARCHAR(255) NOT NULL,
+    LifetimePoints      INT NOT NULL DEFAULT 0,
+    PreferredDifficulty INT NOT NULL DEFAULT 10,
+    IsActive            BIT NOT NULL DEFAULT 1,
+    CreatedAt           DATETIME(3) NOT NULL,
+    UpdatedAt           DATETIME(3) NULL,
+    DeletedAt           DATETIME(3) NULL,
+    UNIQUE INDEX IX_Users_Name (Name),
+    UNIQUE INDEX IX_Users_Email (Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE GamePhrases (
-    UniqueId      VARCHAR(30) PRIMARY KEY,
-    Text          VARCHAR(200) NOT NULL UNIQUE,
-    WordCount     INT,
-    GeneratedByLlm BIT DEFAULT 0,
-    CreatedAt     DATETIME NOT NULL
-);
+    UniqueId        VARCHAR(30) PRIMARY KEY,
+    Text            VARCHAR(500) NOT NULL,
+    WordCount       INT NOT NULL,
+    Difficulty      INT NOT NULL DEFAULT 0,
+    GeneratedByLlm  BIT NOT NULL DEFAULT 0,
+    IsActive        BIT NOT NULL DEFAULT 1,
+    CreatedAt       DATETIME(3) NOT NULL,
+    UNIQUE INDEX IX_GamePhrases_Text (Text(255))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Game data tables (Sprint 8b)
+
+CREATE TABLE GameRecords (
+    GameId          VARCHAR(30) PRIMARY KEY,
+    UserId          VARCHAR(30) NOT NULL,
+    PhraseUniqueId  VARCHAR(30) NULL,
+    PhraseText      VARCHAR(500) NOT NULL,
+    PlayedAt        DATETIME(3) NOT NULL,
+    CompletedAt     DATETIME(3) NULL,
+    Score           INT NOT NULL DEFAULT 0,
+    Difficulty      INT NOT NULL DEFAULT 0,
+    Result          VARCHAR(20) NOT NULL DEFAULT 'InProgress',
+    CONSTRAINT FK_GameRecords_Users
+        FOREIGN KEY (UserId) REFERENCES Users(UniqueId) ON DELETE RESTRICT,
+    CONSTRAINT FK_GameRecords_Phrases
+        FOREIGN KEY (PhraseUniqueId) REFERENCES GamePhrases(UniqueId) ON DELETE SET NULL,
+    INDEX IX_GameRecords_UserId_PlayedAt (UserId, PlayedAt DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE GameEvents (
+    Id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    GameId          VARCHAR(30) NOT NULL,
+    SequenceNumber  INT NOT NULL,
+    EventType       VARCHAR(10) NOT NULL,
+    WordIndex       INT NULL,
+    SearchTerm      VARCHAR(200) NULL,
+    Url             VARCHAR(2048) NULL,
+    GuessText       VARCHAR(100) NULL,
+    IsCorrect       BIT NULL,
+    PointsAwarded   INT NULL,
+    Reason          VARCHAR(20) NULL,
+    Timestamp       DATETIME(3) NOT NULL,
+    CONSTRAINT FK_GameEvents_GameRecords
+        FOREIGN KEY (GameId) REFERENCES GameRecords(GameId) ON DELETE CASCADE,
+    UNIQUE INDEX IX_GameEvents_GameId_Seq (GameId, SequenceNumber)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Session persistence (Sprint 8c)
+
+CREATE TABLE GameSessions (
+    SessionId       CHAR(36) PRIMARY KEY,
+    UserId          VARCHAR(30) NULL,
+    PhraseUniqueId  VARCHAR(30) NOT NULL,
+    Score           INT NOT NULL DEFAULT 0,
+    Difficulty      INT NOT NULL DEFAULT 0,
+    StateJson       JSON NOT NULL,
+    StartedAt       DATETIME(3) NOT NULL,
+    LastActivityAt  DATETIME(3) NOT NULL,
+    CONSTRAINT FK_GameSessions_Users
+        FOREIGN KEY (UserId) REFERENCES Users(UniqueId) ON DELETE SET NULL,
+    INDEX IX_GameSessions_LastActivity (LastActivityAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Authorization tables (Sprint 8d)
+
+CREATE TABLE Roles (
+    Id      INT AUTO_INCREMENT PRIMARY KEY,
+    Name    VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE UserRoles (
+    UserId      VARCHAR(30) NOT NULL,
+    RoleId      INT NOT NULL,
+    AssignedAt  DATETIME(3) NOT NULL,
+    PRIMARY KEY (UserId, RoleId),
+    CONSTRAINT FK_UserRoles_Users
+        FOREIGN KEY (UserId) REFERENCES Users(UniqueId) ON DELETE CASCADE,
+    CONSTRAINT FK_UserRoles_Roles
+        FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE AuditLog (
+    Id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    UserId      VARCHAR(30) NULL,
+    Action      VARCHAR(50) NOT NULL,
+    EntityType  VARCHAR(50) NULL,
+    EntityId    VARCHAR(30) NULL,
+    Details     JSON NULL,
+    IpAddress   VARCHAR(45) NULL,
+    Timestamp   DATETIME(3) NOT NULL,
+    INDEX IX_AuditLog_Entity (EntityType, EntityId),
+    INDEX IX_AuditLog_User (UserId, Timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| `VARCHAR(30)` for entity IDs | Matches the `{PREFIX}-{unix_ms}-{6_hex}` format (max 26 chars) with room |
+| `DATETIME(3)` everywhere | Millisecond precision matches timestamp-based ID generation |
+| `utf8mb4_unicode_ci` collation | Supports full Unicode, case-insensitive name/email comparisons |
+| `InnoDB` engine | Required for FK constraints and transactions |
+| `ON DELETE RESTRICT` for Users→GameRecords | Prevent accidental user deletion that would orphan game history |
+| `ON DELETE CASCADE` for GameRecords→GameEvents | Events have no meaning without their parent game |
+| `ON DELETE SET NULL` for GameRecords→GamePhrases | Allow phrase deletion without losing game history |
+| `SequenceNumber` on GameEvents | Timestamps alone may not be unique within a game (rapid events) |
+| `StateJson JSON` on GameSessions | Ephemeral state (RevealedWords, UsedClueTerms) changes shape frequently; JSON avoids schema churn |
+| Soft-delete (`IsActive`, `DeletedAt`) on Users/Phrases | Preserve referential integrity for analytics; hard-delete would break FK chains |
+| Single-table inheritance for GameEvents | All event types are queried together per game; STI avoids JOINs and simplifies EF Core mapping |
 
 ---
 

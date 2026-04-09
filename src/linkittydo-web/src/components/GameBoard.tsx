@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useGame } from '../hooks/useGame';
 import { useAudioSequence } from '../hooks/useAudio';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useUser } from '../hooks/useUser';
 import { api } from '../services/api';
 import { PhraseDisplay } from './PhraseDisplay';
@@ -11,7 +12,7 @@ import { UserManageModal } from './UserManageModal';
 import './GameBoard.css';
 
 const POINTS_PER_WORD = 100;
-const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+const APP_VERSION = '0.1.0';
 const formatTime = (seconds: number): string => {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -37,141 +38,59 @@ export const GameBoard: React.FC = () => {
   } = useUser();
   const [clueTabs, setClueTabs] = useState<ClueTab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [audioStarted, setAudioStarted] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showManageModal, setShowManageModal] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
-  const [activePanel, setActivePanel] = useState<'game' | 'clues'>('game');
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [streak, setStreak] = useState(0);
   const [showStreakAnimation, setShowStreakAnimation] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const { playSequence, stopAll } = useAudioSequence();
+  const { playCorrect, playIncorrect, playSolved, playGaveUp, setMuted, isMuted } = useSoundEffects();
+  const [soundMuted, setSoundMuted] = useState(isMuted());
 
-  // Track if we've auto-started a game for a connected user
+  // Track if we've auto-started a game
   const hasAutoStartedRef = useRef(false);
 
-  // Touch swipe handling
-  const panelsRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    const swipeDistance = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50; // minimum px to trigger swipe
-
-    if (Math.abs(swipeDistance) > minSwipeDistance) {
-      if (swipeDistance > 0) {
-        // Swiped left - show clues
-        setActivePanel('clues');
-      } else {
-        // Swiped right - show game
-        setActivePanel('game');
-      }
-      setShowSwipeHint(false);
-    }
-  }, []);
-
-  // Hide swipe hint after first interaction or after 5 seconds
+  // Auto-start game on mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSwipeHint(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Keyboard shortcuts: G = give up, N = new game (only when not typing in input)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input or textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-
-      if (e.key === 'g' || e.key === 'G') {
-        if (gameState && !gameState.isComplete && !gaveUp) {
-          e.preventDefault();
-          handleGiveUp();
-        }
-      } else if (e.key === 'n' || e.key === 'N') {
-        if (gameState?.isComplete) {
-          e.preventDefault();
-          handleNewGame();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, gaveUp]);
-
-  // Game timer - ticks every second while game is active
-  useEffect(() => {
-    if (!gameState || gameState.isComplete) return;
-    const interval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [gameState, gameState?.isComplete]);
-
-  // Auto-start game for connected (non-guest) users
-  useEffect(() => {
-    if (!isGuest && !gameState && !loading && !hasAutoStartedRef.current) {
+    if (!gameState && !loading && !hasAutoStartedRef.current) {
       hasAutoStartedRef.current = true;
-      // Set audio started for connected users to skip click-to-start screen
-      setAudioStarted(true);
       playSequence();
-      // Start game with user's settings
-      startGame({ 
+      const startRequest = !isGuest ? { 
         userId: user.uniqueId,
         difficulty: user.preferredDifficulty 
-      });
+      } : undefined;
+      startGame(startRequest);
     }
-    // Reset flag when user becomes guest (signs out)
     if (isGuest) {
       hasAutoStartedRef.current = false;
     }
   }, [isGuest, gameState, loading, user.uniqueId, user.preferredDifficulty, startGame, playSequence]);
 
-  // Reset auto-start flag if there's an error, allowing retry
+  // Reset auto-start flag on error
   useEffect(() => {
     if (error && !isGuest) {
       hasAutoStartedRef.current = false;
     }
   }, [error, isGuest]);
 
-  // Handle click to start audio
-  const handleStartAudio = () => {
-    if (!audioStarted) {
-      playSequence();
-      setAudioStarted(true);
-    }
-  };
-
   const handleGuess = async (wordIndex: number, guess: string): Promise<boolean> => {
     const response = await submitGuess(wordIndex, guess);
     if (response?.isCorrect) {
+      playCorrect();
       setStreak(prev => prev + 1);
       setShowStreakAnimation(true);
       setTimeout(() => setShowStreakAnimation(false), 1000);
-      // Add points for correct guess
       await addPoints(POINTS_PER_WORD);
       
-      // If phrase is complete, add bonus points
       if (response.isPhraseComplete && gameState) {
-        // Count guessable words (hidden words that can be guessed)
+        playSolved();
         const guessableWords = gameState.words.filter(w => w.isHidden).length;
         const bonusPoints = guessableWords * POINTS_PER_WORD;
         await addPoints(bonusPoints);
       }
     } else {
+      playIncorrect();
       setStreak(0);
     }
     return response?.isCorrect ?? false;
@@ -190,9 +109,6 @@ export const GameBoard: React.FC = () => {
       };
       setClueTabs(prev => [...prev, newTab]);
       setActiveTabId(tabId);
-      // Auto-switch to clues panel on mobile when clue is requested
-      setActivePanel('clues');
-      setShowSwipeHint(false);
     }
   };
 
@@ -208,33 +124,27 @@ export const GameBoard: React.FC = () => {
     });
   };
 
-  const handleNewGame = () => {
+  const handleNewGame = useCallback(() => {
     setClueTabs([]);
     setActiveTabId(null);
     setGaveUp(false);
     setStreak(0);
     setElapsedSeconds(0);
     stopAll();
-    // Pass userId for non-guest users so game events are tracked
-    // Guest users (no email) don't have their games saved
     const startRequest = !isGuest ? { 
       userId: user.uniqueId,
       difficulty: user.preferredDifficulty 
     } : undefined;
     startGame(startRequest);
-  };
+  }, [isGuest, user.uniqueId, user.preferredDifficulty, startGame, stopAll]);
 
   const handleSwitchUser = async (uniqueId: string): Promise<boolean> => {
     const success = await switchUser(uniqueId);
     if (success) {
-      // Reset game state when switching users
       setClueTabs([]);
       setActiveTabId(null);
       setGaveUp(false);
       stopAll();
-      // Note: We'll start the game when the user state is updated
-      // Pass userId for non-guest users
-      // Since we just switched, the user will no longer be a guest
       const switchedUser = allUsers.find(u => u.uniqueId === uniqueId);
       const startRequest = switchedUser ? { 
         userId: uniqueId,
@@ -245,173 +155,104 @@ export const GameBoard: React.FC = () => {
     return success;
   };
 
-  const handleGiveUp = async () => {
+  const handleGiveUp = useCallback(async () => {
     setGaveUp(true);
+    playGaveUp();
     await giveUp();
-  };
+  }, [giveUp, playGaveUp]);
 
   const handleSignOut = () => {
-    // Sign out the user (resets to guest)
     signOut();
-    // Clear and restart game for the guest user
     setClueTabs([]);
     setActiveTabId(null);
     setGaveUp(false);
     stopAll();
-    // Start a new game without userId (guest mode)
     startGame();
   };
 
-  // Click to start screen - need user interaction for audio
-  if (!audioStarted && !gameState && !loading) {
-    return (
-      <div className="click-to-start" onClick={handleStartAudio}>
-        <div className="click-content">
-          <h1>🎵 LinkittyDo! 🎵</h1>
-          <p>Click anywhere to start</p>
-        </div>
-      </div>
-    );
-  }
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
-  // Welcome screen - no game started
-  if (!gameState && !loading) {
-    return (
-      <div className="splash-screen">
-        <img src={assetUrl('lounge.jpg')} alt="LinkittyDo!" className="splash-logo" />
-        <div className="splash-overlay">
-          <button className="play-button" onClick={handleNewGame}>
-            <span className="play-icon">▶</span>
-            <span className="play-text">PLAY!</span>
-          </button>
-          {error && <p className="error">{error}</p>}
-        </div>
-      </div>
-    );
-  }
+      if (e.key === 'g' || e.key === 'G') {
+        if (gameState && !gameState.isComplete && !gaveUp) {
+          e.preventDefault();
+          handleGiveUp();
+        }
+      } else if (e.key === 'n' || e.key === 'N') {
+        if (gameState?.isComplete) {
+          e.preventDefault();
+          handleNewGame();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, gaveUp, handleGiveUp, handleNewGame]);
 
-  // Loading state - show a proper full-screen loading overlay
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-content">
-          <h1 className="loading-title">LinkittyDo!</h1>
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Finding the perfect phrase...</p>
-        </div>
-      </div>
-    );
-  }
+  // Game timer
+  useEffect(() => {
+    if (!gameState || gameState.isComplete) return;
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gameState, gameState?.isComplete]);
 
-  // Game in progress
-  if (gameState) {
+  // Loading state
+  if (loading && !gameState) {
     return (
       <div className="game-layout">
-        {/* Header outside game-board for mobile - spans full width */}
-        <header className="game-header">
-          <div className="header-title">
-            <h1>LinkittyDo!</h1>
-            <span 
-              className="user-name user-name-clickable"
-              onClick={() => isGuest ? setShowUserModal(true) : setShowManageModal(true)}
-              title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
-            >
-              Playing as {user.name}
-              {isGuest && <span className="guest-badge">👤</span>}
-            </span>
-            <div className="lifetime-points" title="Lifetime Points">
-              <span className="points-icon">⭐</span>
-              <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
-            </div>
-          </div>
-          <div className="game-stats-bar">
-            <div className="game-timer" aria-label={`Time elapsed: ${formatTime(elapsedSeconds)}`}>
-              <span className="timer-icon">⏱️</span>
-              <span className="timer-value">{formatTime(elapsedSeconds)}</span>
-            </div>
-            {streak > 1 && (
-              <div className={`streak-indicator ${showStreakAnimation ? 'streak-pop' : ''}`} aria-label={`${streak} correct guesses in a row`}>
-                <span className="streak-icon">🔥</span>
-                <span className="streak-value">{streak}x streak!</span>
+        <div className="game-loading">
+          <div className="loading-spinner"></div>
+          <p>Finding the perfect phrase...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Determine game status text
+  const getStatusText = () => {
+    if (!gameState) return 'Ready';
+    if (gameState.isComplete) return gaveUp ? 'Game Over' : 'Solved!';
+    const hidden = gameState.words.filter(w => w.isHidden && !w.isRevealed).length;
+    return `${hidden} word${hidden !== 1 ? 's' : ''} remaining`;
+  };
+
+  return (
+    <div className="game-layout">
+      {/* Phrase Bar - compact top section */}
+      <section className="phrase-bar">
+        <div className="phrase-bar-content">
+          {gameState ? (
+            <>
+              <div className="phrase-bar-stats">
+                <ScoreDisplay score={gameState.score} />
+                <div className="game-timer" aria-label={`Time: ${formatTime(elapsedSeconds)}`}>
+                  <span className="timer-value">{formatTime(elapsedSeconds)}</span>
+                </div>
+                {streak > 1 && (
+                  <div className={`streak-indicator ${showStreakAnimation ? 'streak-pop' : ''}`}>
+                    <span className="streak-value">{streak}x</span>
+                  </div>
+                )}
               </div>
-            )}
-            <ScoreDisplay score={gameState.score} />
-          </div>
-        </header>
-
-        {/* Mobile panel navigation tabs */}
-        <nav className="mobile-panel-nav">
-          <button 
-            className={`panel-nav-tab game-tab ${activePanel === 'game' ? 'active' : ''}`}
-            onClick={() => setActivePanel('game')}
-          >
-            <span className="tab-icon">🎮</span>
-            Game
-          </button>
-          <button 
-            className={`panel-nav-tab clue-tab ${activePanel === 'clues' ? 'active' : ''}`}
-            onClick={() => setActivePanel('clues')}
-          >
-            <span className="tab-icon">🔍</span>
-            Clues {clueTabs.length > 0 && `(${clueTabs.length})`}
-          </button>
-        </nav>
-
-        {/* Swipeable panels container */}
-        <div className="panels-container">
-          <div 
-            ref={panelsRef}
-            className={`panels-wrapper ${activePanel === 'clues' ? 'show-clues' : ''}`}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div className="game-board">
-              {/* Header inside game-board for desktop */}
-              <header className="game-header">
-                <div className="header-title">
-                  <h1>LinkittyDo!</h1>
-                  <span 
-                    className="user-name user-name-clickable"
-                    onClick={() => isGuest ? setShowUserModal(true) : setShowManageModal(true)}
-                    title={isGuest ? 'Click to create a profile' : 'Click to manage account'}
-                  >
-                    Playing as {user.name}
-                    {isGuest && <span className="guest-badge">👤</span>}
-                  </span>
-                  <div className="lifetime-points" title="Lifetime Points">
-                    <span className="points-icon">⭐</span>
-                    <span className="points-value">{user.lifetimePoints.toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="game-stats-bar">
-                  <div className="game-timer" aria-label={`Time elapsed: ${formatTime(elapsedSeconds)}`}>
-                    <span className="timer-icon">⏱️</span>
-                    <span className="timer-value">{formatTime(elapsedSeconds)}</span>
-                  </div>
-                  {streak > 1 && (
-                    <div className={`streak-indicator ${showStreakAnimation ? 'streak-pop' : ''}`} aria-label={`${streak} correct guesses in a row`}>
-                      <span className="streak-icon">🔥</span>
-                      <span className="streak-value">{streak}x streak!</span>
-                    </div>
-                  )}
-                  <ScoreDisplay score={gameState.score} />
-                </div>
-              </header>
-
-              <main className="game-main" role="main" aria-label="Game area">
+              <div className="phrase-bar-phrase">
                 {gameState.isComplete ? (
-                  <div className="victory" role="status" aria-live="polite">
-                    <h2>{gaveUp ? 'Better luck next time!' : 'Congratulations!'}</h2>
-                    <p>{gaveUp ? 'The phrase was:' : 'You completed the phrase!'}</p>
+                  <div className="game-complete-bar" role="status" aria-live="polite">
+                    <span className="complete-message">
+                      {gaveUp ? 'Better luck next time!' : 'Congratulations!'}
+                    </span>
                     <PhraseDisplay 
                       words={gameState.words} 
                       onGuess={handleGuess} 
                       onClue={handleClue} 
                     />
-                    <p className="final-score">Final Score: {gameState.score}</p>
-                    <button className="start-button" onClick={handleNewGame}>
-                      Play Again
+                    <span className="final-score">Score: {gameState.score}</span>
+                    <button className="new-game-btn" onClick={handleNewGame}>
+                      New Game
                     </button>
                   </div>
                 ) : (
@@ -422,89 +263,97 @@ export const GameBoard: React.FC = () => {
                     onGiveUp={handleGiveUp}
                   />
                 )}
-              </main>
-
-              <footer className="game-footer">
-                <p>Type your guess and press Enter • Click the clue button for hints!</p>
-                <p className="keyboard-hints" aria-label="Keyboard shortcuts">
-                  Shortcuts: <kbd>G</kbd> Give up • <kbd>N</kbd> New game (after game ends)
-                </p>
-              </footer>
+              </div>
+            </>
+          ) : (
+            <div className="phrase-bar-empty">
+              <button className="new-game-btn" onClick={handleNewGame}>
+                Start Game
+              </button>
+              {error && <p className="error-text">{error}</p>}
             </div>
-
-            <CluePanel 
-              tabs={clueTabs}
-              activeTabId={activeTabId}
-              onTabSelect={setActiveTabId}
-              onTabClose={handleTabClose}
-              words={gameState.words}
-            />
-          </div>
-
-          {/* Mobile swipe hint */}
-          <div className={`swipe-hint ${showSwipeHint ? 'visible' : ''}`}>
-            👈 Swipe to switch panels 👉
-          </div>
+          )}
         </div>
+      </section>
 
-        <UserModal
-          isOpen={showUserModal}
-          onClose={() => {
-            setShowUserModal(false);
-            clearError();
-          }}
-          onSubmit={async (name, email) => {
-            const success = await registerUser({ name, email });
-            if (success) {
-              // Start a new game for the new user
-              // We need to wait for the next user list fetch and get the new user ID
-              // Since registerUser returns the user info and updates state, 
-              // we should fetch the new user to get their ID for starting the game
-              try {
-                const newUserData = await api.getUserByEmail(email);
-                if (newUserData) {
-                  setClueTabs([]);
-                  setActiveTabId(null);
-                  setGaveUp(false);
-                  stopAll();
-                  startGame({ 
-                    userId: newUserData.uniqueId, 
-                    difficulty: newUserData.preferredDifficulty 
-                  });
-                }
-              } catch (e) {
-                // Fallback: start game without userId (guest mode)
-                handleNewGame();
+      {/* Clue Panel - primary content area */}
+      <section className="clue-area">
+        <CluePanel 
+          tabs={clueTabs}
+          activeTabId={activeTabId}
+          onTabSelect={setActiveTabId}
+          onTabClose={handleTabClose}
+          words={gameState?.words ?? []}
+        />
+      </section>
+
+      {/* Footer */}
+      <footer className="game-footer">
+        <span className="footer-version">LinkittyDo v{APP_VERSION}</span>
+        <span className="footer-status">{getStatusText()}</span>
+        <span className="footer-shortcuts">
+          <button
+            className="mute-toggle"
+            onClick={() => { const next = !soundMuted; setSoundMuted(next); setMuted(next); }}
+            title={soundMuted ? 'Unmute sound effects' : 'Mute sound effects'}
+            aria-label={soundMuted ? 'Unmute sound effects' : 'Mute sound effects'}
+          >
+            {soundMuted ? 'Sound Off' : 'Sound On'}
+          </button>
+          <kbd>G</kbd> Give up &middot; <kbd>N</kbd> New game
+        </span>
+      </footer>
+
+      <UserModal
+        isOpen={showUserModal}
+        onClose={() => {
+          setShowUserModal(false);
+          clearError();
+        }}
+        onSubmit={async (name, email) => {
+          const success = await registerUser({ name, email });
+          if (success) {
+            try {
+              const newUserData = await api.getUserByEmail(email);
+              if (newUserData) {
+                setClueTabs([]);
+                setActiveTabId(null);
+                setGaveUp(false);
+                stopAll();
+                startGame({ 
+                  userId: newUserData.uniqueId, 
+                  difficulty: newUserData.preferredDifficulty 
+                });
               }
+            } catch {
+              handleNewGame();
             }
-            return success;
-          }}
-          onCheckName={checkNameAvailability}
-          onCheckEmail={checkEmailAvailability}
-          onSelectExistingUser={handleSwitchUser}
-          allUsers={allUsers}
-          loading={userLoading}
-          error={userError}
-        />
+          }
+          return success;
+        }}
+        onCheckName={checkNameAvailability}
+        onCheckEmail={checkEmailAvailability}
+        onSelectExistingUser={handleSwitchUser}
+        allUsers={allUsers}
+        loading={userLoading}
+        error={userError}
+      />
 
-        <UserManageModal
-          isOpen={showManageModal}
-          onClose={() => {
-            setShowManageModal(false);
-            clearError();
-          }}
-          currentUser={user}
-          allUsers={allUsers}
-          isGuest={isGuest}
-          onSignOut={handleSignOut}
-          onSwitchUser={handleSwitchUser}
-          onUpdateDifficulty={updateDifficulty}
-          onCreateProfile={() => setShowUserModal(true)}
-          loading={userLoading}
-        />
-      </div>
-    );
-  }
-
-  return null;
+      <UserManageModal
+        isOpen={showManageModal}
+        onClose={() => {
+          setShowManageModal(false);
+          clearError();
+        }}
+        currentUser={user}
+        allUsers={allUsers}
+        isGuest={isGuest}
+        onSignOut={handleSignOut}
+        onSwitchUser={handleSwitchUser}
+        onUpdateDifficulty={updateDifficulty}
+        onCreateProfile={() => setShowUserModal(true)}
+        loading={userLoading}
+      />
+    </div>
+  );
 };

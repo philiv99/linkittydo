@@ -1,22 +1,22 @@
 {
   "current_sprint": {
-    "number": 8,
+    "number": 9,
     "status": "complete",
-    "branch": "feature/20260409-sprint-8",
+    "branch": "feature/20260409-sprint-9",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 8,
+    "number": 9,
     "date": "2026-04-09",
     "result": "complete",
-    "items_completed": 2,
-    "items_carried_over": 1,
-    "key_lesson": "ASP.NET Core 8 built-in rate limiting and [ApiController] auto-validation make security features low-friction to add"
+    "items_completed": 5,
+    "items_carried_over": 0,
+    "key_lesson": "Many UI overhaul items were already implemented from prior work; research before planning prevents overscoping"
   },
   "test_metrics": {
-    "backend_tests_passing": 157,
-    "frontend_tests_passing": 55,
+    "backend_tests_passing": 163,
+    "frontend_tests_passing": 57,
     "lint_errors": 0
   }
 }

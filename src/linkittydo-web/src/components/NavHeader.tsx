@@ -23,14 +23,8 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
       </div>
       <nav className="nav-links">
         <Link
-          to="/"
-          className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-        >
-          Home
-        </Link>
-        <Link
           to="/play"
-          className={`nav-link ${location.pathname === '/play' ? 'active' : ''}`}
+          className={`nav-link ${location.pathname === '/play' || location.pathname === '/' ? 'active' : ''}`}
         >
           Play
         </Link>

@@ -1,10 +1,9 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useState } from 'react'
 import { NavHeader } from './components/NavHeader'
 import { GameBoard } from './components/GameBoard'
 import { UserModal } from './components/UserModal'
 import { UserManageModal } from './components/UserManageModal'
-import { HomePage } from './pages/HomePage'
 import { GameHistoryPage } from './pages/GameHistoryPage'
 import { LeaderboardPage } from './pages/LeaderboardPage'
 import { useUser } from './hooks/useUser'
@@ -45,7 +44,7 @@ function App() {
         onUserClick={handleUserClick}
       />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/play" replace />} />
         <Route path="/play" element={<GameBoard />} />
         <Route path="/history" element={<GameHistoryPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
