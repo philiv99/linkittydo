@@ -1,6 +1,7 @@
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LinkittyDo.Api.Controllers;
 
@@ -21,6 +22,7 @@ public class GameController : ControllerBase
     /// Start a new game session
     /// </summary>
     [HttpPost("start")]
+    [EnableRateLimiting("game-start")]
     public async Task<ActionResult<ApiResponse<GameState>>> StartGame([FromBody] StartGameRequest? request = null)
     {
         var userId = request?.UserId;

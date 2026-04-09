@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-09
+- **feat**: Add input sanitization with DataAnnotation validation on GuessRequest and StartGameRequest (#23)
+- **feat**: Add rate limiting middleware — game-start 10/min, clue 30/min, user 60/min, global 100/min per IP (#24)
+- **test**: Add 12 input validation tests covering XSS prevention, boundary checks, and format validation (157 backend total)
 - **feat**: Add leaderboard page with backend API GET /api/user/leaderboard and ranked table UI (#18)
 - **feat**: Add game timer displaying elapsed time during gameplay (#19)
 - **feat**: Add consecutive correct guess streak indicator with visual animation (#19)

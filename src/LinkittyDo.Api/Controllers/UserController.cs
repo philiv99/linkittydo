@@ -1,11 +1,13 @@
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LinkittyDo.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("user")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
