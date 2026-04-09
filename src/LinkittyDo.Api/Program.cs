@@ -75,6 +75,7 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddSingleton<IAuditService, AuditService>();
     builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
     builder.Services.AddSingleton<ISiteConfigService, SiteConfigService>();
+    builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 }
 else
 {
@@ -89,6 +90,7 @@ else
     builder.Services.AddSingleton<IRoleService, NoOpRoleService>();
     builder.Services.AddSingleton<IAuditService, NoOpAuditService>();
     builder.Services.AddSingleton<ISiteConfigService, InMemorySiteConfigService>();
+    builder.Services.AddSingleton<IAnalyticsService, NoOpAnalyticsService>();
 }
 
 // Session store is always Singleton (survives across Scoped lifetimes)
