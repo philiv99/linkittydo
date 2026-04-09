@@ -80,7 +80,15 @@ else
 }
 
 // Session store is always Singleton (survives across Scoped lifetimes)
-builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton<ISessionStore, DatabaseSessionStore>();
+    builder.Services.AddScoped<IDataMigrationService, JsonToMySqlMigrationService>();
+}
+else
+{
+    builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
+}
 
 // GameService uses ISessionStore + repositories
 if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
