@@ -1,0 +1,220 @@
+.history-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.history-page h2 {
+  font-size: 1.5rem;
+  color: var(--dark);
+  margin: 0 0 0.3rem;
+}
+
+.history-subtitle {
+  color: #666;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Guest / Empty / Loading states */
+.history-guest-message,
+.history-empty,
+.history-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.history-guest-message p,
+.history-empty p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.history-play-button {
+  background: var(--coral);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.history-play-button:hover {
+  opacity: 0.9;
+}
+
+/* Game List */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.history-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.history-card-header:hover {
+  background: #f9f9f9;
+}
+
+.history-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.history-phrase {
+  font-weight: 600;
+  color: var(--dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-date {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.history-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.history-result {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+}
+
+.history-result.solved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.history-result.gaveup {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.history-result.inprogress {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.history-score {
+  font-weight: 600;
+  color: var(--coral);
+  font-size: 0.9rem;
+}
+
+.history-difficulty {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.history-expand {
+  font-size: 0.7rem;
+  color: #999;
+}
+
+/* Event Timeline Detail */
+.history-card-detail {
+  border-top: 1px solid #eee;
+  padding: 1rem 1.2rem;
+  background: #fafafa;
+}
+
+.history-card-detail h4 {
+  font-size: 0.9rem;
+  color: var(--dark);
+  margin: 0 0 0.8rem;
+}
+
+.event-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.event-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  color: #555;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.event-clue .event-icon {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.event-guess.correct .event-icon {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.event-guess.wrong .event-icon {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.event-end .event-icon {
+  background: #f3e5f5;
+  color: #6a1b9a;
+}
+
+@media (max-width: 600px) {
+  .history-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .history-card-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
