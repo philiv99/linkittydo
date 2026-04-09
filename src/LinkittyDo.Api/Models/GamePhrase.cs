@@ -31,6 +31,11 @@ public class GamePhrase
     public DateTime CreatedAt { get; set; }
     
     /// <summary>
+    /// Computed difficulty score (0-100). Higher = harder.
+    /// </summary>
+    public int Difficulty { get; set; }
+    
+    /// <summary>
     /// Generates a unique phrase ID following the format: PHR-{timestamp}-{random}
     /// </summary>
     public static string GenerateUniqueId()

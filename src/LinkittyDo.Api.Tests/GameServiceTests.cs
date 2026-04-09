@@ -36,7 +36,7 @@ public class GameServiceTests
     [Fact]
     public async Task StartNewGameAsync_CreatesGuestSession_WhenNoUserId()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
 
         var session = await _service.StartNewGameAsync();
 
@@ -50,7 +50,7 @@ public class GameServiceTests
     [Fact]
     public async Task StartNewGameAsync_CreatesRegisteredSession_WhenUserIdProvided()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123")).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 50)).ReturnsAsync(CreateTestPhrase());
 
         var session = await _service.StartNewGameAsync("USR-123", 50);
 
@@ -65,7 +65,7 @@ public class GameServiceTests
     [Fact]
     public async Task GetGame_ReturnsSession_WhenExists()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.GetGame(session.SessionId);
@@ -85,13 +85,14 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_CorrectGuess_ReturnsCorrectAndAwardsPoints()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         Assert.True(result.IsCorrect);
-        Assert.Equal(100, result.CurrentScore);
+        // First guess, no clues, easy difficulty (base=100): 100/1 * 2x bonus = 200
+        Assert.Equal(200, result.CurrentScore);
         Assert.Equal("quick", result.RevealedWord);
         Assert.False(result.IsPhraseComplete);
     }
@@ -99,7 +100,7 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_CaseInsensitive()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "QUICK" });
@@ -110,7 +111,7 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_IncorrectGuess_ReturnsFalse()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "wrong" });
@@ -123,7 +124,7 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_AllWordsRevealed_MarksComplete()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
@@ -131,13 +132,14 @@ public class GameServiceTests
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 3, Guess = "fox" });
 
         Assert.True(result.IsPhraseComplete);
-        Assert.Equal(300, result.CurrentScore);
+        // 3 words × 200 each (first guess, no clues, 2x bonus) = 600
+        Assert.Equal(600, result.CurrentScore);
     }
 
     [Fact]
     public async Task SubmitGuess_RecordsEvents_ForRegisteredUser()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123")).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync("USR-123");
 
         _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
@@ -145,13 +147,14 @@ public class GameServiceTests
 
         Assert.Equal(2, session.GameRecord!.Events.Count(e => e is GuessEvent));
         var correctGuess = session.GameRecord.Events.OfType<GuessEvent>().First(e => e.IsCorrect);
-        Assert.Equal(100, correctGuess.PointsAwarded);
+        // First guess, no clues, easy difficulty: 200
+        Assert.Equal(200, correctGuess.PointsAwarded);
     }
 
     [Fact]
     public async Task SubmitGuess_RecordsSolvedEvent_WhenComplete()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123")).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync("USR-123");
 
         _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
@@ -167,7 +170,7 @@ public class GameServiceTests
     [Fact]
     public async Task GetGameState_ReturnsCorrectState()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var state = _service.GetGameState(session.SessionId);
@@ -189,7 +192,7 @@ public class GameServiceTests
     [Fact]
     public async Task GiveUp_RevealsAllWords_AndMarksComplete()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123")).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync("USR-123");
 
         var state = _service.GiveUp(session.SessionId);
@@ -203,7 +206,7 @@ public class GameServiceTests
     [Fact]
     public async Task RecordClueEvent_RecordsEvent_ForRegisteredUser()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123")).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync("USR-123");
 
         _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com");
@@ -217,7 +220,7 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_InvalidWordIndex_ReturnsFalse()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 99, Guess = "test" });
@@ -228,7 +231,7 @@ public class GameServiceTests
     [Fact]
     public async Task SubmitGuess_NonHiddenWord_ReturnsFalse()
     {
-        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null)).ReturnsAsync(CreateTestPhrase());
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
         var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 0, Guess = "the" });

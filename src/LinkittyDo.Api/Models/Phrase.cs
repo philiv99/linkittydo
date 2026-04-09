@@ -4,6 +4,7 @@ public class Phrase
 {
     public int Id { get; set; }
     public string FullText { get; set; } = string.Empty;
+    public int Difficulty { get; set; }
     public List<PhraseWord> Words { get; set; } = new();
 }
 

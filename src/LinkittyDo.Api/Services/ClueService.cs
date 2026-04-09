@@ -16,6 +16,13 @@ public class ClueService : IClueService
     private readonly ILogger<ClueService> _logger;
     private readonly Random _random = new();
 
+    // URL domains considered "transparent" (easy to deduce meaning from)
+    private static readonly HashSet<string> TransparentDomains = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "wikipedia.org", "wiktionary.org", "merriam-webster.com", "dictionary.com",
+        "thesaurus.com", "britannica.com", "oxford", "cambridge.org"
+    };
+
     public ClueService(HttpClient httpClient, ILogger<ClueService> logger)
     {
         _httpClient = httpClient;
@@ -40,16 +47,17 @@ public class ClueService : IClueService
             session.UsedClueTerms[wordIndex] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        // Get a synonym that hasn't been used yet
-        _logger.LogInformation("Getting clue for word '{Word}' at index {WordIndex}", word.Text, wordIndex);
-        var searchTerm = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex]);
+        // Get a synonym that hasn't been used yet, considering difficulty
+        _logger.LogInformation("Getting clue for word '{Word}' at index {WordIndex}, difficulty {Difficulty}", 
+            word.Text, wordIndex, session.Difficulty);
+        var searchTerm = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex], session.Difficulty);
         
         // Track that we've used this term
         session.UsedClueTerms[wordIndex].Add(searchTerm);
         _logger.LogInformation("Selected search term '{SearchTerm}' for word '{Word}'", searchTerm, word.Text);
 
-        // Search for actual URLs using the synonym
-        var clueUrl = await GetSearchResultUrlAsync(searchTerm, session.UsedClueUrls);
+        // Search for actual URLs using the synonym, considering difficulty
+        var clueUrl = await GetSearchResultUrlAsync(searchTerm, session.UsedClueUrls, session.Difficulty);
         
         // Track that we've used this URL
         if (!string.IsNullOrEmpty(clueUrl))
@@ -69,7 +77,7 @@ public class ClueService : IClueService
         };
     }
 
-    private async Task<string> GetSearchResultUrlAsync(string searchTerm, HashSet<string> usedUrls)
+    private async Task<string> GetSearchResultUrlAsync(string searchTerm, HashSet<string> usedUrls, int difficulty = 10)
     {
         try
         {
@@ -90,7 +98,7 @@ public class ClueService : IClueService
                 }
             }
 
-            // Filter out already used URLs and pick a random one
+            // Filter out already used URLs and pick based on difficulty
             var availableUrls = urls
                 .Where(u => !usedUrls.Contains(u))
                 .Where(u => !u.Contains("duckduckgo.com"))
@@ -102,8 +110,8 @@ public class ClueService : IClueService
 
             if (availableUrls.Count > 0)
             {
-                var selectedUrl = availableUrls[_random.Next(availableUrls.Count)];
-                _logger.LogDebug("Randomly selected URL from {Count} available: {SelectedUrl}", availableUrls.Count, selectedUrl);
+                var selectedUrl = SelectUrlByDifficulty(availableUrls, difficulty);
+                _logger.LogDebug("Selected URL for difficulty {Difficulty}: {SelectedUrl}", difficulty, selectedUrl);
                 return selectedUrl;
             }
 
@@ -204,21 +212,22 @@ public class ClueService : IClueService
         return true;
     }
 
-    private async Task<string> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms)
+    private async Task<string> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms, int difficulty = 10)
     {
         try
         {
-            var synonyms = await GetSynonymsFromDatamuseAsync(word);
-            _logger.LogDebug("Datamuse returned {SynonymCount} synonyms for '{Word}'", synonyms.Count, word);
+            var synonyms = await GetSynonymsFromDatamuseAsync(word, difficulty);
+            _logger.LogDebug("Datamuse returned {SynonymCount} synonyms for '{Word}' at difficulty {Difficulty}", 
+                synonyms.Count, word, difficulty);
             
             if (_logger.IsEnabled(LogLevel.Trace))
             {
-                _logger.LogTrace("All synonyms for '{Word}': {Synonyms}", word, string.Join(", ", synonyms));
+                _logger.LogTrace("All synonyms for '{Word}': {Synonyms}", word, string.Join(", ", synonyms.Select(s => s.Word)));
             }
             
             var availableSynonyms = synonyms
-                .Where(s => !s.Equals(word, StringComparison.OrdinalIgnoreCase))
-                .Where(s => !usedTerms.Contains(s))
+                .Where(s => !s.Word.Equals(word, StringComparison.OrdinalIgnoreCase))
+                .Where(s => !usedTerms.Contains(s.Word))
                 .ToList();
             
             _logger.LogDebug("{AvailableCount} synonyms available after filtering (already used: {UsedTerms})", 
@@ -226,12 +235,15 @@ public class ClueService : IClueService
 
             if (availableSynonyms.Count > 0)
             {
-                var synonymWord = availableSynonyms[_random.Next(availableSynonyms.Count)];
-                _logger.LogInformation("Selected synonym '{Synonym}' for word '{Word}' (from {Count} available)", 
-                    synonymWord, word, availableSynonyms.Count);
-                return synonymWord;
+                // Select synonym based on difficulty:
+                // Easy: pick from top-scored (most similar) synonyms
+                // Hard: pick from bottom-scored (most distant) synonyms
+                var selectedSynonym = SelectSynonymByDifficulty(availableSynonyms, difficulty);
+                _logger.LogInformation("Selected synonym '{Synonym}' for word '{Word}' (difficulty {Difficulty}, from {Count} available)", 
+                    selectedSynonym, word, difficulty, availableSynonyms.Count);
+                return selectedSynonym;
             }
-            // Fallback: use the word itself with "meaning" if no synonyms available
+            // Fallback: use the word itself if no synonyms available
             _logger.LogInformation("No unused synonyms available for '{Word}', using original word", word);
             return word;
         }
@@ -242,39 +254,136 @@ public class ClueService : IClueService
         }
     }
 
-    private async Task<List<string>> GetSynonymsFromDatamuseAsync(string word)
+    /// <summary>
+    /// Selects a synonym based on difficulty. Easy prefers close matches (high score),
+    /// hard prefers distant matches (low score).
+    /// </summary>
+    internal static string SelectSynonymByDifficulty(List<ScoredWord> synonyms, int difficulty)
     {
-        var results = new List<string>();
+        if (synonyms.Count == 0) return string.Empty;
+        if (synonyms.Count == 1) return synonyms[0].Word;
+
+        // Sort by score descending (highest = most similar)
+        var sorted = synonyms.OrderByDescending(s => s.Score).ToList();
         
-        var synonymUrl = $"https://api.datamuse.com/words?rel_syn={HttpUtility.UrlEncode(word)}&max=15";
-        var similarUrl = $"https://api.datamuse.com/words?ml={HttpUtility.UrlEncode(word)}&max=15";
-
-        var synonymTask = FetchDatamuseWordsAsync(synonymUrl);
-        var similarTask = FetchDatamuseWordsAsync(similarUrl);
-
-        await Task.WhenAll(synonymTask, similarTask);
-
-        results.AddRange(await synonymTask);
-        results.AddRange(await similarTask);
-
-        return results.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (difficulty <= 20)
+        {
+            // Easy: pick from top third (closest synonyms)
+            var topCount = Math.Max(1, sorted.Count / 3);
+            return sorted[new Random().Next(topCount)].Word;
+        }
+        else if (difficulty <= 50)
+        {
+            // Medium: pick from middle range
+            var start = sorted.Count / 4;
+            var end = sorted.Count * 3 / 4;
+            var range = Math.Max(1, end - start);
+            return sorted[start + new Random().Next(range)].Word;
+        }
+        else if (difficulty <= 80)
+        {
+            // Hard: pick from bottom half (more distant)
+            var bottomStart = sorted.Count / 2;
+            var range = Math.Max(1, sorted.Count - bottomStart);
+            return sorted[bottomStart + new Random().Next(range)].Word;
+        }
+        else
+        {
+            // Expert: pick from bottom third (most distant)
+            var bottomStart = sorted.Count * 2 / 3;
+            var range = Math.Max(1, sorted.Count - bottomStart);
+            return sorted[bottomStart + new Random().Next(range)].Word;
+        }
     }
 
-    private async Task<List<string>> FetchDatamuseWordsAsync(string url)
+    /// <summary>
+    /// Selects a URL based on difficulty. Easy prefers transparent/educational sites,
+    /// hard avoids them.
+    /// </summary>
+    internal static string SelectUrlByDifficulty(List<string> urls, int difficulty)
+    {
+        if (urls.Count == 0) return string.Empty;
+        if (urls.Count == 1) return urls[0];
+
+        var transparent = urls.Where(u => IsTransparentUrl(u)).ToList();
+        var opaque = urls.Where(u => !IsTransparentUrl(u)).ToList();
+
+        if (difficulty <= 20)
+        {
+            // Easy: prefer transparent URLs (Wikipedia, dictionaries)
+            if (transparent.Count > 0)
+                return transparent[new Random().Next(transparent.Count)];
+        }
+        else if (difficulty >= 51)
+        {
+            // Hard/Expert: prefer opaque URLs (avoid Wikipedia, dictionaries)
+            if (opaque.Count > 0)
+                return opaque[new Random().Next(opaque.Count)];
+        }
+
+        // Medium or fallback: pick randomly from all
+        return urls[new Random().Next(urls.Count)];
+    }
+
+    private static bool IsTransparentUrl(string url)
+    {
+        return TransparentDomains.Any(domain => url.Contains(domain, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task<List<ScoredWord>> GetSynonymsFromDatamuseAsync(string word, int difficulty = 10)
+    {
+        var results = new List<ScoredWord>();
+        var encodedWord = HttpUtility.UrlEncode(word);
+        
+        // Always fetch close synonyms
+        var synonymTask = FetchDatamuseScoredWordsAsync(
+            $"https://api.datamuse.com/words?rel_syn={encodedWord}&max=15");
+        
+        // Always fetch meaning-similar words
+        var similarTask = FetchDatamuseScoredWordsAsync(
+            $"https://api.datamuse.com/words?ml={encodedWord}&max=15");
+        
+        var tasks = new List<Task<List<ScoredWord>>> { synonymTask, similarTask };
+        
+        // For hard/expert: also fetch triggers (associated words) for more distant clues
+        if (difficulty > 50)
+        {
+            tasks.Add(FetchDatamuseScoredWordsAsync(
+                $"https://api.datamuse.com/words?rel_trg={encodedWord}&max=10"));
+        }
+
+        await Task.WhenAll(tasks);
+
+        foreach (var task in tasks)
+        {
+            results.AddRange(await task);
+        }
+
+        // Deduplicate by word, keeping highest score
+        return results
+            .GroupBy(w => w.Word, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new ScoredWord { Word = g.Key, Score = g.Max(x => x.Score) })
+            .ToList();
+    }
+
+    private async Task<List<ScoredWord>> FetchDatamuseScoredWordsAsync(string url)
     {
         try
         {
             _logger.LogDebug("Fetching from Datamuse: {Url}", url);
             var response = await _httpClient.GetStringAsync(url);
             var words = JsonSerializer.Deserialize<List<DatamuseWord>>(response);
-            var result = words?.Select(w => w.word).Where(w => !string.IsNullOrEmpty(w)).ToList() ?? new List<string>();
+            var result = words?
+                .Where(w => !string.IsNullOrEmpty(w.word))
+                .Select(w => new ScoredWord { Word = w.word, Score = w.score })
+                .ToList() ?? new List<ScoredWord>();
             _logger.LogDebug("Datamuse returned {Count} words", result.Count);
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to fetch from Datamuse: {Url}", url);
-            return new List<string>();
+            return new List<ScoredWord>();
         }
     }
 
@@ -282,5 +391,11 @@ public class ClueService : IClueService
     {
         public string word { get; set; } = string.Empty;
         public int score { get; set; }
+    }
+
+    internal class ScoredWord
+    {
+        public string Word { get; set; } = string.Empty;
+        public int Score { get; set; }
     }
 }
