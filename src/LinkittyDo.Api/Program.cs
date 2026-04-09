@@ -5,6 +5,7 @@ using DotNetEnv;
 using LinkittyDo.Api;
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
@@ -44,7 +45,11 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.FromMinutes(1)
     };
 });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireModerator", policy => policy.RequireRole("Admin", "Moderator"));
+});
 
 // Data provider feature flag: "Json" (default) or "MySql"
 var dataProvider = builder.Configuration.GetValue<string>("DataProvider") ?? "Json";
@@ -66,6 +71,9 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddScoped<IGamePhraseService, GamePhraseService>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IRoleService, RoleService>();
+    builder.Services.AddSingleton<IAuditService, AuditService>();
+    builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 }
 else
 {
@@ -77,6 +85,8 @@ else
     builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
     builder.Services.AddSingleton<IUserService, UserService>();
     builder.Services.AddSingleton<IAuthService, AuthService>();
+    builder.Services.AddSingleton<IRoleService, NoOpRoleService>();
+    builder.Services.AddSingleton<IAuditService, NoOpAuditService>();
 }
 
 // Session store is always Singleton (survives across Scoped lifetimes)
