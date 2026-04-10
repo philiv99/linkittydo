@@ -112,3 +112,31 @@ export interface PlayerDetail {
     playedAt: string;
   }[];
 }
+
+export interface AdminPhrase {
+  uniqueId: string;
+  text: string;
+  wordCount: number;
+  difficulty: number;
+  isActive: boolean;
+  generatedByLlm: boolean;
+  createdAt: string;
+}
+
+export interface PhraseStats {
+  phraseUniqueId: string;
+  timesPlayed: number;
+  timesSolved: number;
+  timesGaveUp: number;
+  solveRate: number;
+  avgCluesToSolve: number | null;
+  avgTimeToSolveSeconds: number | null;
+  giveUpRate: number;
+  calibratedDifficulty: number | null;
+  lastComputedAt: string;
+}
+
+export interface UserRoles {
+  uniqueId: string;
+  roles: string[];
+}

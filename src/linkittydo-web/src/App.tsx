@@ -14,6 +14,7 @@ import { AdminUsers } from './pages/admin/AdminUsers'
 import { AdminGames } from './pages/admin/AdminGames'
 import { AdminConfig } from './pages/admin/AdminConfig'
 import { AdminDataExplorer } from './pages/admin/AdminDataExplorer'
+import { AdminPhrases } from './pages/admin/AdminPhrases'
 import { useUser } from './hooks/useUser'
 import './App.css'
 
@@ -65,6 +66,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="games" element={<AdminGames />} />
+          <Route path="phrases" element={<AdminPhrases />} />
           <Route path="config" element={<AdminConfig />} />
           <Route path="data" element={<AdminDataExplorer />} />
         </Route>
