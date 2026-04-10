@@ -34,6 +34,11 @@ public class GameRecord
     /// The phrase ID that was played
     /// </summary>
     public int PhraseId { get; set; }
+
+    /// <summary>
+    /// The phrase unique ID for analytics lookups (format: PHR-{timestamp}-{random})
+    /// </summary>
+    public string PhraseUniqueId { get; set; } = string.Empty;
     
     /// <summary>
     /// The full phrase text that was played

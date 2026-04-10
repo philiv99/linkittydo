@@ -87,6 +87,7 @@ public class LinkittyDoDbContext : DbContext
             entity.Property(e => e.GameId).HasMaxLength(30).IsRequired();
             entity.Property(e => e.UserId).HasMaxLength(30).IsRequired();
             entity.Property(e => e.PhraseText).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).HasDefaultValue(string.Empty);
             entity.Property(e => e.Score).HasDefaultValue(0);
             entity.Property(e => e.Difficulty).HasDefaultValue(0);
             entity.Property(e => e.Result).HasConversion<string>().HasMaxLength(20).HasDefaultValue(GameResult.InProgress);

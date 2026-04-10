@@ -279,6 +279,24 @@ _Source: Gap analysis of existing admin pages, backend endpoints, and design wir
 | 101 | Admin data export (CSV) | P3 | 30+ | | No export capability for user lists, game stats, or config. Add CSV export buttons to AdminUsers and AdminGames pages. |
 | 102 | Admin phrase CRUD backend endpoints | P1 | 28 | | Need new endpoints: `GET /api/admin/phrases` (paginated list), `POST /api/admin/phrases` (create), `PUT /api/admin/phrases/{id}` (update), `PATCH /api/admin/phrases/{id}/status` (activate/deactivate). Required for phrase management UI (#94). |
 
+### Admin Data Integrity & Defect Fixes
+
+_Source: Comprehensive gap analysis of admin functionality (2026-04-10). Critical defects where game data is not correctly persisted, admin analytics show stale/wrong data, and admin navigation disappears._
+
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 103 | Fix GameEvent persistence — events never saved to DB | P1 | 30 | | **CRITICAL DEFECT**: `LinkittyDoDbContext.ConfigureGameRecord()` calls `entity.Ignore(e => e.Events)` which tells EF Core to skip the Events navigation property. `EfGameRecordRepository.CreateAsync()` saves the GameRecord but events are silently discarded. The `GameEvents` table is always empty. Fix: after saving GameRecord, explicitly add each event via `_context.GameEvents.AddRange()` and `SaveChangesAsync()`. Must preserve SequenceNumber ordering and Discriminator values (clue/guess/gameend). |
+| 104 | Recompute PlayerStats after game completion | P1 | 30 | | **DEFECT**: `AnalyticsService.RecomputePlayerStatsAsync()` has correct logic but is NEVER CALLED after a game completes. `PersistGameRecordAsync()` only saves the GameRecord and updates LifetimePoints. Admin player analytics show GamesPlayed=0, Streaks=0, BestScore=0. Fix: call `RecomputePlayerStatsAsync(userId)` in `PersistGameRecordAsync()` after successfully saving the game record. |
+| 105 | Recompute PhrasePlayStats after game completion | P1 | 30 | | **DEFECT**: `AnalyticsService.RecomputePhrasePlayStatsAsync()` exists but is never called. Admin phrase stats (solve rate, calibrated difficulty, avg time to solve) are always stale/zero. Fix: call after game completion. Note: the method currently matches on `PhraseText` which may not be the PhraseUniqueId — verify and fix the query. |
+| 106 | Fix admin nav link disappearing on page refresh | P1 | 30 | | **DEFECT**: `mapResponseToUser()` in useUser.ts maps UserResponse to User but does NOT include `roles`. On page load, `syncUser()` fetches user data from `GET /api/user/{id}` and overwrites the user object — wiping `roles` set during login. Since `isAdmin` checks `(user.roles ?? []).includes('Admin')`, admin nav link disappears. Fix requires TWO changes: (1) add `roles` field to backend `UserResponse` DTO and populate from UserRoles table, (2) update `mapResponseToUser()` to include roles. |
+| 107 | Backend: Add roles to UserResponse DTO | P1 | 30 | | Backend `UserResponse` model has no `roles` property. The roles are only returned in `AuthResponse` during login/register. All `GET /api/user/*` endpoints return `UserResponse` without roles. Fix: add `List<string> Roles` to `UserResponse`, populate by querying `UserRoles` + `Roles` tables in `UserService` methods that return user data. |
+| 108 | Consistent adminApi error handling | P2 | 31 | | `adminApi.ts` uses `handleResponse<T>()` for some endpoints but duplicates 401 handling inline for getUsers, getGames, getPhrases. This leads to inconsistent error handling. Fix: refactor all endpoints to use the shared `handleResponse<T>()` helper. |
+| 109 | AdminGuard should verify admin role, not just token existence | P2 | 31 | | `AdminGuard.tsx` only checks `getAdminToken() !== null`. A non-admin user who somehow has a JWT token (e.g., from normal login that stores to wrong key) would pass the guard. Fix: decode JWT to check for admin role claim, or add an `/api/auth/verify-admin` endpoint. |
+| 110 | Admin player analytics show empty when PlayerStats row missing | P2 | 31 | | `AdminService.GetPlayerAnalyticsAsync()` returns `null` when no `PlayerStats` row exists (new user, never recomputed). Frontend shows empty analytics section with no message. Fix: when null, either return a zero-initialized PlayerStats object OR show "No games played yet" in the frontend. |
+| 111 | Trigger ClueEffectiveness recomputation | P3 | 31 | | `AnalyticsService` has no `RecomputeClueEffectivenessAsync()` implementation even though the `ClueEffectiveness` table exists. Need to: (1) implement the recompute method that aggregates from GameEvents (clue events + subsequent guess results), (2) call it after game completion or on a scheduled basis. Without this, clue quality analytics are permanently empty. |
+| 112 | Admin games detail shows 0 events | P2 | 30 | | **DEFECT** (downstream of #103): `GamesManagerService.GetGameEventsAsync()` queries `GameEvents` table, which is always empty because events are never persisted. Once #103 is fixed, this will self-resolve. However, also need to verify the admin UI correctly renders the event timeline (clue/guess/gameend types with proper fields). |
+| 113 | PhrasePlayStats query uses wrong field | P2 | 30 | | **DEFECT**: `AnalyticsService.RecomputePhrasePlayStatsAsync()` filters by `g.PhraseText == phraseUniqueId` — comparing the full phrase text string against a UniqueId. Should filter by PhraseId or by the actual phrase unique ID field on GameRecord. This means phrase stats will NEVER match any games. Fix: add `PhraseUniqueId` to GameRecord or fix the query to match correctly. |
+
 ### Advanced Linguistic Features
 
 | # | Item | Priority | Sprint | Notes |
@@ -307,6 +325,8 @@ Sprints are sequenced by dependencies and priority. Each sprint builds on the pr
 
 | Sprint | Theme | Key Items | Dependencies |
 |--------|-------|-----------|--------------|
+| **30** | **Admin Critical Data Fixes** | #103, #104, #105, #106, #107, #112, #113 | Sprint 29 (admin UI) |
+| **31** | **Admin Quality & Completeness** | #108, #109, #110, #111 | Sprint 30 (data fixes) |
 | **1** | **Testing & API Foundation** | #1, #2, #3 | None — must be first |
 | **2** | **Difficulty & Scoring Engine** | #4, #5, #6, #7 | Sprint 1 (tests) |
 | **3** | **Frontend Architecture & History** | #8, #9, #10 | Sprint 1 (tests) |

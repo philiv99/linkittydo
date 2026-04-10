@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **fix**: Persist GameEvents to database — events were ignored by EF Core (#103)
+- **fix**: Recompute PlayerStats after each game completion (#104)
+- **fix**: Recompute PhrasePlayStats after each game completion (#105)
+- **fix**: Admin nav disappears on refresh — roles now included in UserResponse (#106)
+- **fix**: Add roles field to UserResponse DTO and populate from backend (#107)
+- **fix**: Admin games page shows 0 events — events now persisted explicitly (#112)
+- **fix**: PhrasePlayStats query uses PhraseUniqueId instead of PhraseText (#113)
+- **feat**: Add PhraseUniqueId column to GameRecord with EF migration (#113)
 - **feat**: Add reusable ConfirmDialog component for destructive admin actions (#97)
 - **feat**: Add audit log API endpoint and admin viewer page with filters (#98)
 - **chore**: Extract inline styles to CSS files for AdminDashboard, AdminGames, AdminConfig, AdminDataExplorer (#99)

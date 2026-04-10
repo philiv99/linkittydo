@@ -1,18 +1,18 @@
 {
   "current_sprint": {
-    "number": 29,
+    "number": 30,
     "status": "complete",
-    "branch": "feature/20260410-sprint-29",
+    "branch": "feature/20260410-sprint-30",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 29,
+    "number": 30,
     "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 4,
+    "items_completed": 7,
     "items_carried_over": 0,
-    "key_lesson": "Extracting inline styles to CSS files early prevents accumulation of tech debt; reusable components like ConfirmDialog pay off across multiple pages"
+    "key_lesson": "GameEvents were silently dropped due to entity.Ignore() in DbContext; explicit AddRange for child entities is needed when navigation is ignored"
   },
   "test_metrics": {
     "backend_tests_passing": 293,
@@ -34,6 +34,7 @@
     "sprint_26": { "pr": null, "items": "Admin frontend (login, dashboard, users, games, config, data explorer)", "tests_after": 290 },
     "sprint_27": { "pr": null, "items": "Admin nav link for admin users, roles in auth response/JWT", "tests_after": 293 },
     "sprint_28": { "pr": null, "items": "TS build fixes, phrase admin CRUD, user search, role management UI", "tests_after": 293 },
-    "sprint_29": { "pr": null, "items": "ConfirmDialog, audit log viewer, CSS cleanup, dashboard refresh", "tests_after": 293 }
+    "sprint_29": { "pr": null, "items": "ConfirmDialog, audit log viewer, CSS cleanup, dashboard refresh", "tests_after": 293 },
+    "sprint_30": { "pr": null, "items": "GameEvent persistence, PlayerStats/PhrasePlayStats recomputation, admin nav roles fix, PhraseUniqueId", "tests_after": 293 }
   }
 }

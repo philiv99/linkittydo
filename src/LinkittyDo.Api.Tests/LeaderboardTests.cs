@@ -86,7 +86,8 @@ public class LeaderboardTests
     public async Task LeaderboardEndpoint_InvalidTop_ReturnsBadRequest()
     {
         var serviceMock = new Mock<IUserService>();
-        var controller = new UserController(serviceMock.Object);
+        var roleServiceMock = new Mock<IRoleService>();
+        var controller = new UserController(serviceMock.Object, roleServiceMock.Object);
 
         var result = await controller.GetLeaderboard(0);
 
@@ -105,7 +106,8 @@ public class LeaderboardTests
         serviceMock.Setup(s => s.GetLeaderboardAsync(10)).ReturnsAsync(users);
         serviceMock.Setup(s => s.GetGameCountAsync("USR-1")).ReturnsAsync(2);
         serviceMock.Setup(s => s.GetGameCountAsync("USR-2")).ReturnsAsync(1);
-        var controller = new UserController(serviceMock.Object);
+        var roleServiceMock = new Mock<IRoleService>();
+        var controller = new UserController(serviceMock.Object, roleServiceMock.Object);
 
         var result = await controller.GetLeaderboard(10);
 

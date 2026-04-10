@@ -12,10 +12,12 @@ namespace LinkittyDo.Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IRoleService _roleService;
 
-    public UserController(IUserService userService)
+    public UserController(IUserService userService, IRoleService roleService)
     {
         _userService = userService;
+        _roleService = roleService;
     }
 
     /// <summary>
@@ -95,7 +97,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<ApiResponse<IEnumerable<UserResponse>>>> GetAllUsers()
     {
         var users = await _userService.GetAllUsersAsync();
-        return Ok(new ApiResponse<IEnumerable<UserResponse>>(users.Select(MapToResponse), "Users retrieved successfully"));
+        return Ok(new ApiResponse<IEnumerable<UserResponse>>(users.Select(u => MapToResponse(u)), "Users retrieved successfully"));
     }
 
     /// <summary>
@@ -151,7 +153,7 @@ public class UserController : ControllerBase
             });
         }
 
-        return Ok(new ApiResponse<UserResponse>(MapToResponse(user)));
+        return Ok(new ApiResponse<UserResponse>(await MapToResponseWithRolesAsync(user)));
     }
 
     /// <summary>
@@ -173,7 +175,7 @@ public class UserController : ControllerBase
             });
         }
 
-        return Ok(new ApiResponse<UserResponse>(MapToResponse(user)));
+        return Ok(new ApiResponse<UserResponse>(await MapToResponseWithRolesAsync(user)));
     }
 
     /// <summary>
@@ -438,7 +440,7 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<IEnumerable<GameRecord>>(games));
     }
 
-    private static UserResponse MapToResponse(User user, int gamesPlayed = 0)
+    private static UserResponse MapToResponse(User user, int gamesPlayed = 0, IList<string>? roles = null)
     {
         return new UserResponse
         {
@@ -448,7 +450,14 @@ public class UserController : ControllerBase
             LifetimePoints = user.LifetimePoints,
             PreferredDifficulty = user.PreferredDifficulty,
             GamesPlayed = gamesPlayed,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            Roles = roles?.ToList() ?? new List<string>()
         };
+    }
+
+    private async Task<UserResponse> MapToResponseWithRolesAsync(User user, int gamesPlayed = 0)
+    {
+        var roles = await _roleService.GetUserRolesAsync(user.UniqueId);
+        return MapToResponse(user, gamesPlayed, roles);
     }
 }
