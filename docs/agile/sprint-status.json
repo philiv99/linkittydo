@@ -1,18 +1,18 @@
 {
   "current_sprint": {
     "number": 28,
-    "status": "review",
+    "status": "complete",
     "branch": "feature/20260410-sprint-28",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 27,
+    "number": 28,
     "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 1,
+    "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "Role-based nav visibility is straightforward when roles are included in the auth response and JWT claims"
+    "key_lesson": "Fix build errors first to unblock all downstream work; check API signatures before calling"
   },
   "test_metrics": {
     "backend_tests_passing": 293,
