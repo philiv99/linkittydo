@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { SiteConfigEntry } from '../../types/admin';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 export function AdminConfig() {
   const [configs, setConfigs] = useState<SiteConfigEntry[]>([]);
@@ -9,6 +10,7 @@ export function AdminConfig() {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   useEffect(() => {
     adminApi.getConfigs()
@@ -92,7 +94,7 @@ export function AdminConfig() {
                 {editingKey === config.key ? (
                   <div style={{ display: 'flex', gap: '0.3rem' }}>
                     <button
-                      onClick={handleSave}
+                      onClick={() => setShowSaveConfirm(true)}
                       disabled={saving}
                       style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: 'none', background: '#48bb78', color: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
                     >
@@ -121,6 +123,20 @@ export function AdminConfig() {
           )}
         </tbody>
       </table>
+
+      {showSaveConfirm && (
+        <ConfirmDialog
+          title="Save Configuration"
+          message={`Are you sure you want to update "${editingKey}" to "${editValue}"?`}
+          confirmLabel="Save"
+          variant="safe"
+          onConfirm={async () => {
+            setShowSaveConfirm(false);
+            await handleSave();
+          }}
+          onCancel={() => setShowSaveConfirm(false)}
+        />
+      )}
     </div>
   );
 }
