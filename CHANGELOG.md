@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **feat**: Unified auth system — single token for player and admin, no more re-login when navigating to admin pages (#113, #114, #115)
+- **feat**: Add AuthContext with useAuth hook for centralized auth state management (#114)
+- **fix**: Admin users no longer forced to re-login when accessing admin pages (#113)
+- **chore**: Remove redundant AdminLogin page and dual-token system (#115)
 - **fix**: Apply pending AddPhraseUniqueIdToGameRecord migration — column missing from DB caused MySqlException (#112)
 - **feat**: Auto-apply EF Core migrations on startup in Development environment (#112)
 - **test**: Add integration test for GameRecord PhraseUniqueId query and filter (#112)

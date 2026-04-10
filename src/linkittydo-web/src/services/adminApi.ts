@@ -14,6 +14,7 @@ import type {
   UserRoles,
   AuditLogEntry,
 } from '../types/admin';
+import { getStoredToken, clearTokens } from './api';
 
 const getApiBaseUrl = (): string => {
   const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5157/api').replace(/\/$/, '');
@@ -22,22 +23,8 @@ const getApiBaseUrl = (): string => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-const ADMIN_TOKEN_KEY = 'linkittydo_admin_token';
-const ADMIN_REFRESH_TOKEN_KEY = 'linkittydo_admin_refresh_token';
-
-export const getAdminToken = (): string | null => localStorage.getItem(ADMIN_TOKEN_KEY);
-export const getAdminRefreshToken = (): string | null => localStorage.getItem(ADMIN_REFRESH_TOKEN_KEY);
-export const storeAdminTokens = (accessToken: string, refreshToken: string): void => {
-  localStorage.setItem(ADMIN_TOKEN_KEY, accessToken);
-  localStorage.setItem(ADMIN_REFRESH_TOKEN_KEY, refreshToken);
-};
-export const clearAdminTokens = (): void => {
-  localStorage.removeItem(ADMIN_TOKEN_KEY);
-  localStorage.removeItem(ADMIN_REFRESH_TOKEN_KEY);
-};
-
 const adminHeaders = (): Record<string, string> => {
-  const token = getAdminToken();
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -46,8 +33,8 @@ const adminHeaders = (): Record<string, string> => {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
-    clearAdminTokens();
-    window.location.href = '/linkittydo/admin/login';
+    clearTokens();
+    window.location.href = '/linkittydo/play';
     throw new Error('Unauthorized');
   }
   if (!response.ok) {
@@ -61,8 +48,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 async function handlePaginatedResponse<T>(response: Response): Promise<PaginatedResponse<T>> {
   if (response.status === 401) {
-    clearAdminTokens();
-    window.location.href = '/linkittydo/admin/login';
+    clearTokens();
+    window.location.href = '/linkittydo/play';
     throw new Error('Unauthorized');
   }
   if (!response.ok) {
@@ -73,30 +60,6 @@ async function handlePaginatedResponse<T>(response: Response): Promise<Paginated
 }
 
 export const adminApi = {
-  async login(email: string, password: string): Promise<{ uniqueId: string; name: string; accessToken: string; refreshToken: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.error?.message || 'Login failed');
-    }
-    const wrapper = await response.json();
-    const data = wrapper.data;
-    storeAdminTokens(data.accessToken, data.refreshToken);
-    return data;
-  },
-
-  logout(): void {
-    clearAdminTokens();
-  },
-
-  isAuthenticated(): boolean {
-    return !!getAdminToken();
-  },
-
   // Dashboard
   async getDashboard(): Promise<DashboardStats> {
     const response = await fetch(`${API_BASE_URL}/admin/dashboard`, { headers: adminHeaders() });

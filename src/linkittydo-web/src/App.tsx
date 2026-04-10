@@ -6,7 +6,6 @@ import { UserModal } from './components/UserModal'
 import { UserManageModal } from './components/UserManageModal'
 import { GameHistoryPage } from './pages/GameHistoryPage'
 import { LeaderboardPage } from './pages/LeaderboardPage'
-import { AdminLogin } from './pages/admin/AdminLogin'
 import { AdminGuard } from './pages/admin/AdminGuard'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
@@ -61,7 +60,6 @@ function App() {
         <Route path="/play" element={<GameBoard />} />
         <Route path="/history" element={<GameHistoryPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />

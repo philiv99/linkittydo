@@ -100,6 +100,9 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
 | 112 | BUG: `Unknown column 'g.PhraseUniqueId' in 'field list'` — Migration not applied | P1 | 32 | The `AddPhraseUniqueIdToGameRecord` migration exists but was not applied to the running MySQL database. Any LINQ query touching `GameRecord.PhraseUniqueId` (e.g., `AnalyticsService.RecomputePhrasePlayStatsAsync`) throws `MySqlException`. Fix: apply pending migration, add startup migration check, verify all model-to-DB column mappings are consistent, add integration test. |
+| 113 | BUG: Admin users forced to re-login when navigating to admin pages | P1 | 33 | Dual token system: player login stores JWT in `linkittydo_token`, but `AdminGuard` and `adminApi` only read from `linkittydo_admin_token`. Admin users who logged in as players must login a second time. Fix: unify to a single token, have `adminApi` use the shared token, update `AdminGuard`. |
+| 114 | Introduce AuthContext for centralized auth state | P1 | 33 | Auth state is scattered across `useUser` hook, `api.ts` token functions, and `adminApi.ts` token functions. Create a React Context (`AuthContext`) providing token, user, roles, isAdmin to the entire component tree. Eliminates direct localStorage reads from multiple modules. |
+| 115 | Remove redundant admin login page and token storage | P2 | 33 | `AdminLogin.tsx` duplicates the player login flow against the same backend endpoint. `adminApi.ts` maintains separate `ADMIN_TOKEN_KEY`/`ADMIN_REFRESH_TOKEN_KEY`. Remove these in favor of the unified auth layer. Redirect `/admin/login` to the main login flow. |
 
 ### Security & Production Readiness
 
