@@ -240,6 +240,12 @@ Create `docs/agile/sprints/SPRINT_N_RETRO.md` using the template in [SPRINT_RETR
   - Add newly discovered items
   - Add deferred improvements as `chore` items
   - Re-prioritize if needed
+- [ ] **Backlog Hygiene Check** (added Sprint 34):
+  - [ ] Verify ALL items completed in this sprint are marked Done in BACKLOG.md
+  - [ ] Remove stale sprint assignments from items not yet started
+  - [ ] Verify remaining item descriptions are still accurate (models, APIs, architecture may have changed)
+  - [ ] Check for items that are already implemented but not marked complete
+  - [ ] Update Completed Items table at bottom of BACKLOG.md
 - [ ] Save sprint summary to Copilot memory (`/memories/repo/`):
   ```
   Sprint N completed [date]. Goal: [goal]. Result: [result].
