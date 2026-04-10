@@ -30,7 +30,7 @@ public class DatabaseSeedService : IHostedService
         var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var phraseRepository = scope.ServiceProvider.GetRequiredService<IGamePhraseRepository>();
 
-        await SeedAdminUser(userRepository);
+        await SeedAdminUser(scope.ServiceProvider, userRepository);
 
         if (_environment.IsDevelopment())
         {
@@ -43,28 +43,45 @@ public class DatabaseSeedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    private async Task SeedAdminUser(IUserRepository userRepository)
+    private async Task SeedAdminUser(IServiceProvider scopedProvider, IUserRepository userRepository)
     {
         var existing = await userRepository.GetByEmailAsync("admin@linkittydo.com");
         if (existing != null)
         {
             _logger.LogInformation("Admin user already exists, skipping");
-            return;
+        }
+        else
+        {
+            var admin = new User
+            {
+                UniqueId = "USR-0000000000000-ADMIN1",
+                Name = "admin",
+                Email = "admin@linkittydo.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("tatyung86"),
+                LifetimePoints = 0,
+                PreferredDifficulty = 10,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await userRepository.CreateAsync(admin);
+            _logger.LogInformation("Seeded admin user: {Email}", admin.Email);
         }
 
-        var admin = new User
+        // Ensure admin role is assigned
+        try
         {
-            UniqueId = "USR-0000000000000-ADMIN1",
-            Name = "Admin",
-            Email = "admin@linkittydo.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
-            LifetimePoints = 0,
-            PreferredDifficulty = 10,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await userRepository.CreateAsync(admin);
-        _logger.LogInformation("Seeded admin user: {Email}", admin.Email);
+            var roleService = scopedProvider.GetRequiredService<IRoleService>();
+            var roles = await roleService.GetUserRolesAsync("USR-0000000000000-ADMIN1");
+            if (!roles.Contains("Admin"))
+            {
+                await roleService.AssignRoleAsync("USR-0000000000000-ADMIN1", "Admin");
+                _logger.LogInformation("Assigned Admin role to admin user");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not assign Admin role (role service may not be available)");
+        }
     }
 
     private async Task SeedTestUser(IUserRepository userRepository)

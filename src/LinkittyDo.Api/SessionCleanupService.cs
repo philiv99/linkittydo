@@ -4,17 +4,17 @@ namespace LinkittyDo.Api;
 
 public class SessionCleanupService : BackgroundService
 {
-    private readonly IGameService _gameService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SessionCleanupService> _logger;
     private readonly TimeSpan _sessionTtl;
     private readonly TimeSpan _cleanupInterval;
 
     public SessionCleanupService(
-        IGameService gameService,
+        IServiceProvider serviceProvider,
         IConfiguration configuration,
         ILogger<SessionCleanupService> logger)
     {
-        _gameService = gameService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
 
         var ttlHours = configuration.GetValue("SessionManagement:TtlHours", 24);
@@ -32,7 +32,9 @@ public class SessionCleanupService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await Task.Delay(_cleanupInterval, stoppingToken);
-            _gameService.RemoveExpiredSessions(_sessionTtl);
+            using var scope = _serviceProvider.CreateScope();
+            var gameService = scope.ServiceProvider.GetRequiredService<IGameService>();
+            gameService.RemoveExpiredSessions(_sessionTtl);
         }
     }
 }

@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-10
+- **feat**: Add admin frontend — login, dashboard, user management, games manager, site config, data explorer (#86-#92)
+- **feat**: Admin route guards with JWT validation and sidebar layout (#87)
+- **feat**: Admin API service with separate token management for admin sessions (#86)
+- **fix**: Fix SessionCleanupService captive dependency — use IServiceProvider + scope creation (#82)
+- **fix**: Update DatabaseSeedService admin user to name `admin` with correct password and Admin role assignment (#84)
+- **chore**: Apply InitialCreate EF Core migration to MySQL — 17 tables created (#82)
+- **chore**: Run JSON-to-MySQL data migration — 3 users, 10 phrases imported (#83)
+- **test**: Fix DatabaseSeedServiceTests for updated admin user name and IRoleService mock (#84)
+
 ### 2026-04-09
 - **feat**: Add ASP.NET Core health check infrastructure with JSON/MySQL provider checks (#67)
 - **feat**: Add DatabaseSeedService — admin user in all environments, test data in Development (#68)

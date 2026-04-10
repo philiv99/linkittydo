@@ -1,0 +1,229 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.admin-sidebar {
+  width: 220px;
+  background: #16213e;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #2a3a5c;
+  flex-shrink: 0;
+}
+
+.admin-sidebar-header {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #2a3a5c;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-sidebar-header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.admin-badge {
+  background: #e94560;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-nav {
+  flex: 1;
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-nav a {
+  display: block;
+  padding: 0.65rem 1.25rem;
+  color: #a0aec0;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+}
+
+.admin-nav a:hover {
+  background: rgba(233, 69, 96, 0.1);
+  color: #e0e0e0;
+}
+
+.admin-nav a.active {
+  background: rgba(233, 69, 96, 0.2);
+  color: #e94560;
+  border-left: 3px solid #e94560;
+}
+
+.admin-sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #2a3a5c;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.back-to-game {
+  color: #a0aec0;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+}
+
+.back-to-game:hover {
+  color: #e0e0e0;
+}
+
+.logout-button {
+  background: none;
+  border: 1px solid #2a3a5c;
+  color: #a0aec0;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.logout-button:hover {
+  border-color: #e94560;
+  color: #e94560;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+/* Shared admin page styles */
+.admin-page h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #e0e0e0;
+}
+
+.admin-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-card {
+  background: #16213e;
+  border-radius: 10px;
+  padding: 1.25rem;
+  border: 1px solid #2a3a5c;
+}
+
+.admin-card .card-label {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  margin-bottom: 0.35rem;
+}
+
+.admin-card .card-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #16213e;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2a3a5c;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: #0f3460;
+  color: #a0aec0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.admin-table td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid #2a3a5c;
+  font-size: 0.9rem;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: rgba(233, 69, 96, 0.05);
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-pagination button {
+  background: #0f3460;
+  border: 1px solid #2a3a5c;
+  color: #e0e0e0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.admin-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-pagination span {
+  font-size: 0.85rem;
+  color: #a0aec0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+.status-badge.inactive { background: rgba(233, 69, 96, 0.2); color: #e94560; }
+.status-badge.solved { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+.status-badge.gaveup { background: rgba(237, 137, 54, 0.2); color: #ed8936; }
+.status-badge.inprogress { background: rgba(66, 153, 225, 0.2); color: #4299e1; }
+.status-badge.simulated { background: rgba(159, 122, 234, 0.2); color: #9f7aea; }
+
+.admin-loading {
+  text-align: center;
+  padding: 3rem;
+  color: #a0aec0;
+}
+
+.admin-error {
+  background: rgba(233, 69, 96, 0.15);
+  color: #e94560;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}

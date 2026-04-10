@@ -1,18 +1,18 @@
 {
   "current_sprint": {
-    "number": 24,
+    "number": 26,
     "status": "complete",
-    "branch": "feature/20260409-sprint-24",
+    "branch": "feature/20260409-sprint-6",
     "plan_approved": true,
-    "pr_number": 35
+    "pr_number": null
   },
   "last_completed": {
-    "number": 24,
-    "date": "2026-04-09",
+    "number": 26,
+    "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 30,
+    "items_completed": 11,
     "items_carried_over": 0,
-    "key_lesson": "EF Core InMemory provider does not support Include on polymorphic navigation properties or OfType queries - load events separately then filter in memory"
+    "key_lesson": "Admin frontend pages can be built efficiently using shared adminApi service with JWT token management separate from player auth"
   },
   "test_metrics": {
     "backend_tests_passing": 290,
@@ -29,6 +29,8 @@
     "sprint_21": { "pr": 32, "items": "Simulation engine (SimulationService, batch runner, purge)", "tests_after": 261 },
     "sprint_22": { "pr": 33, "items": "Admin dashboard API, user management, player analytics", "tests_after": 271 },
     "sprint_23": { "pr": 34, "items": "Games manager API, site config controller", "tests_after": 281 },
-    "sprint_24": { "pr": 35, "items": "Data explorer (simulation summary, player detail, data summary)", "tests_after": 290 }
+    "sprint_24": { "pr": 35, "items": "Data explorer (simulation summary, player detail, data summary)", "tests_after": 290 },
+    "sprint_25": { "pr": null, "items": "DB initialization, JSON-to-MySQL migration, admin user seeding", "tests_after": 290 },
+    "sprint_26": { "pr": null, "items": "Admin frontend (login, dashboard, users, games, config, data explorer)", "tests_after": 290 }
   }
 }

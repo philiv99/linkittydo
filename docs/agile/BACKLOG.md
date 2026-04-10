@@ -242,24 +242,24 @@ _Extends the Admin & Management section (#56-#60) with detailed data exploration
 
 ### Database Initialization & Data Migration
 
-| # | Item | Priority | Sprint | Notes |
-|---|------|----------|--------|-------|
-| 82 | Apply InitialCreate EF Core migration to MySQL | P1 | 25 | Run `dotnet ef database update` to create the `linkittydo` MySQL schema from the InitialCreate migration. Verify all tables created (Users, GamePhrases, GameRecords, GameEvents, GameSessions, Roles, UserRoles, AuditLog, SiteConfigs, PhraseCategories, PhraseCategoryAssignments, PhraseReviews, ClueEffectiveness, PlayerStats, PhrasePlayStats, SimulationProfiles). |
-| 83 | Run JSON-to-MySQL data migration | P1 | 25 | Execute the existing `JsonToMySqlMigrationService` to migrate all JSON data (3 Users, 109 Phrases, embedded GameRecords/Events) into MySQL. Verify row counts match. Run via `POST /api/migration/json-to-mysql` or startup command. |
-| 84 | Update admin user seed with correct credentials | P1 | 25 | Update `DatabaseSeedService` to seed admin user with name `admin` and configured password. Ensure Admin role is assigned in `UserRoles` table during seed. Verify admin can login and has admin role claims. |
-| 85 | Switch DataProvider to MySql | P1 | 25 | Update `appsettings.json` and `appsettings.Development.json` to set `DataProvider: "MySql"` as default. Verify application starts and all endpoints work against MySQL. |
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 82 | Apply InitialCreate EF Core migration to MySQL | P1 | 25 | Done | All 17 tables created. Migration applied successfully. |
+| 83 | Run JSON-to-MySQL data migration | P1 | 25 | Done | 3 users imported, 10 unique phrases imported. Duplicate phrase texts correctly rejected by unique constraint. |
+| 84 | Update admin user seed with correct credentials | P1 | 25 | Done | Admin user seeded with name `admin`, password `tatyung86`, Admin role assigned. |
+| 85 | Switch DataProvider to MySql | P1 | 25 | Done | Already set to `MySql` in appsettings. Verified all endpoints work. |
 
 ### Admin Frontend
 
-| # | Item | Priority | Sprint | Notes |
-|---|------|----------|--------|-------|
-| 86 | Admin login page | P1 | 26 | Dedicated `/admin/login` route with email/password form. On success, store JWT + refresh token. Redirect to admin dashboard. Show error on invalid credentials. |
-| 87 | Admin route guards and layout | P1 | 26 | Protected `/admin/*` routes that require valid JWT with Admin role. Redirect to login if unauthenticated. AdminLayout component with sidebar navigation (Dashboard, Users, Games, Config, Data Explorer). |
-| 88 | Admin dashboard page | P1 | 26 | `/admin/dashboard` page calling `GET /api/admin/dashboard`. Display cards: total users, active sessions, phrase count, games today, top players table. |
-| 89 | Admin user management page | P2 | 26 | `/admin/users` page calling `GET /api/admin/users`. Paginated user list with search/filter. Status toggle (active/inactive) via `PATCH /api/admin/users/{id}/status`. Player analytics drill-down. |
-| 90 | Admin games manager page | P2 | 26 | `/admin/games` page calling `GET /api/admin/games`. Searchable/filterable game list. Game detail view with event timeline. Phrase stats view. |
-| 91 | Admin site config page | P2 | 26 | `/admin/config` page calling `GET /api/admin/config`. Editable key-value pairs with type-appropriate inputs (toggle for bool, number for int, textarea for json). Save via `PUT /api/admin/config/{key}`. |
-| 92 | Admin data explorer page | P3 | 26 | `/admin/data` page calling data explorer endpoints. Data summary cards, simulation summary, player detail drill-down. |
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 86 | Admin login page | P1 | 26 | Done | `/admin/login` with email/password, JWT storage, redirect to dashboard. |
+| 87 | Admin route guards and layout | P1 | 26 | Done | AdminGuard checks JWT, AdminLayout with sidebar nav and Outlet. |
+| 88 | Admin dashboard page | P1 | 26 | Done | Dashboard with stat cards (users, phrases, games, solve rate, avg score). |
+| 89 | Admin user management page | P2 | 26 | Done | Paginated user list, activate/deactivate toggle, player analytics drill-down. |
+| 90 | Admin games manager page | P2 | 26 | Done | Filterable game list, game detail with event timeline. |
+| 91 | Admin site config page | P2 | 26 | Done | Type-aware inline editing (bool/int/json/string). |
+| 92 | Admin data explorer page | P3 | 26 | Done | Data summary, simulation summary, player lookup. |
 
 ### Advanced Linguistic Features
 

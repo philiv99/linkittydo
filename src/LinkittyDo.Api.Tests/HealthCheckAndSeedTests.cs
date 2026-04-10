@@ -84,7 +84,7 @@ public class DatabaseSeedServiceTests
         await seedService.StartAsync(CancellationToken.None);
 
         userRepoMock.Verify(r => r.CreateAsync(It.Is<User>(u =>
-            u.Email == "admin@linkittydo.com" && u.Name == "Admin")), Times.Once);
+            u.Email == "admin@linkittydo.com" && u.Name == "admin")), Times.Once);
     }
 
     [Fact]
@@ -200,9 +200,14 @@ public class DatabaseSeedServiceTests
         IUserRepository userRepository,
         IGamePhraseRepository phraseRepository)
     {
+        var roleServiceMock = new Mock<IRoleService>();
+        roleServiceMock.Setup(r => r.GetUserRolesAsync(It.IsAny<string>())).ReturnsAsync(new List<string>());
+        roleServiceMock.Setup(r => r.AssignRoleAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
         var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
         services.AddScoped(_ => userRepository);
         services.AddScoped(_ => phraseRepository);
+        services.AddScoped(_ => roleServiceMock.Object);
         return services.BuildServiceProvider();
     }
 }
