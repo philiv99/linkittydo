@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api, clearTokens, getStoredToken } from '../services/api';
+import { api, clearTokens } from '../services/api';
 import type { User, UserResponse, RegisterRequest, LoginRequest, CreateUserRequest } from '../types';
 
 const STORAGE_KEY = 'linkittydo_user';

@@ -2,7 +2,7 @@
 
 Master backlog of all planned work for LinkittyDo. Items are prioritized and grouped by category. This is the single source of truth for what to build next.
 
-**Last Updated**: 2026-04-09
+**Last Updated**: 2026-04-10
 **Source Analysis**: See [DESIGN_CONTENT_ANALYSIS.md](DESIGN_CONTENT_ANALYSIS.md) for the full gap assessment that generated this backlog.
 
 ---
@@ -261,6 +261,23 @@ _Extends the Admin & Management section (#56-#60) with detailed data exploration
 | 90 | Admin games manager page | P2 | 26 | Done | Filterable game list, game detail with event timeline. |
 | 91 | Admin site config page | P2 | 26 | Done | Type-aware inline editing (bool/int/json/string). |
 | 92 | Admin data explorer page | P3 | 26 | Done | Data summary, simulation summary, player lookup. |
+
+### Admin Completeness (Identified Sprint 28 Gap Analysis)
+
+_Source: Gap analysis of existing admin pages, backend endpoints, and design wireframes. These items complete the admin panel to production-ready status._
+
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 93 | Fix frontend TypeScript build errors | P1 | 28 | | Pre-existing TS errors in GameBoard, UserModal, useUser, tests, and vite.config. `tsc -b` fails but Vite dev server works. Must fix for production builds. |
+| 94 | Admin Phrases Management page | P1 | 28 | | Backend has `GET /api/admin/games/phrase-stats/{id}` but NO frontend page. Need: phrase list with search/filter by category and difficulty, phrase stats display, phrase CRUD (add/edit/deactivate). Requires new backend endpoints for phrase listing and CRUD. |
+| 95 | Admin user search and filter | P2 | 28 | | AdminUsers page has pagination but no search by name/email and no simulated user filter toggle. Backend API already supports `isSimulated` parameter. |
+| 96 | Admin user role management | P2 | 28 | | AdminUsers page can toggle active status but cannot assign/change user roles (Admin, Moderator, Player). Backend `IRoleService` has `AssignRoleAsync`/`RemoveRoleAsync` but no admin API endpoint for role changes. |
+| 97 | Confirmation dialogs for destructive actions | P2 | 29 | | User status toggle, config changes, and future delete actions execute immediately with no confirmation. Add modal confirmation for: user deactivation, config value changes, phrase deactivation. |
+| 98 | Admin audit log viewer | P2 | 29 | | Backend `IAuditService` logs actions to `AuditLog` table but there is no API endpoint to query logs and no frontend viewer page. Need: `GET /api/admin/audit-log` endpoint with pagination/filters, admin page to browse/filter audit log entries. |
+| 99 | Admin CSS cleanup (extract inline styles) | P3 | 29 | | 5 admin pages (Dashboard, Users, Games, Config, DataExplorer) use 300+ lines of inline styles. Extract to dedicated CSS files for maintainability. |
+| 100 | Dashboard refresh and date filters | P3 | 29 | | AdminDashboard has no manual refresh button or auto-refresh. Add refresh button and optional date range filter. |
+| 101 | Admin data export (CSV) | P3 | 30+ | | No export capability for user lists, game stats, or config. Add CSV export buttons to AdminUsers and AdminGames pages. |
+| 102 | Admin phrase CRUD backend endpoints | P1 | 28 | | Need new endpoints: `GET /api/admin/phrases` (paginated list), `POST /api/admin/phrases` (create), `PUT /api/admin/phrases/{id}` (update), `PATCH /api/admin/phrases/{id}/status` (activate/deactivate). Required for phrase management UI (#94). |
 
 ### Advanced Linguistic Features
 

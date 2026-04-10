@@ -1,8 +1,8 @@
 {
   "current_sprint": {
-    "number": 27,
-    "status": "complete",
-    "branch": "feature/20260410-sprint-27",
+    "number": 28,
+    "status": "review",
+    "branch": "feature/20260410-sprint-28",
     "plan_approved": true,
     "pr_number": null
   },
@@ -32,6 +32,7 @@
     "sprint_24": { "pr": 35, "items": "Data explorer (simulation summary, player detail, data summary)", "tests_after": 290 },
     "sprint_25": { "pr": null, "items": "DB initialization, JSON-to-MySQL migration, admin user seeding", "tests_after": 290 },
     "sprint_26": { "pr": null, "items": "Admin frontend (login, dashboard, users, games, config, data explorer)", "tests_after": 290 },
-    "sprint_27": { "pr": null, "items": "Admin nav link for admin users, roles in auth response/JWT", "tests_after": 293 }
+    "sprint_27": { "pr": null, "items": "Admin nav link for admin users, roles in auth response/JWT", "tests_after": 293 },
+    "sprint_28": { "pr": null, "items": "TS build fixes, phrase admin CRUD, user search, role management UI", "tests_after": 293 }
   }
 }

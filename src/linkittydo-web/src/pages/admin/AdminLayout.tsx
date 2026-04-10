@@ -27,6 +27,9 @@ export function AdminLayout() {
           <NavLink to="/admin/games" className={({ isActive }) => isActive ? 'active' : ''}>
             Games
           </NavLink>
+          <NavLink to="/admin/phrases" className={({ isActive }) => isActive ? 'active' : ''}>
+            Phrases
+          </NavLink>
           <NavLink to="/admin/config" className={({ isActive }) => isActive ? 'active' : ''}>
             Site Config
           </NavLink>

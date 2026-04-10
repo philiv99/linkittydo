@@ -9,6 +9,9 @@ import type {
   DataSummary,
   SimulationSummary,
   PlayerDetail,
+  AdminPhrase,
+  PhraseStats,
+  UserRoles,
 } from '../types/admin';
 
 const getApiBaseUrl = (): string => {
@@ -86,9 +89,10 @@ export const adminApi = {
   },
 
   // Users
-  async getUsers(page = 1, pageSize = 20, isSimulated?: boolean): Promise<PaginatedResponse<AdminUser>> {
+  async getUsers(page = 1, pageSize = 20, isSimulated?: boolean, search?: string): Promise<PaginatedResponse<AdminUser>> {
     const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (isSimulated !== undefined) params.set('isSimulated', String(isSimulated));
+    if (search) params.set('search', search);
     const response = await fetch(`${API_BASE_URL}/admin/users?${params}`, { headers: adminHeaders() });
     if (response.status === 401) {
       clearAdminTokens();
@@ -163,5 +167,74 @@ export const adminApi = {
   async getPlayerDetail(userId: string): Promise<PlayerDetail> {
     const response = await fetch(`${API_BASE_URL}/admin/data/player/${userId}`, { headers: adminHeaders() });
     return handleResponse<PlayerDetail>(response);
+  },
+
+  // Phrases
+  async getPhrases(page = 1, pageSize = 20, isActive?: boolean): Promise<PaginatedResponse<AdminPhrase>> {
+    const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (isActive !== undefined) params.set('isActive', String(isActive));
+    const response = await fetch(`${API_BASE_URL}/admin/phrases?${params}`, { headers: adminHeaders() });
+    if (response.status === 401) {
+      clearAdminTokens();
+      window.location.href = '/linkittydo/admin/login';
+      throw new Error('Unauthorized');
+    }
+    if (!response.ok) throw new Error('Failed to fetch phrases');
+    return response.json();
+  },
+
+  async createPhrase(text: string, difficulty: number): Promise<AdminPhrase> {
+    const response = await fetch(`${API_BASE_URL}/admin/phrases`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ text, difficulty }),
+    });
+    return handleResponse<AdminPhrase>(response);
+  },
+
+  async updatePhrase(uniqueId: string, text: string, difficulty: number): Promise<AdminPhrase> {
+    const response = await fetch(`${API_BASE_URL}/admin/phrases/${uniqueId}`, {
+      method: 'PUT',
+      headers: adminHeaders(),
+      body: JSON.stringify({ text, difficulty }),
+    });
+    return handleResponse<AdminPhrase>(response);
+  },
+
+  async setPhraseStatus(uniqueId: string, isActive: boolean): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/phrases/${uniqueId}/status`, {
+      method: 'PATCH',
+      headers: adminHeaders(),
+      body: JSON.stringify({ isActive }),
+    });
+    if (!response.ok) throw new Error('Failed to update phrase status');
+  },
+
+  async getPhraseStats(uniqueId: string): Promise<PhraseStats> {
+    const response = await fetch(`${API_BASE_URL}/admin/phrases/${uniqueId}/stats`, { headers: adminHeaders() });
+    return handleResponse<PhraseStats>(response);
+  },
+
+  // User Roles
+  async getUserRoles(uniqueId: string): Promise<UserRoles> {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${uniqueId}/roles`, { headers: adminHeaders() });
+    return handleResponse<UserRoles>(response);
+  },
+
+  async assignRole(uniqueId: string, roleName: string): Promise<UserRoles> {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${uniqueId}/roles`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ roleName }),
+    });
+    return handleResponse<UserRoles>(response);
+  },
+
+  async removeRole(uniqueId: string, roleName: string): Promise<UserRoles> {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${uniqueId}/roles/${encodeURIComponent(roleName)}`, {
+      method: 'DELETE',
+      headers: adminHeaders(),
+    });
+    return handleResponse<UserRoles>(response);
   },
 };

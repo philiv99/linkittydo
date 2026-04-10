@@ -21,7 +21,7 @@ export const UserModal: React.FC<UserModalProps> = ({
   onLogin,
   onCheckName,
   onCheckEmail,
-  allUsers,
+  allUsers: _allUsers,
   loading,
   error,
 }) => {

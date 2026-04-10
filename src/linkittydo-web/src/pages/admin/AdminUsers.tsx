@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '../../services/adminApi';
-import type { AdminUser, PlayerAnalytics } from '../../types/admin';
+import type { AdminUser, PlayerAnalytics, UserRoles } from '../../types/admin';
+import './AdminUsers.css';
+
+const ALL_ROLES = ['Admin', 'Moderator', 'Player'] as const;
 
 export function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -8,25 +11,51 @@ export function AdminUsers() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<PlayerAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [roleToAssign, setRoleToAssign] = useState<Record<string, string>>({});
 
-  const fetchUsers = async (p: number) => {
+  const fetchUsers = useCallback(async (p: number, search?: string) => {
     setLoading(true);
     try {
-      const result = await adminApi.getUsers(p);
+      const result = await adminApi.getUsers(p, 20, undefined, search);
       setUsers(result.data);
       setTotalPages(result.pagination.totalPages);
       setPage(result.pagination.page);
+      // Fetch roles for all loaded users
+      const rolesMap: Record<string, string[]> = {};
+      await Promise.all(result.data.map(async (u: AdminUser) => {
+        try {
+          const r: UserRoles = await adminApi.getUserRoles(u.uniqueId);
+          rolesMap[u.uniqueId] = r.roles;
+        } catch {
+          rolesMap[u.uniqueId] = [];
+        }
+      }));
+      setUserRoles(rolesMap);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load users');
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => { fetchUsers(1); }, [fetchUsers]);
+
+  const handleSearch = () => {
+    setSearchTerm(searchInput);
+    fetchUsers(1, searchInput || undefined);
   };
 
-  useEffect(() => { fetchUsers(1); }, []);
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    fetchUsers(1);
+  };
 
   const handleToggleStatus = async (uniqueId: string, currentActive: boolean) => {
     try {
@@ -55,17 +84,58 @@ export function AdminUsers() {
     }
   };
 
+  const handleAssignRole = async (uniqueId: string) => {
+    const role = roleToAssign[uniqueId];
+    if (!role) return;
+    try {
+      await adminApi.assignRole(uniqueId, role);
+      setUserRoles(prev => ({
+        ...prev,
+        [uniqueId]: [...(prev[uniqueId] || []), role]
+      }));
+      setRoleToAssign(prev => ({ ...prev, [uniqueId]: '' }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to assign role');
+    }
+  };
+
+  const handleRemoveRole = async (uniqueId: string, role: string) => {
+    try {
+      await adminApi.removeRole(uniqueId, role);
+      setUserRoles(prev => ({
+        ...prev,
+        [uniqueId]: (prev[uniqueId] || []).filter(r => r !== role)
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove role');
+    }
+  };
+
   if (loading) return <div className="admin-loading">Loading users...</div>;
 
   return (
     <div className="admin-page">
-      <h1>User Management</h1>
+      <div className="users-header">
+        <h1>User Management</h1>
+        <div className="users-search">
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          />
+          <button onClick={handleSearch}>Search</button>
+          {searchTerm && <button onClick={handleClearSearch}>Clear</button>}
+        </div>
+      </div>
       {error && <div className="admin-error">{error}</div>}
       <table className="admin-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Roles</th>
             <th>Points</th>
             <th>Status</th>
             <th>Created</th>
@@ -78,9 +148,31 @@ export function AdminUsers() {
               <tr key={user.uniqueId}>
                 <td>
                   {user.name}
-                  {user.isSimulated && <span className="status-badge simulated" style={{ marginLeft: '0.5rem' }}>SIM</span>}
+                  {user.isSimulated && <span className="status-badge simulated sim-badge">SIM</span>}
                 </td>
                 <td>{user.email}</td>
+                <td>
+                  <div className="role-badges">
+                    {(userRoles[user.uniqueId] || []).map(role => (
+                      <span key={role} className={`role-badge ${role.toLowerCase()}`}>
+                        {role}
+                        <button className="remove-role" onClick={() => handleRemoveRole(user.uniqueId, role)} title={`Remove ${role} role`}>&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="role-assign">
+                    <select
+                      value={roleToAssign[user.uniqueId] || ''}
+                      onChange={e => setRoleToAssign(prev => ({ ...prev, [user.uniqueId]: e.target.value }))}
+                    >
+                      <option value="">Add role...</option>
+                      {ALL_ROLES.filter(r => !(userRoles[user.uniqueId] || []).includes(r)).map(r => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                    <button onClick={() => handleAssignRole(user.uniqueId)} disabled={!roleToAssign[user.uniqueId]}>Add</button>
+                  </div>
+                </td>
                 <td>{user.lifetimePoints}</td>
                 <td>
                   <span className={`status-badge ${user.isActive ? 'active' : 'inactive'}`}>
@@ -90,14 +182,14 @@ export function AdminUsers() {
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>
                   <button
+                    className="admin-action-btn"
                     onClick={() => handleToggleStatus(user.uniqueId, user.isActive)}
-                    style={{ marginRight: '0.5rem', padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #2a3a5c', background: '#0f3460', color: '#e0e0e0', cursor: 'pointer', fontSize: '0.8rem' }}
                   >
                     {user.isActive ? 'Deactivate' : 'Activate'}
                   </button>
                   <button
+                    className="admin-action-btn"
                     onClick={() => handleViewAnalytics(user.uniqueId)}
-                    style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #2a3a5c', background: '#0f3460', color: '#e0e0e0', cursor: 'pointer', fontSize: '0.8rem' }}
                   >
                     {selectedUser === user.uniqueId ? 'Hide Stats' : 'Stats'}
                   </button>
@@ -105,22 +197,22 @@ export function AdminUsers() {
               </tr>
               {selectedUser === user.uniqueId && (
                 <tr key={`${user.uniqueId}-analytics`}>
-                  <td colSpan={6} style={{ background: '#0f3460', padding: '1rem' }}>
+                  <td colSpan={7} className="analytics-row">
                     {analyticsLoading ? (
                       <span>Loading analytics...</span>
                     ) : analytics ? (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Games Played</span><br /><strong>{analytics.gamesPlayed}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Solved</span><br /><strong>{analytics.gamesSolved}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Avg Score</span><br /><strong>{analytics.avgScore.toFixed(0)}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Best Score</span><br /><strong>{analytics.bestScore}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Current Streak</span><br /><strong>{analytics.currentStreak}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Best Streak</span><br /><strong>{analytics.bestStreak}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Avg Clues/Game</span><br /><strong>{analytics.avgCluesPerGame.toFixed(1)}</strong></div>
-                        <div><span style={{ color: '#a0aec0', fontSize: '0.8rem' }}>Avg Guesses/Game</span><br /><strong>{analytics.avgGuessesPerGame.toFixed(1)}</strong></div>
+                      <div className="analytics-grid">
+                        <div><span className="analytics-label">Games Played</span><br /><strong>{analytics.gamesPlayed}</strong></div>
+                        <div><span className="analytics-label">Solved</span><br /><strong>{analytics.gamesSolved}</strong></div>
+                        <div><span className="analytics-label">Avg Score</span><br /><strong>{analytics.avgScore.toFixed(0)}</strong></div>
+                        <div><span className="analytics-label">Best Score</span><br /><strong>{analytics.bestScore}</strong></div>
+                        <div><span className="analytics-label">Current Streak</span><br /><strong>{analytics.currentStreak}</strong></div>
+                        <div><span className="analytics-label">Best Streak</span><br /><strong>{analytics.bestStreak}</strong></div>
+                        <div><span className="analytics-label">Avg Clues/Game</span><br /><strong>{analytics.avgCluesPerGame.toFixed(1)}</strong></div>
+                        <div><span className="analytics-label">Avg Guesses/Game</span><br /><strong>{analytics.avgGuessesPerGame.toFixed(1)}</strong></div>
                       </div>
                     ) : (
-                      <span style={{ color: '#a0aec0' }}>No analytics available for this user</span>
+                      <span className="analytics-empty">No analytics available for this user</span>
                     )}
                   </td>
                 </tr>
@@ -130,9 +222,9 @@ export function AdminUsers() {
         </tbody>
       </table>
       <div className="admin-pagination">
-        <button disabled={page <= 1} onClick={() => fetchUsers(page - 1)}>Previous</button>
+        <button disabled={page <= 1} onClick={() => fetchUsers(page - 1, searchTerm || undefined)}>Previous</button>
         <span>Page {page} of {totalPages}</span>
-        <button disabled={page >= totalPages} onClick={() => fetchUsers(page + 1)}>Next</button>
+        <button disabled={page >= totalPages} onClick={() => fetchUsers(page + 1, searchTerm || undefined)}>Next</button>
       </div>
     </div>
   );

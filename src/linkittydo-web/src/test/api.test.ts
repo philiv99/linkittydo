@@ -3,7 +3,7 @@ import { api } from '../services/api';
 
 // Mock global fetch
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+(globalThis as Record<string, unknown>).fetch = mockFetch;
 
 beforeEach(() => {
   mockFetch.mockReset();
