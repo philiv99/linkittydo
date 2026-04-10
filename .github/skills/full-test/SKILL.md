@@ -48,16 +48,16 @@ cd src/LinkittyDo.Api
 dotnet build --warnaserrors
 ```
 
-**Frontend**:
+**Frontend** (IMPORTANT: use `npm run build`, not `tsc --noEmit`):
 ```powershell
 cd src/linkittydo-web
-npx tsc --noEmit
+npm run build
 npx eslint src/
 ```
 
+- **Always use `npm run build`** as the definitive frontend build check. It runs `tsc -b` which catches unused imports, stricter type checks, and other errors that `tsc --noEmit` misses (learned Sprint 33).
 - No compilation warnings or errors
 - No lint violations
-- No type errors
 
 ### 4. Report Results
 

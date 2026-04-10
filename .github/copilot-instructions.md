@@ -396,6 +396,33 @@ public enum GameResult
 
 ---
 
+## Lessons Learned (Sprint Retrospective Registry)
+
+These lessons are extracted from sprint retrospectives. Check them before making changes.
+
+### Build & Verification
+- **L1** (Sprint 33): Always use `npm run build` (not `npx tsc --noEmit`) as the definitive frontend build check. `tsc -b` catches unused imports and stricter errors.
+- **L2** (Sprint 33): Run the full build early during frontend refactors (after first major file change), not just at the end.
+
+### Refactoring
+- **L3** (Sprint 13): When removing a property, function, or file, ALWAYS grep the entire codebase first. Property removal broke unexpected files that were not checked.
+- **L4** (Sprint 11): When using EF Core discriminators with polymorphic models that have abstract computed properties, use shadow properties instead of mapping the abstract property directly.
+
+### API Integration
+- **L5** (Sprint 28): Before calling any backend endpoint from frontend, verify parameter order, types, and defaults. API signature mismatches cause runtime failures.
+- **L6** (Sprint 12): When migrating Singleton services to Scoped lifetime, extract the stateful component into a Singleton first (e.g., `ISessionStore`).
+
+### Testing
+- **L7** (Sprints 28, 29, 33): New code MUST have corresponding tests specified in the sprint plan. Do not defer test writing.
+- **L8** (Sprint 6): When tests use reflection to access private helpers, they are fragile to refactoring. Prefer testing through public interfaces.
+- **L9** (Sprint 14): xUnit test projects targeting newer .NET need explicit `<FrameworkReference Include="Microsoft.AspNetCore.App" />`.
+
+### Sprint Process
+- **L10** (Sprint 9): Pre-sprint research (checking what is already done, validating assumptions) saves significant effort. Always verify backlog items are still relevant before planning.
+- **L11** (Sprint 3): When a sprint plan changes scope, update BACKLOG.md sprint columns immediately to prevent downstream confusion.
+
+---
+
 ## Backend Patterns
 
 ### Repository Pattern
