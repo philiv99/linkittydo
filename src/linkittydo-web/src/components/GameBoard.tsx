@@ -28,6 +28,7 @@ export const GameBoard: React.FC = () => {
     loading: userLoading, 
     error: userError, 
     registerUser, 
+    loginUser,
     switchUser,
     updateDifficulty,
     addPoints,
@@ -310,8 +311,8 @@ export const GameBoard: React.FC = () => {
           setShowUserModal(false);
           clearError();
         }}
-        onSubmit={async (name, email) => {
-          const success = await registerUser({ name, email });
+        onRegister={async (name, email, password) => {
+          const success = await registerUser({ name, email, password });
           if (success) {
             try {
               const newUserData = await api.getUserByEmail(email);
@@ -331,9 +332,15 @@ export const GameBoard: React.FC = () => {
           }
           return success;
         }}
+        onLogin={async (email, password) => {
+          const success = await loginUser({ email, password });
+          if (success) {
+            handleNewGame();
+          }
+          return success;
+        }}
         onCheckName={checkNameAvailability}
         onCheckEmail={checkEmailAvailability}
-        onSelectExistingUser={handleSwitchUser}
         allUsers={allUsers}
         loading={userLoading}
         error={userError}

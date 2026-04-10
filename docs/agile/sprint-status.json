@@ -1,8 +1,8 @@
 {
   "current_sprint": {
-    "number": 27,
-    "status": "complete",
-    "branch": "feature/20260410-sprint-27",
+    "number": 28,
+    "status": "in-progress",
+    "branch": "feature/20260410-sprint-28",
     "plan_approved": true,
     "pr_number": null
   },
