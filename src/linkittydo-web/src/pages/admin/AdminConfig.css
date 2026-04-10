@@ -1,0 +1,95 @@
+.config-key {
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.config-value-display {
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.config-select,
+.config-input {
+  padding: 0.3rem;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+}
+
+.config-input {
+  width: 200px;
+}
+
+.config-textarea {
+  width: 100%;
+  padding: 0.3rem;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.config-type {
+  color: #a0aec0;
+  font-size: 0.8rem;
+}
+
+.config-date {
+  font-size: 0.8rem;
+}
+
+.config-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.config-save-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: none;
+  background: #48bb78;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.config-save-btn:hover {
+  background: #38a169;
+}
+
+.config-cancel-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #2a3a5c;
+  background: transparent;
+  color: #a0aec0;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.config-cancel-btn:hover {
+  background: #2a3a5c;
+}
+
+.config-edit-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #2a3a5c;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.config-edit-btn:hover {
+  background: #16213e;
+}
+
+.config-empty {
+  text-align: center;
+  color: #a0aec0;
+  padding: 2rem;
+}

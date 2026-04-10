@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { DashboardStats } from '../../types/admin';
+import './AdminDashboard.css';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -55,7 +56,7 @@ export function AdminDashboard() {
           <div className="card-value">{stats.simulatedUsers}</div>
         </div>
       </div>
-      <p style={{ fontSize: '0.8rem', color: '#a0aec0' }}>
+      <p className="dashboard-computed">
         Last computed: {new Date(stats.computedAt).toLocaleString()}
       </p>
     </div>

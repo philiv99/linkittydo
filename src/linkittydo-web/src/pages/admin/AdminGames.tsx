@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { AdminGame, GameDetail } from '../../types/admin';
+import './AdminGames.css';
 
 export function AdminGames() {
   const [games, setGames] = useState<AdminGame[]>([]);
@@ -56,12 +57,11 @@ export function AdminGames() {
     <div className="admin-page">
       <h1>Games Manager</h1>
       {error && <div className="admin-error">{error}</div>}
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <label style={{ color: '#a0aec0', fontSize: '0.85rem' }}>Filter by result:</label>
+      <div className="games-filter-bar">
+        <label className="games-filter-label">Filter by result:</label>
         <select
           value={resultFilter}
           onChange={e => setResultFilter(e.target.value)}
-          style={{ padding: '0.4rem', borderRadius: '4px', background: '#0f3460', color: '#e0e0e0', border: '1px solid #2a3a5c' }}
         >
           <option value="">All</option>
           <option value="Solved">Solved</option>
@@ -84,11 +84,11 @@ export function AdminGames() {
           {games.map(game => (
             <>
               <tr key={game.gameId}>
-                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                <td className="game-id-cell">
                   {game.gameId.substring(0, 20)}...
-                  {game.isSimulated && <span className="status-badge simulated" style={{ marginLeft: '0.5rem' }}>SIM</span>}
+                  {game.isSimulated && <span className="status-badge simulated game-sim-badge">SIM</span>}
                 </td>
-                <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <td className="game-phrase-cell">
                   {game.phraseText}
                 </td>
                 <td>{game.score}</td>
@@ -97,7 +97,7 @@ export function AdminGames() {
                 <td>
                   <button
                     onClick={() => handleViewDetail(game.gameId)}
-                    style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #2a3a5c', background: '#0f3460', color: '#e0e0e0', cursor: 'pointer', fontSize: '0.8rem' }}
+                    className="game-detail-btn"
                   >
                     {detail?.gameId === game.gameId ? 'Hide' : 'Detail'}
                   </button>
@@ -105,30 +105,30 @@ export function AdminGames() {
               </tr>
               {detail?.gameId === game.gameId && (
                 <tr key={`${game.gameId}-detail`}>
-                  <td colSpan={6} style={{ background: '#0f3460', padding: '1rem' }}>
+                  <td colSpan={6} className="game-detail-row">
                     {detailLoading ? (
                       <span>Loading detail...</span>
                     ) : (
                       <div>
-                        <div style={{ marginBottom: '0.75rem' }}>
+                        <div className="game-detail-meta">
                           <strong>Phrase:</strong> {detail.phraseText}<br />
                           <strong>Difficulty:</strong> {detail.difficulty} | <strong>Score:</strong> {detail.score} | <strong>Events:</strong> {detail.eventCount}
                         </div>
                         {detail.events.length > 0 && (
-                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <table className="game-events-table">
                             <thead>
                               <tr>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'left', color: '#a0aec0' }}>#</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'left', color: '#a0aec0' }}>Type</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'left', color: '#a0aec0' }}>Time</th>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Time</th>
                               </tr>
                             </thead>
                             <tbody>
                               {detail.events.map(evt => (
                                 <tr key={evt.id}>
-                                  <td style={{ padding: '0.3rem 0.4rem', fontSize: '0.8rem' }}>{evt.sequenceNumber}</td>
-                                  <td style={{ padding: '0.3rem 0.4rem', fontSize: '0.8rem' }}>{evt.eventType}</td>
-                                  <td style={{ padding: '0.3rem 0.4rem', fontSize: '0.8rem' }}>{new Date(evt.timestamp).toLocaleTimeString()}</td>
+                                  <td>{evt.sequenceNumber}</td>
+                                  <td>{evt.eventType}</td>
+                                  <td>{new Date(evt.timestamp).toLocaleTimeString()}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -142,7 +142,7 @@ export function AdminGames() {
             </>
           ))}
           {games.length === 0 && (
-            <tr><td colSpan={6} style={{ textAlign: 'center', color: '#a0aec0', padding: '2rem' }}>No games found</td></tr>
+            <tr><td colSpan={6} className="games-empty">No games found</td></tr>
           )}
         </tbody>
       </table>
