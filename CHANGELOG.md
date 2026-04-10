@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **docs**: Sprint 34 — fix backlog drift: mark 60+ completed items, update copilot-instructions with current architecture (MySQL/EF Core, JWT auth, roles, admin, analytics, simulation)
+- **docs**: Update User model in copilot-instructions to reflect soft-delete, PasswordHash, and GameRecord decoupling (Sprint 13+)
+- **docs**: Replace outdated JSON file storage docs with MySQL/EF Core data access layer documentation
+- **docs**: Update Backend Patterns with current service layer, auth, EF Core patterns, and controller inventory
+- **docs**: Add Backlog Hygiene checklist to SPRINT_EXECUTION_WORKFLOW.md Phase 5
 - **feat**: Unified auth system — single token for player and admin, no more re-login when navigating to admin pages (#113, #114, #115)
 - **feat**: Add AuthContext with useAuth hook for centralized auth state management (#114)
 - **fix**: Admin users no longer forced to re-login when accessing admin pages (#113)

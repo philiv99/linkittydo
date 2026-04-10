@@ -23,15 +23,20 @@ LinkittyDo is a word-guessing game with:
 ```csharp
 public class User
 {
-    public string UniqueId { get; set; }      // Format: USR-{timestamp}-{random}
-    public string Name { get; set; }          // 2-50 chars, unique
-    public string Email { get; set; }         // Valid email, unique
-    public int LifetimePoints { get; set; }   // Cumulative points earned
+    public string UniqueId { get; set; }        // Format: USR-{timestamp}-{random}
+    public string Name { get; set; }            // 2-50 chars, unique
+    public string Email { get; set; }           // Valid email, unique
+    public string PasswordHash { get; set; }    // BCrypt hash
+    public int LifetimePoints { get; set; }     // Cumulative points earned
     public int PreferredDifficulty { get; set; } // 0-100, default 10
-    public List<GameRecord> Games { get; set; } // Game history
+    public bool IsActive { get; set; }          // Soft-delete flag
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }    // Soft-delete timestamp
 }
+```
+
+**Note**: GameRecords are a separate aggregate (since Sprint 13). Access game history via `IGameRecordRepository`, not through the User model.
 ```
 
 ### UniqueId Generation Rules
@@ -71,37 +76,47 @@ const generateUniqueId = (): string => {
 
 ### Repository Pattern
 
-The data access layer uses the Repository pattern to abstract storage implementation:
+The data access layer uses the Repository pattern with EF Core and a feature-flag switchover:
 
 ```
 IUserRepository (interface)
-    ├── JsonUserRepository (JSON file storage)
-    └── SqlUserRepository (future: relational database)
+    ├── JsonUserRepository (JSON file storage — legacy fallback)
+    └── EfUserRepository (MySQL via EF Core — current default)
+
+IGameRecordRepository (interface)
+    ├── JsonGameRecordRepository (JSON file storage — legacy fallback)
+    └── EfGameRecordRepository (MySQL via EF Core — current default)
+
+IGamePhraseRepository (interface)
+    ├── JsonGamePhraseRepository (JSON file storage — legacy fallback)
+    └── EfGamePhraseRepository (MySQL via EF Core — current default)
 ```
 
-### Current Implementation: JSON File Storage
+### Current Implementation: MySQL via EF Core
 
-- Users are stored as individual JSON files in `Data/Users/` directory
-- File naming: `{uniqueId}.json`
-- Thread-safe with SemaphoreSlim for concurrent access
-- Data directory is configurable via `appsettings.json`:
-  ```json
-  {
-    "DataDirectory": "path/to/data"
-  }
-  ```
+- **ORM**: Entity Framework Core with Pomelo MySQL provider
+- **DbContext**: `LinkittyDoDbContext` with Fluent API configurations (16 DbSets)
+- **Migrations**: EF Core code-first with auto-migration at startup
+- **DI Lifetime**: Repositories are Scoped (EF Core DbContext is not thread-safe)
+- **Unit of Work**: `IUnitOfWork` wrapping `SaveChangesAsync()` + `BeginTransactionAsync()`
+- **Soft-delete**: Users and GamePhrases use `IsActive`/`DeletedAt` columns
 
-### Swapping to Database
+### Data Provider Feature Flag
 
-To switch to a relational database:
-1. Implement `IUserRepository` with database logic
-2. Update DI registration in `Program.cs`:
-   ```csharp
-   // Replace this:
-   builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
-   // With this:
-   builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
-   ```
+The `DataProvider` setting in `appsettings.json` selects the storage backend:
+
+```json
+{
+  "DataProvider": "MySql"
+}
+```
+
+- `"MySql"` (default): Uses EF Core repositories with MySQL
+- `"Json"`: Falls back to JSON file repositories (legacy)
+
+### Session State
+
+Game sessions use a separate Singleton `ISessionStore` (`InMemorySessionStore` with `ConcurrentDictionary`) to survive across Scoped DI lifetimes. Sessions are persisted to MySQL via `GameSessions` table with configurable TTL cleanup.
 
 ---
 
@@ -384,19 +399,46 @@ public enum GameResult
 ## Backend Patterns
 
 ### Repository Pattern
-- Data access abstracted via `IUserRepository` interface
-- Implementations can be swapped (JSON files, SQL database, etc.)
+- Data access abstracted via repository interfaces (`IUserRepository`, `IGameRecordRepository`, `IGamePhraseRepository`)
+- Current implementation: EF Core with MySQL (Pomelo provider)
+- Legacy fallback: JSON file-based repositories (switchable via `DataProvider` flag)
 - Repository handles persistence, Service handles business logic
+- `IUnitOfWork` for cross-repository transactional consistency
 
-### Service Pattern
-- All business logic in Service classes
-- Interface-based for dependency injection
+### Service Layer
+- All business logic in Service classes with interface-based DI
 - Controllers only handle HTTP concerns
+- Key services: `GameService`, `ClueService`, `UserService`, `AuthService`, `RoleService`, `AuditService`, `SiteConfigService`, `AnalyticsService`, `SimulationService`, `AdminService`, `GamesManagerService`, `DataExplorerService`
+
+### Authentication & Authorization
+- JWT tokens with refresh token rotation
+- BCrypt password hashing
+- Role-based authorization: Player, Moderator, Admin
+- Claims-based policies: `[Authorize(Policy = "RequireAdmin")]`
+- Unified AuthContext on frontend (single token for player and admin)
+
+### EF Core Patterns
+- `LinkittyDoDbContext` with 16 DbSets and Fluent API configurations
+- Auto-migration at startup
+- Soft-delete via `IsActive`/`DeletedAt` on Users and GamePhrases
+- Single-table inheritance for polymorphic `GameEvent` (Discriminator column)
+- Shadow properties for EF-specific mappings
 
 ### Model Organization
 - Domain models in `Models/` folder
 - Request DTOs: `{Entity}Request.cs`
 - Response DTOs: `{Entity}Response.cs`
+
+### Key Controllers
+- `GameController` — Game session management
+- `UserController` — User CRUD, leaderboard
+- `AuthController` — Login, register, refresh tokens
+- `AdminController` — Dashboard, user management, player analytics
+- `GamesManagerController` — Game browsing, phrase stats
+- `SiteConfigController` — Site configuration CRUD
+- `DataExplorerController` — Data summaries, simulation data
+- `AuditLogController` — Audit log queries
+- `MigrationController` — JSON-to-MySQL data migration
 
 ---
 

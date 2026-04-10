@@ -498,3 +498,65 @@ _Move items here after sprint completion. Include sprint number._
 | #65 User model refactoring (decouple Games) | 13 | 2026-04-09 |
 | #67 MySQL health check endpoint | 14 | 2026-04-09 |
 | #68 Database seeding (admin user, test data) | 14 | 2026-04-09 |
+| #47 Session persistence (DB-backed) | 15 | 2026-04-09 |
+| #66 JSON → MySQL data migration tool | 15 | 2026-04-09 |
+| #48 Roles & authorization tables | 16 | 2026-04-09 |
+| #69 Audit log table | 16 | 2026-04-09 |
+| #49 Site configuration table | 17 | 2026-04-09 |
+| #50 Phrase categories & tagging | 17 | 2026-04-09 |
+| #51 Phrase review workflow | 17 | 2026-04-09 |
+| #52 Clue effectiveness materialized table | 18 | 2026-04-09 |
+| #53 Player statistics computed table | 18 | 2026-04-09 |
+| #54 Phrase play statistics table | 18 | 2026-04-09 |
+| #27 Clue effectiveness tracking service | 19 | 2026-04-10 |
+| #29 Phrase difficulty auto-calibration | 19 | 2026-04-10 |
+| #70 IsSimulated flag on data models | 20 | 2026-04-10 |
+| #71 Simulated user ID format (SIM- prefix) | 20 | 2026-04-10 |
+| #72 Simulation behavior profiles | 20 | 2026-04-10 |
+| #73 ISimulationService + game simulation engine | 21 | 2026-04-10 |
+| #74 Batch simulation runner | 21 | 2026-04-10 |
+| #75 Simulation data purge tool | 21 | 2026-04-10 |
+| #56 Admin dashboard API | 22 | 2026-04-10 |
+| #57 Admin user management UI | 22 | 2026-04-10 |
+| #78 Player detail view API & UI | 22 | 2026-04-10 |
+| #58 Games Manager API | 23 | 2026-04-10 |
+| #59 Games Manager UI | 23 | 2026-04-10 |
+| #60 Site configuration admin UI | 23 | 2026-04-10 |
+| #79 Game detail view API & UI | 23 | 2026-04-10 |
+| #80 Game browser API & UI | 23 | 2026-04-10 |
+| #81 Data summary & system overview | 24 | 2026-04-10 |
+| #77 Simulation summary dashboard | 24 | 2026-04-10 |
+| #82 Apply InitialCreate EF Core migration | 25 | 2026-04-10 |
+| #83 Run JSON-to-MySQL data migration | 25 | 2026-04-10 |
+| #84 Update admin user seed with credentials | 25 | 2026-04-10 |
+| #85 Switch DataProvider to MySql | 25 | 2026-04-10 |
+| #86 Admin login page | 26 | 2026-04-10 |
+| #87 Admin route guards and layout | 26 | 2026-04-10 |
+| #88 Admin dashboard page | 26 | 2026-04-10 |
+| #89 Admin user management page | 26 | 2026-04-10 |
+| #90 Admin games manager page | 26 | 2026-04-10 |
+| #91 Admin site config page | 26 | 2026-04-10 |
+| #92 Admin data explorer page | 26 | 2026-04-10 |
+| #70a Admin nav link for admin users | 27 | 2026-04-10 |
+| #93 Fix frontend TypeScript build errors | 28 | 2026-04-10 |
+| #94 Admin Phrases Management page | 28 | 2026-04-10 |
+| #95 Admin user search and filter | 28 | 2026-04-10 |
+| #96 Admin user role management | 28 | 2026-04-10 |
+| #102 Admin phrase CRUD backend endpoints | 28 | 2026-04-10 |
+| #97 Confirmation dialogs for destructive actions | 29 | 2026-04-10 |
+| #98 Admin audit log viewer | 29 | 2026-04-10 |
+| #99 Admin CSS cleanup (extract inline styles) | 29 | 2026-04-10 |
+| #100 Dashboard refresh and date filters | 29 | 2026-04-10 |
+| #103 Fix GameEvent persistence | 30 | 2026-04-10 |
+| #104 Recompute PlayerStats after game completion | 30 | 2026-04-10 |
+| #105 Recompute PhrasePlayStats after game completion | 30 | 2026-04-10 |
+| #106 Fix admin nav link disappearing on refresh | 30 | 2026-04-10 |
+| #107 Backend: Add roles to UserResponse DTO | 30 | 2026-04-10 |
+| #108 Consistent adminApi error handling | 31 | 2026-04-10 |
+| #109 AdminGuard should verify admin role | 31 | 2026-04-10 |
+| #110 Admin player analytics empty state handling | 31 | 2026-04-10 |
+| #111 Trigger ClueEffectiveness recomputation | 31 | 2026-04-10 |
+| #112 BUG: PhraseUniqueId missing column migration | 32 | 2026-04-10 |
+| #113 BUG: Admin re-login (dual-token system) | 33 | 2026-04-10 |
+| #114 Introduce AuthContext for centralized auth | 33 | 2026-04-10 |
+| #115 Remove redundant admin login page | 33 | 2026-04-10 |
