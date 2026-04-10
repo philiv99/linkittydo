@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **fix**: Fix 6 TypeScript build errors — GameBoard props, unused imports, test mocks, vitest config (#93)
+- **feat**: Add phrase admin CRUD API endpoints at /api/admin/phrases with pagination and stats (#102)
+- **feat**: Add user search parameter to admin GET /api/admin/users endpoint (#95)
+- **feat**: Add role management API — GET/POST/DELETE /api/admin/users/{id}/roles (#96)
+- **feat**: Add admin phrases management page with search, create/edit, activate/deactivate, and stats (#94)
+- **feat**: Add user search input with clear to AdminUsers page (#95)
+- **feat**: Add role badges display and role assignment/removal to AdminUsers page (#96)
+- **chore**: Extract AdminUsers inline styles to AdminUsers.css (#99)
 - **feat**: Add roles to auth response and JWT claims — login/register/refresh now return user roles
 - **feat**: Show Admin nav link for admin users (roleId 3) in main NavHeader between Leaderboard and user section
 - **fix**: Fix pre-existing GameHistoryPage test missing `loginUser` mock
