@@ -240,6 +240,27 @@ _Extends the Admin & Management section (#56-#60) with detailed data exploration
 | 80 | Game browser API & UI | P3 | 10 | `GET /api/admin/games?page=&user=&phrase=&result=&from=&to=&simulated=` — paginated game list with multi-filter. Filter by user, phrase, result (Solved/GaveUp), date range, and simulated flag. Sortable by date, score, duration. Frontend: game browser page with filter sidebar, sortable table, row click navigates to game detail (#79). Depends on #45 (GameRecords table), #70 (IsSimulated flag). |
 | 81 | Data summary & system overview | P3 | 10 | Extends admin dashboard (#56) with: total games (real vs simulated), games per day chart, phrase usage heatmap (most/least played phrases), average scores by difficulty band, active session count, database size. Powers the admin landing page. Depends on #53, #54 (computed stats tables), #70 (IsSimulated). |
 
+### Database Initialization & Data Migration
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 82 | Apply InitialCreate EF Core migration to MySQL | P1 | 25 | Run `dotnet ef database update` to create the `linkittydo` MySQL schema from the InitialCreate migration. Verify all tables created (Users, GamePhrases, GameRecords, GameEvents, GameSessions, Roles, UserRoles, AuditLog, SiteConfigs, PhraseCategories, PhraseCategoryAssignments, PhraseReviews, ClueEffectiveness, PlayerStats, PhrasePlayStats, SimulationProfiles). |
+| 83 | Run JSON-to-MySQL data migration | P1 | 25 | Execute the existing `JsonToMySqlMigrationService` to migrate all JSON data (3 Users, 109 Phrases, embedded GameRecords/Events) into MySQL. Verify row counts match. Run via `POST /api/migration/json-to-mysql` or startup command. |
+| 84 | Update admin user seed with correct credentials | P1 | 25 | Update `DatabaseSeedService` to seed admin user with name `admin` and configured password. Ensure Admin role is assigned in `UserRoles` table during seed. Verify admin can login and has admin role claims. |
+| 85 | Switch DataProvider to MySql | P1 | 25 | Update `appsettings.json` and `appsettings.Development.json` to set `DataProvider: "MySql"` as default. Verify application starts and all endpoints work against MySQL. |
+
+### Admin Frontend
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 86 | Admin login page | P1 | 26 | Dedicated `/admin/login` route with email/password form. On success, store JWT + refresh token. Redirect to admin dashboard. Show error on invalid credentials. |
+| 87 | Admin route guards and layout | P1 | 26 | Protected `/admin/*` routes that require valid JWT with Admin role. Redirect to login if unauthenticated. AdminLayout component with sidebar navigation (Dashboard, Users, Games, Config, Data Explorer). |
+| 88 | Admin dashboard page | P1 | 26 | `/admin/dashboard` page calling `GET /api/admin/dashboard`. Display cards: total users, active sessions, phrase count, games today, top players table. |
+| 89 | Admin user management page | P2 | 26 | `/admin/users` page calling `GET /api/admin/users`. Paginated user list with search/filter. Status toggle (active/inactive) via `PATCH /api/admin/users/{id}/status`. Player analytics drill-down. |
+| 90 | Admin games manager page | P2 | 26 | `/admin/games` page calling `GET /api/admin/games`. Searchable/filterable game list. Game detail view with event timeline. Phrase stats view. |
+| 91 | Admin site config page | P2 | 26 | `/admin/config` page calling `GET /api/admin/config`. Editable key-value pairs with type-appropriate inputs (toggle for bool, number for int, textarea for json). Save via `PUT /api/admin/config/{key}`. |
+| 92 | Admin data explorer page | P3 | 26 | `/admin/data` page calling data explorer endpoints. Data summary cards, simulation summary, player detail drill-down. |
+
 ### Advanced Linguistic Features
 
 | # | Item | Priority | Sprint | Notes |
