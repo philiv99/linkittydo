@@ -203,6 +203,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Apply pending EF Core migrations on startup (Development only)
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase) && app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<LinkittyDoDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 // Configure the HTTP request pipeline
 // Enable Swagger in all environments for API documentation
 app.UseSwagger();
