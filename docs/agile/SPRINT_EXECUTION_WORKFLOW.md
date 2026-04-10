@@ -68,6 +68,11 @@ All prerequisites pass before proceeding to planning. If previous sprint's High-
 - [ ] Select items for the sprint (aim for 1-2 weeks of work)
 - [ ] Break each item into tasks with estimates
 - [ ] Define acceptance criteria for each item
+- [ ] **Define test expectations for each item** (added Sprint 36):
+  - For each item that adds new code: specify what tests are expected (e.g., "3 unit tests for AuthContext login/logout/token-restore")
+  - For refactoring items: specify that existing tests must still pass
+  - For docs-only items: mark as "No new tests needed"
+  - This prevents the recurring "no new tests added" pattern (Sprints 28, 29, 33)
 - [ ] Identify risks and mitigations
 - [ ] Create `docs/agile/sprints/SPRINT_N_PLAN.md`
 - [ ] Present plan to user for approval
@@ -240,6 +245,13 @@ For each "Apply Now" improvement, update the relevant process document:
 | Coding patterns | `.github/copilot-instructions.md` |
 | Build/test process | `.github/skills/full-test/SKILL.md` |
 | Agent behavior | `.github/agents/*.agent.md` |
+
+**Retro Lesson Encoding** (added Sprint 36): For each lesson learned in the retro, also:
+1. Add an indexed entry to the "Lessons Learned" registry in `.github/copilot-instructions.md` (format: `L{N} (Sprint {M}): description`)
+2. If the lesson affects an agent's behavior, update the relevant agent's instructions
+3. If the lesson is a developer practice, add it to the verify-app agent's Pre-Commit Checklist
+
+This ensures lessons are not just documented in retro files (which may not be read) but encoded into the active instructions that agents use every sprint.
 
 Commit changes: `docs: apply sprint N retrospective improvements`
 

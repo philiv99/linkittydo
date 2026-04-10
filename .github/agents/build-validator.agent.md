@@ -40,6 +40,7 @@ npm ci
 npm run build
 ```
 
+- **IMPORTANT**: Always use `npm run build` (which runs `tsc -b` internally), NOT `npx tsc --noEmit`. The `tsc -b` mode catches unused imports, stricter type checks, and other errors that `--noEmit` misses. This was learned in Sprint 33 when an unused import slipped through `tsc --noEmit` but failed`npm run build`.
 - Ensure no TypeScript compilation errors
 - Vite build completes successfully
 - No missing module imports

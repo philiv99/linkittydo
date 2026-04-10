@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **docs**: Sprint 36 — developer practice gaps: lessons-learned registry, pre-commit checklist, test expectations in plans, npm run build enforcement, retro lesson encoding
+- **docs**: Create Lessons Learned registry in copilot-instructions.md (L1-L11 indexed from 13 retrospectives)
+- **docs**: Add Pre-Commit Checklist to verify-app agent (unused imports, test coverage, API signatures, grep-before-delete)
+- **docs**: Update build-validator agent and full-test skill to enforce `npm run build` over `tsc --noEmit`
+- **docs**: Add test coverage expectations requirement to sprint plan template (Phase 1)
+- **docs**: Add Retro Lesson Encoding step to Phase 5 workflow
 - **docs**: Sprint 35 — context exhaustion prevention: context-efficiency guidelines in all agents, task-level sprint tracking, context budget estimation, session handoff checklist
 - **docs**: Add Context Efficiency sections to build-validator, code-architect, code-simplifier, verify-app agents
 - **docs**: Add Context Budget Estimation rules to SPRINT_EXECUTION_WORKFLOW.md Phase 3

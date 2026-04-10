@@ -77,6 +77,15 @@ Test the specific feature that was changed:
 - Test boundary conditions (name length 2/50 chars, difficulty 0/100)
 - Test error handling paths (not found, duplicate name/email)
 
+### 6. Pre-Commit Checklist (added Sprint 36)
+
+Before approving changes for commit, verify:
+- [ ] **No unused imports**: Run `npm run build` (uses `tsc -b` which catches these)
+- [ ] **All new code has tests**: Check that new services, components, or endpoints have corresponding test files
+- [ ] **API signatures match**: If frontend calls a backend endpoint, verify parameter order, types, and defaults match (L5)
+- [ ] **Grep before delete**: If any property, function, or file was removed, verify no remaining references exist (L3)
+- [ ] **Build passes**: `dotnet build` (backend) + `npm run build` (frontend) both succeed
+
 ## Reporting
 
 1. **Summary**: Pass/Fail with brief explanation
