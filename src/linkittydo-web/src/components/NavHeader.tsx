@@ -4,6 +4,7 @@ import './NavHeader.css';
 interface NavHeaderProps {
   userName: string;
   isGuest: boolean;
+  isAdmin: boolean;
   lifetimePoints: number;
   onUserClick: () => void;
 }
@@ -11,6 +12,7 @@ interface NavHeaderProps {
 export const NavHeader: React.FC<NavHeaderProps> = ({
   userName,
   isGuest,
+  isAdmin,
   lifetimePoints,
   onUserClick,
 }) => {
@@ -42,6 +44,14 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
         >
           Leaderboard
         </Link>
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className={`nav-link nav-link-admin ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+          >
+            Admin
+          </Link>
+        )}
       </nav>
       <div className="nav-user">
         <span

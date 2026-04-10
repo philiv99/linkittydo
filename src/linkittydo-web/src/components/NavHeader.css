@@ -46,6 +46,10 @@
   color: white;
 }
 
+.nav-link-admin {
+  color: var(--yellow);
+}
+
 .nav-user {
   display: flex;
   align-items: center;

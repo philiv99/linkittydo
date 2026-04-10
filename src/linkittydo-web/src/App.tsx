@@ -21,6 +21,7 @@ function App() {
   const {
     user,
     isGuest,
+    isAdmin,
     allUsers,
     loading: userLoading,
     error: userError,
@@ -49,6 +50,7 @@ function App() {
       <NavHeader
         userName={user.name}
         isGuest={isGuest}
+        isAdmin={isAdmin}
         lifetimePoints={user.lifetimePoints}
         onUserClick={handleUserClick}
       />

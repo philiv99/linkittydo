@@ -94,6 +94,7 @@ export interface User {
   lifetimePoints: number;
   preferredDifficulty: number;
   createdAt?: string;
+  roles?: string[];
 }
 
 export interface CreateUserRequest {
@@ -188,4 +189,5 @@ export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   expiresAt: string;
+  roles: string[];
 }

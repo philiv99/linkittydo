@@ -19,11 +19,13 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IRoleService _roleService;
     private readonly IConfiguration _configuration;
 
-    public AuthService(IUserRepository userRepository, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IRoleService roleService, IConfiguration configuration)
     {
         _userRepository = userRepository;
+        _roleService = roleService;
         _configuration = configuration;
     }
 
@@ -46,7 +48,7 @@ public class AuthService : IAuthService
             CreatedAt = DateTime.UtcNow
         };
 
-        var (accessToken, expiresAt) = GenerateAccessToken(user);
+        var (accessToken, expiresAt) = GenerateAccessToken(user, new List<string>());
         var refreshToken = GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
@@ -61,7 +63,8 @@ public class AuthService : IAuthService
             Email = user.Email,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            Roles = new List<string>()
         };
     }
 
@@ -74,7 +77,8 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
 
-        var (accessToken, expiresAt) = GenerateAccessToken(user);
+        var roles = await _roleService.GetUserRolesAsync(user.UniqueId);
+        var (accessToken, expiresAt) = GenerateAccessToken(user, roles);
         var refreshToken = GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
@@ -90,7 +94,8 @@ public class AuthService : IAuthService
             Email = user.Email,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            Roles = roles.ToList()
         };
     }
 
@@ -104,7 +109,8 @@ public class AuthService : IAuthService
         if (user == null)
             return null;
 
-        var (accessToken, expiresAt) = GenerateAccessToken(user);
+        var roles = await _roleService.GetUserRolesAsync(user.UniqueId);
+        var (accessToken, expiresAt) = GenerateAccessToken(user, roles);
         var newRefreshToken = GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
@@ -120,7 +126,8 @@ public class AuthService : IAuthService
             Email = user.Email,
             AccessToken = accessToken,
             RefreshToken = newRefreshToken,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            Roles = roles.ToList()
         };
     }
 
@@ -136,7 +143,7 @@ public class AuthService : IAuthService
         }
     }
 
-    private (string token, DateTime expiresAt) GenerateAccessToken(User user)
+    private (string token, DateTime expiresAt) GenerateAccessToken(User user, IList<string> roles)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
@@ -145,13 +152,18 @@ public class AuthService : IAuthService
         var expiresAt = DateTime.UtcNow.AddMinutes(
             int.Parse(jwtSettings["ExpirationMinutes"] ?? "60"));
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UniqueId),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("name", user.Name)
         };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],

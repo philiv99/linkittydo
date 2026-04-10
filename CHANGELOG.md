@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **feat**: Add roles to auth response and JWT claims — login/register/refresh now return user roles
+- **feat**: Show Admin nav link for admin users (roleId 3) in main NavHeader between Leaderboard and user section
+- **fix**: Fix pre-existing GameHistoryPage test missing `loginUser` mock
+- **test**: Add NavHeader admin link tests (4 new) — visibility for admin/non-admin/guest, correct href
+- **test**: Add AuthService roles tests (3 new) — admin roles in response, empty roles for regular users, role claims in JWT
 - **feat**: Add admin frontend — login, dashboard, user management, games manager, site config, data explorer (#86-#92)
 - **feat**: Admin route guards with JWT validation and sidebar layout (#87)
 - **feat**: Admin API service with separate token management for admin sessions (#86)

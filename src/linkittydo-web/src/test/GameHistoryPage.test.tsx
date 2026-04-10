@@ -69,10 +69,12 @@ const sampleGames: GameRecord[] = [
 const guestUser = {
   user: { uniqueId: 'USR-1-ABC', name: 'Guest', email: '', lifetimePoints: 0, preferredDifficulty: 10 },
   isGuest: true,
+  isAdmin: false,
   allUsers: [],
   loading: false,
   error: null,
   registerUser: vi.fn(),
+  loginUser: vi.fn(),
   updateUser: vi.fn(),
   switchUser: vi.fn(),
   updateDifficulty: vi.fn(),
