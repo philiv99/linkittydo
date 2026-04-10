@@ -15,6 +15,7 @@ import { AdminGames } from './pages/admin/AdminGames'
 import { AdminConfig } from './pages/admin/AdminConfig'
 import { AdminDataExplorer } from './pages/admin/AdminDataExplorer'
 import { AdminPhrases } from './pages/admin/AdminPhrases'
+import { AdminAuditLog } from './pages/admin/AdminAuditLog'
 import { useUser } from './hooks/useUser'
 import './App.css'
 
@@ -69,6 +70,7 @@ function App() {
           <Route path="phrases" element={<AdminPhrases />} />
           <Route path="config" element={<AdminConfig />} />
           <Route path="data" element={<AdminDataExplorer />} />
+          <Route path="audit" element={<AdminAuditLog />} />
         </Route>
       </Routes>
 
