@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { DashboardStats } from '../../types/admin';
 import './AdminDashboard.css';
@@ -7,13 +7,36 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchDashboard = useCallback(async () => {
+    try {
+      const data = await adminApi.getDashboard();
+      setStats(data);
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    adminApi.getDashboard()
-      .then(setStats)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+    fetchDashboard();
+  }, [fetchDashboard]);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      intervalRef.current = setInterval(fetchDashboard, 30000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [autoRefresh, fetchDashboard]);
 
   if (loading) return <div className="admin-loading">Loading dashboard...</div>;
   if (error) return <div className="admin-error">{error}</div>;
@@ -21,7 +44,16 @@ export function AdminDashboard() {
 
   return (
     <div className="admin-page">
-      <h1>Dashboard</h1>
+      <div className="dashboard-header">
+        <h1>Dashboard</h1>
+        <div className="dashboard-controls">
+          <button className="btn btn-secondary" onClick={fetchDashboard}>Refresh</button>
+          <label className="auto-refresh-toggle">
+            <input type="checkbox" checked={autoRefresh} onChange={e => setAutoRefresh(e.target.checked)} />
+            Auto-refresh (30s)
+          </label>
+        </div>
+      </div>
       <div className="admin-cards">
         <div className="admin-card">
           <div className="card-label">Total Users</div>
