@@ -349,6 +349,59 @@ Sprints are sequenced by dependencies and priority. Each sprint builds on the pr
 | **8d** | **Authorization & Roles** | #48, #69 | Sprint 7 (JWT), Sprint 8a (MySQL) |
 | **9a** | **Content Management Schema** | #49, #50, #51 | Sprint 8b (game data tables) |
 | **9b** | **Analytics Computed Tables** | #27, #29, #52, #53, #54 | Sprint 8b (GameRecords + GameEvents) |
+
+---
+
+## Retrospective Recommendations (Process & Documentation Improvements)
+
+_Source: Comprehensive scan of all 18 sprint retrospective files (Sprint 1–33). These are process improvements — updates to agent instructions, documentation, and workflow — not feature work. Each item traces back to the sprint(s) that identified the issue._
+
+### Priority Definitions
+
+| Priority | Meaning |
+|----------|---------|
+| CRITICAL | Actively causing bugs or build surprises; should be addressed next sprint |
+| HIGH | Recurring pattern across multiple sprints; plan within next 2 sprints |
+| MEDIUM | Would improve quality/efficiency; schedule when capacity allows |
+
+### CRITICAL — Address Next Sprint
+
+| # | Item | Priority | Source Sprint(s) | Target Document | Notes |
+|---|------|----------|-----------------|-----------------|-------|
+| R1 | Establish `npm run build` as definitive frontend build check (not `tsc --noEmit`) | CRITICAL | 33 | `.github/skills/full-test/SKILL.md`, `.github/copilot-instructions.md` | `tsc --noEmit` misses unused imports and stricter errors that `tsc -b` (used by `npm run build`) catches. Update the full-test skill and copilot instructions to always use `npm run build` as the build verification step. |
+| R2 | Add "Test Coverage Requirements" to sprint plan template | CRITICAL | 28, 29, 33 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` Phase 1 | Recurring pattern: new code ships without tests. Sprint plans that say "update tests" must specify WHAT tests (e.g., "Add 3 unit tests for AuthContext login/logout/token-restore"). Add a mandatory "Test Expectations" section to the sprint plan template. |
+
+### HIGH — Plan Within Next 2 Sprints
+
+| # | Item | Priority | Source Sprint(s) | Target Document | Notes |
+|---|------|----------|-----------------|-----------------|-------|
+| R3 | Document "Grep-Before-Delete" developer practice | HIGH | 13 | `.github/copilot-instructions.md` | When removing a property, function, or file, ALWAYS grep the entire codebase first. Sprint 13 learned this the hard way when property removal broke files that weren't checked. Add a "Refactoring Checklist" section to copilot-instructions. |
+| R4 | Create "API Integration Checklist" for frontend work | HIGH | 28 | `.github/copilot-instructions.md` | Sprint 28 had API signature mismatches. Before calling any backend endpoint from frontend: verify parameter order, types, and defaults. Add a checklist to the Frontend Patterns section. |
+| R5 | Add Sprint Planning Pre-Audit step to Phase 0 | HIGH | 3, 9 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` Phase 0 | Sprints 3 and 9 discovered backlog items already done or stale mappings. Add a mandatory pre-planning audit: verify all candidate items are still relevant, check if any are already implemented, update sprint mappings. Sprint 9's research step saved 50% effort. |
+| R6 | Session-spanning sprint checkpoint protocol | HIGH | 33 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` | When a sprint exhausts context mid-execution, save task-level progress to `sprint-status.json` (which tasks done, which in-progress, which pending) and commit WIP. Document the resume protocol. |
+
+### MEDIUM — Schedule When Capacity Allows
+
+| # | Item | Priority | Source Sprint(s) | Target Document | Notes |
+|---|------|----------|-----------------|-----------------|-------|
+| R7 | Add "Frontend Refactor: Early Build Validation" guideline | MEDIUM | 33 | `.github/copilot-instructions.md` | During major frontend refactors, run `npm run build` after the first significant file change (not just at the end). Catches cascading issues early. |
+| R8 | Update backlog sprint mappings immediately on scope changes | MEDIUM | 3 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` Phase 1 | When a sprint plan changes scope (items added/removed), update BACKLOG.md sprint column immediately to prevent downstream confusion. |
+| R9 | Document reflection-based testing fragility | MEDIUM | 6 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` or testing guide | When tests use reflection to access private helpers, they're fragile to refactoring. Document when to use reflection vs. testing through public interfaces. |
+| R10 | Script validation checklist (port checks, error handling) | MEDIUM | 2 | `.github/copilot-instructions.md` → Scripts section | Scripts that manage services (start-app.bat, stop-app.bat) need pre-flight checks: port availability, process existence, graceful error messages. Document as a checklist for future scripts. |
+| R11 | Formalize pre-sprint research as mandatory Phase 0 step | MEDIUM | 9 | `docs/agile/SPRINT_EXECUTION_WORKFLOW.md` Phase 0 | Sprint 9 showed research (checking what's already done, validating assumptions) saves significant effort. Make it a repeatable, documented sub-step. |
+| R12 | Component architecture evolution guidelines | MEDIUM | 7, 27, 29 | `.github/copilot-instructions.md` → Frontend Patterns | Track growing complexity signals: `useUser` return type expanding (Sprint 27), dual headers (Sprint 7), inline styles proliferating (Sprint 29). Document refactor triggers (e.g., "when a hook returns >8 values, extract an interface or split"). |
+
+### Recurring Themes Summary
+
+| Theme | Occurrences | Impact | Key Items |
+|-------|-------------|--------|-----------|
+| **Testing gaps** — new code ships without tests | Sprints 28, 29, 33 | Untested code paths accumulate | R2 |
+| **API integration mismatches** | Sprints 10, 28 | Frontend calls fail at runtime | R4 |
+| **Build check inconsistency** | Sprint 33 | Unused imports slip to production build | R1 |
+| **Backlog accuracy drift** | Sprints 3, 9 | Wasted planning time, stale items | R5, R8 |
+| **Context budget exhaustion** | Sprint 33 | Session breaks, lost intermediate state | R6 |
+| **Developer practice gaps** | Sprints 2, 13, 33 | Bugs from missing grep, missing checks | R3, R7, R10 |
+| **Growing technical complexity** | Sprints 7, 27, 29 | Maintainability declining | R12 |
 | **9c** | **Simulated Computer Player** | #70, #71, #72, #73, #74, #75, #76 | Sprint 8b (game data), Sprint 9b (analytics tables) |
 | **10** | **Admin, Games Manager & Data Explorer** | #28, #56, #57, #58, #59, #60, #77, #78, #79, #80, #81 | Sprint 8d (roles), Sprint 9a-9c (all schemas + simulation) |
 | **11** | **Advanced NLP & RL** | #30, #31 | Sprint 9b (analytics data), Sprint 5 (xnym) |

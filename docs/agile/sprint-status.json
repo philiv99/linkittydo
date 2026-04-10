@@ -7,12 +7,12 @@
     "pr_number": null
   },
   "last_completed": {
-    "number": 32,
+    "number": 33,
     "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 3,
+    "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "EF Core migrations must be applied to the database; add startup auto-migrate for Development"
+    "key_lesson": "Dual-token systems cause re-login bugs; unified AuthContext with single token is manageable and testable"
   },
   "test_metrics": {
     "backend_tests_passing": 294,
@@ -37,6 +37,7 @@
     "sprint_29": { "pr": null, "items": "ConfirmDialog, audit log viewer, CSS cleanup, dashboard refresh", "tests_after": 293 },
     "sprint_30": { "pr": null, "items": "GameEvent persistence, PlayerStats/PhrasePlayStats recomputation, admin nav roles fix, PhraseUniqueId", "tests_after": 293 },
     "sprint_31": { "pr": null, "items": "Consistent adminApi error handling, AdminGuard role check, graceful empty stats, ClueEffectiveness per-game", "tests_after": 293 },
-    "sprint_32": { "pr": null, "items": "Fix PhraseUniqueId missing column, auto-migrate on startup, model-DB audit", "tests_after": 294 }
+    "sprint_32": { "pr": 39, "items": "Fix PhraseUniqueId missing column, auto-migrate on startup, model-DB audit", "tests_after": 294 },
+    "sprint_33": { "pr": 40, "items": "Unified auth system, AuthContext, remove dual-token and AdminLogin", "tests_after": 294 }
   }
 }
