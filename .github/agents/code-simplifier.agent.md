@@ -41,6 +41,15 @@ Review recently modified files and look for opportunities to:
 - Remove unnecessary type assertions
 - Clean up unused imports
 
+### 4. Complexity Awareness (added Sprint 37)
+
+Watch for these complexity signals and flag them:
+- **God objects**: A service with >10 public methods or >300 lines likely needs splitting
+- **Hook bloat**: A React hook returning >8 values should be split or use an interface/type (e.g., `useUser` — Sprint 27)
+- **Inline style proliferation**: >50 lines of inline styles in a component should be extracted to CSS (Sprint 29)
+- **Controller doing business logic**: Controllers should only handle HTTP; business logic belongs in services
+- **Deep nesting**: >3 levels of conditional nesting should be refactored to early returns or extracted methods
+
 ## Constraints
 
 - Do NOT add new features or functionality

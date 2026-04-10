@@ -1,25 +1,25 @@
 {
   "current_sprint": {
-    "number": 35,
-    "status": "in-progress",
-    "branch": "feature/20260410-sprint-35",
+    "number": 37,
+    "status": "complete",
+    "branch": "feature/20260410-sprint-37",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Add context-efficiency guidelines to agents", "status": "done" },
-      { "id": 2, "title": "Enhance sprint-status.json schema", "status": "done" },
-      { "id": 3, "title": "Add context budget estimation to Phase 3", "status": "in-progress" },
-      { "id": 4, "title": "Create session-handoff checklist", "status": "not-started" },
-      { "id": 5, "title": "Add memory-save instructions to copilot-instructions", "status": "not-started" }
+      { "id": 1, "title": "Update code-architect agent with current architecture", "status": "done" },
+      { "id": 2, "title": "Update code-simplifier with complexity awareness", "status": "done" },
+      { "id": 3, "title": "Add Codebase Map to copilot-instructions", "status": "done" },
+      { "id": 4, "title": "Add complexity budget to workflow", "status": "done" },
+      { "id": 5, "title": "Update Backend Patterns section", "status": "done" }
     ]
   },
   "last_completed": {
-    "number": 34,
+    "number": 37,
     "date": "2026-04-10",
     "result": "complete",
     "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "Backlog drift accumulates silently - hygiene checklist in retro prevents it"
+    "key_lesson": "Agent instructions must evolve with the codebase - outdated architecture context causes incorrect guidance"
   },
   "test_metrics": {
     "backend_tests_passing": 294,
@@ -45,6 +45,10 @@
     "sprint_30": { "pr": null, "items": "GameEvent persistence, PlayerStats/PhrasePlayStats recomputation, admin nav roles fix, PhraseUniqueId", "tests_after": 293 },
     "sprint_31": { "pr": null, "items": "Consistent adminApi error handling, AdminGuard role check, graceful empty stats, ClueEffectiveness per-game", "tests_after": 293 },
     "sprint_32": { "pr": 39, "items": "Fix PhraseUniqueId missing column, auto-migrate on startup, model-DB audit", "tests_after": 294 },
-    "sprint_33": { "pr": 40, "items": "Unified auth system, AuthContext, remove dual-token and AdminLogin", "tests_after": 294 }
+    "sprint_33": { "pr": 40, "items": "Unified auth system, AuthContext, remove dual-token and AdminLogin", "tests_after": 294 },
+    "sprint_34": { "pr": 41, "items": "Backlog drift fix, copilot-instructions updated (User model, data access, backend patterns, 60+ completed items)", "tests_after": 294 },
+    "sprint_35": { "pr": 42, "items": "Context exhaustion prevention (agent efficiency, task tracking, session handoff, context budget)", "tests_after": 294 },
+    "sprint_36": { "pr": 43, "items": "Developer practice gaps (lessons registry L1-L11, pre-commit checklist, test expectations, build enforcement)", "tests_after": 294 },
+    "sprint_37": { "pr": null, "items": "Growing complexity management (code-architect update, codebase map, complexity budget, simplifier awareness)", "tests_after": 294 }
   }
 }

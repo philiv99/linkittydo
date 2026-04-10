@@ -425,6 +425,30 @@ These lessons are extracted from sprint retrospectives. Check them before making
 
 ## Backend Patterns
 
+### Codebase Map (added Sprint 37)
+
+Quick-reference for navigating the codebase:
+
+**Backend** (`src/LinkittyDo.Api/`):
+- `Controllers/` — 9 controllers (Game, User, Auth, Admin, GamesManager, SiteConfig, DataExplorer, AuditLog, Migration)
+- `Services/` — 12 service interfaces + implementations
+- `Data/` — `LinkittyDoDbContext`, EF repositories, JSON repositories, UnitOfWork
+- `Models/` — Domain models, request/response DTOs, enums
+- `Migrations/` — EF Core migration files
+
+**Frontend** (`src/linkittydo-web/src/`):
+- `components/` — React components (GameBoard, WordSlot, CluePanel, NavHeader, etc.)
+- `pages/` — Route pages (Home, Play, History, Leaderboard, Profile)
+- `admin/` — Admin pages (Dashboard, Users, Phrases, Games, Config, DataExplorer, AuditLog)
+- `hooks/` — Custom hooks (useAuth, useGame, useUser)
+- `services/` — API clients (api.ts, adminApi.ts)
+- `contexts/` — React contexts (AuthContext)
+
+**Tests** (`src/LinkittyDo.Api.Tests/`):
+- `Services/` — Service unit tests
+- `Controllers/` — Controller unit tests
+- `Data/` — Repository and EF Core tests
+
 ### Repository Pattern
 - Data access abstracted via repository interfaces (`IUserRepository`, `IGameRecordRepository`, `IGamePhraseRepository`)
 - Current implementation: EF Core with MySQL (Pomelo provider)
