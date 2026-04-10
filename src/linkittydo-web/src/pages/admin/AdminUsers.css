@@ -1,0 +1,150 @@
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.users-search {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.users-search input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  width: 250px;
+}
+
+.users-search input::placeholder {
+  color: #666;
+}
+
+.users-search button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.admin-action-btn {
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #2a3a5c;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.admin-action-btn:hover {
+  background: #16213e;
+}
+
+.sim-badge {
+  margin-left: 0.5rem;
+}
+
+.analytics-row {
+  background: #0f3460;
+  padding: 1rem;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.analytics-label {
+  color: #a0aec0;
+  font-size: 0.8rem;
+}
+
+.analytics-empty {
+  color: #a0aec0;
+}
+
+.role-badges {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.role-badge.admin {
+  background: #e53e3e33;
+  color: #fc8181;
+  border: 1px solid #e53e3e55;
+}
+
+.role-badge.moderator {
+  background: #d6940033;
+  color: #f6c95d;
+  border: 1px solid #d6940055;
+}
+
+.role-badge.player {
+  background: #38a16933;
+  color: #68d391;
+  border: 1px solid #38a16955;
+}
+
+.role-badge .remove-role {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.role-badge .remove-role:hover {
+  opacity: 1;
+}
+
+.role-assign {
+  margin-top: 0.5rem;
+}
+
+.role-assign select {
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.75rem;
+  margin-right: 0.3rem;
+}
+
+.role-assign button {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
