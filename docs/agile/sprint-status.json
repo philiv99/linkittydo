@@ -1,18 +1,18 @@
 {
   "current_sprint": {
-    "number": 30,
+    "number": 31,
     "status": "complete",
-    "branch": "feature/20260410-sprint-30",
+    "branch": "feature/20260410-sprint-31",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 30,
+    "number": 31,
     "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 7,
+    "items_completed": 4,
     "items_carried_over": 0,
-    "key_lesson": "GameEvents were silently dropped due to entity.Ignore() in DbContext; explicit AddRange for child entities is needed when navigation is ignored"
+    "key_lesson": "Paginated endpoints need a separate response handler since they return {data, pagination} not {data} wrapper; NoOp implementations must be updated when adding interface methods"
   },
   "test_metrics": {
     "backend_tests_passing": 293,
@@ -35,6 +35,7 @@
     "sprint_27": { "pr": null, "items": "Admin nav link for admin users, roles in auth response/JWT", "tests_after": 293 },
     "sprint_28": { "pr": null, "items": "TS build fixes, phrase admin CRUD, user search, role management UI", "tests_after": 293 },
     "sprint_29": { "pr": null, "items": "ConfirmDialog, audit log viewer, CSS cleanup, dashboard refresh", "tests_after": 293 },
-    "sprint_30": { "pr": null, "items": "GameEvent persistence, PlayerStats/PhrasePlayStats recomputation, admin nav roles fix, PhraseUniqueId", "tests_after": 293 }
+    "sprint_30": { "pr": null, "items": "GameEvent persistence, PlayerStats/PhrasePlayStats recomputation, admin nav roles fix, PhraseUniqueId", "tests_after": 293 },
+    "sprint_31": { "pr": null, "items": "Consistent adminApi error handling, AdminGuard role check, graceful empty stats, ClueEffectiveness per-game", "tests_after": 293 }
   }
 }

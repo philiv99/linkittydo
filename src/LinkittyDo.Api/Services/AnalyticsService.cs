@@ -172,6 +172,50 @@ public class AnalyticsService : IAnalyticsService
         await _context.SaveChangesAsync();
     }
 
+    public async Task RecomputeClueEffectivenessForGameAsync(string gameId, IEnumerable<GameEvent> events)
+    {
+        var eventList = events.OrderBy(e => e.SequenceNumber).ToList();
+        var clueEvents = eventList.OfType<ClueEvent>().ToList();
+        var guessEvents = eventList.OfType<GuessEvent>().Where(g => g.IsCorrect).ToList();
+
+        if (clueEvents.Count == 0) return;
+
+        var clueGroups = clueEvents
+            .GroupBy(c => new { c.SearchTerm, Domain = ExtractDomain(c.Url) });
+
+        foreach (var group in clueGroups)
+        {
+            var firstClue = group.First();
+            var timesShown = group.Count();
+            var timesLedToCorrect = group.Count(clue =>
+                guessEvents.Any(g => g.WordIndex == clue.WordIndex && g.SequenceNumber > clue.SequenceNumber));
+
+            var existing = await _context.ClueEffectiveness
+                .FirstOrDefaultAsync(c =>
+                    c.SearchTerm == group.Key.SearchTerm &&
+                    c.UrlDomain == group.Key.Domain);
+
+            if (existing == null)
+            {
+                existing = new ClueEffectiveness
+                {
+                    TargetWord = firstClue.SearchTerm,
+                    SearchTerm = group.Key.SearchTerm,
+                    UrlDomain = group.Key.Domain,
+                    TimesShown = 0,
+                    TimesLedToCorrectGuess = 0
+                };
+                _context.ClueEffectiveness.Add(existing);
+            }
+
+            existing.TimesShown += timesShown;
+            existing.TimesLedToCorrectGuess += timesLedToCorrect;
+            existing.LastComputedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<PlayerStats?> GetPlayerStatsAsync(string userId)
     {
         return await _context.PlayerStats.FindAsync(userId);

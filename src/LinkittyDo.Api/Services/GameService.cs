@@ -387,6 +387,11 @@ public class GameService : IGameService
                 {
                     await _analyticsService.RecomputePhrasePlayStatsAsync(session.GameRecord.PhraseUniqueId);
                 }
+                if (session.GameRecord.Events.Count > 0)
+                {
+                    await _analyticsService.RecomputeClueEffectivenessForGameAsync(
+                        session.GameRecord.GameId, session.GameRecord.Events);
+                }
             }
             catch (Exception ex)
             {
