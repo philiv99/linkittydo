@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, clearTokens, getStoredToken } from '../services/api';
-import type { User, UserResponse, RegisterRequest, LoginRequest } from '../types';
+import type { User, UserResponse, RegisterRequest, LoginRequest, CreateUserRequest } from '../types';
 
 const STORAGE_KEY = 'linkittydo_user';
 
@@ -126,6 +126,7 @@ export const useUser = () => {
         email: authResponse.email,
         lifetimePoints: 0,
         preferredDifficulty: 10,
+        roles: authResponse.roles ?? [],
       };
       setUser(newUser);
       await fetchAllUsers();
@@ -147,7 +148,7 @@ export const useUser = () => {
       const authResponse = await api.login(request);
       const serverUser = await api.getUser(authResponse.uniqueId);
       if (serverUser) {
-        setUser(mapResponseToUser(serverUser));
+        setUser({ ...mapResponseToUser(serverUser), roles: authResponse.roles ?? [] });
       } else {
         setUser({
           uniqueId: authResponse.uniqueId,
@@ -155,6 +156,7 @@ export const useUser = () => {
           email: authResponse.email,
           lifetimePoints: 0,
           preferredDifficulty: 10,
+          roles: authResponse.roles ?? [],
         });
       }
       await fetchAllUsers();
@@ -280,6 +282,7 @@ export const useUser = () => {
   return {
     user,
     isGuest,
+    isAdmin: !isGuest && (user.roles ?? []).includes('Admin'),
     allUsers,
     loading,
     error,

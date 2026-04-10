@@ -1,22 +1,22 @@
 {
   "current_sprint": {
-    "number": 26,
+    "number": 27,
     "status": "complete",
-    "branch": "feature/20260409-sprint-6",
+    "branch": "feature/20260410-sprint-27",
     "plan_approved": true,
     "pr_number": null
   },
   "last_completed": {
-    "number": 26,
+    "number": 27,
     "date": "2026-04-10",
     "result": "complete",
-    "items_completed": 11,
+    "items_completed": 1,
     "items_carried_over": 0,
-    "key_lesson": "Admin frontend pages can be built efficiently using shared adminApi service with JWT token management separate from player auth"
+    "key_lesson": "Role-based nav visibility is straightforward when roles are included in the auth response and JWT claims"
   },
   "test_metrics": {
-    "backend_tests_passing": 290,
-    "frontend_tests_passing": 57,
+    "backend_tests_passing": 293,
+    "frontend_tests_passing": 61,
     "lint_errors": 0
   },
   "sprint_history": {
@@ -31,6 +31,7 @@
     "sprint_23": { "pr": 34, "items": "Games manager API, site config controller", "tests_after": 281 },
     "sprint_24": { "pr": 35, "items": "Data explorer (simulation summary, player detail, data summary)", "tests_after": 290 },
     "sprint_25": { "pr": null, "items": "DB initialization, JSON-to-MySQL migration, admin user seeding", "tests_after": 290 },
-    "sprint_26": { "pr": null, "items": "Admin frontend (login, dashboard, users, games, config, data explorer)", "tests_after": 290 }
+    "sprint_26": { "pr": null, "items": "Admin frontend (login, dashboard, users, games, config, data explorer)", "tests_after": 290 },
+    "sprint_27": { "pr": null, "items": "Admin nav link for admin users, roles in auth response/JWT", "tests_after": 293 }
   }
 }

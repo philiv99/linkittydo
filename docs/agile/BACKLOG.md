@@ -181,6 +181,7 @@ _Source: Wireframes "6 - Admin.docx", "3 - Games Mgr_.docx", class diagram "User
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
+| 70 | Admin nav link for admin users | P1 | 27 (DONE) | When logged-in user has Admin role (roleId 3), show Admin link in NavHeader. Roles returned in auth response and JWT. |
 | 56 | Admin dashboard API | P3 | 10 | Endpoints: `GET /api/admin/dashboard` (total users, active sessions, phrase count, games today, top players). `GET /api/admin/users?page=&search=` (paginated, filterable). `PATCH /api/admin/users/{id}/role` (assign/remove roles). `GET /api/admin/audit-log?entity=&user=&from=&to=` (paginated audit trail). All require `[Authorize(Policy = "RequireAdmin")]`. |
 | 57 | Admin user management UI | P3 | 10 | Frontend admin page: user list with search/filter, view/edit user details, change roles, soft-deactivate accounts (sets `IsActive = false`). Protected route requiring admin role. Source: wireframe "6 - Admin". |
 | 58 | Games Manager API | P3 | 10 | Endpoints: `GET /api/admin/phrases?page=&category=&difficulty=&status=` (paginated, multi-filter). `POST /api/admin/phrases` (create with category assignment). `PUT /api/admin/phrases/{id}` (edit text, difficulty, categories). `POST /api/admin/phrases/{id}/evaluate` (starts a test-play session). `GET /api/admin/phrases/{id}/stats` (play statistics from #54). `POST /api/admin/phrases/{id}/review` (approve/reject from review queue). |
