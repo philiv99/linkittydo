@@ -43,11 +43,16 @@ public class AdminService : IAdminService
         };
     }
 
-    public async Task<IReadOnlyList<User>> GetUsersAsync(int page = 1, int pageSize = 20, bool? isSimulated = null)
+    public async Task<IReadOnlyList<User>> GetUsersAsync(int page = 1, int pageSize = 20, bool? isSimulated = null, string? search = null)
     {
         var query = _context.Users.AsQueryable();
         if (isSimulated.HasValue)
             query = query.Where(u => u.IsSimulated == isSimulated.Value);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            query = query.Where(u => u.Name.ToLower().Contains(term) || u.Email.ToLower().Contains(term));
+        }
 
         return await query
             .OrderByDescending(u => u.CreatedAt)
@@ -56,11 +61,16 @@ public class AdminService : IAdminService
             .ToListAsync();
     }
 
-    public async Task<int> GetUserCountAsync(bool? isSimulated = null)
+    public async Task<int> GetUserCountAsync(bool? isSimulated = null, string? search = null)
     {
         var query = _context.Users.AsQueryable();
         if (isSimulated.HasValue)
             query = query.Where(u => u.IsSimulated == isSimulated.Value);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            query = query.Where(u => u.Name.ToLower().Contains(term) || u.Email.ToLower().Contains(term));
+        }
         return await query.CountAsync();
     }
 
@@ -78,5 +88,47 @@ public class AdminService : IAdminService
     public async Task<PlayerStats?> GetPlayerAnalyticsAsync(string userId)
     {
         return await _context.PlayerStats.FindAsync(userId);
+    }
+
+    public async Task<IList<string>> GetUserRolesAsync(string userId)
+    {
+        return await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
+            .ToListAsync();
+    }
+
+    public async Task<bool> AssignRoleAsync(string userId, string roleName)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+        if (role == null) return false;
+
+        var exists = await _context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == role.Id);
+        if (exists) return true;
+
+        _context.UserRoles.Add(new Models.UserRole
+        {
+            UserId = userId,
+            RoleId = role.Id,
+            AssignedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> RemoveRoleAsync(string userId, string roleName)
+    {
+        var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+        if (role == null) return false;
+
+        var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == role.Id);
+        if (userRole == null) return false;
+
+        _context.UserRoles.Remove(userRole);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

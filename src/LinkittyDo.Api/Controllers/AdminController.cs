@@ -24,13 +24,13 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool? isSimulated = null)
+    public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool? isSimulated = null, [FromQuery] string? search = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
-        var users = await _adminService.GetUsersAsync(page, pageSize, isSimulated);
-        var totalCount = await _adminService.GetUserCountAsync(isSimulated);
+        var users = await _adminService.GetUsersAsync(page, pageSize, isSimulated, search);
+        var totalCount = await _adminService.GetUserCountAsync(isSimulated, search);
 
         return Ok(new
         {
@@ -74,9 +74,46 @@ public class AdminController : ControllerBase
 
         return Ok(new { data = stats });
     }
+
+    [HttpGet("users/{uniqueId}/roles")]
+    public async Task<IActionResult> GetUserRoles(string uniqueId)
+    {
+        var roles = await _adminService.GetUserRolesAsync(uniqueId);
+        return Ok(new { data = new { uniqueId, roles } });
+    }
+
+    [HttpPost("users/{uniqueId}/roles")]
+    public async Task<IActionResult> AssignRole(string uniqueId, [FromBody] RoleRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.RoleName))
+            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Role name is required" } });
+
+        var success = await _adminService.AssignRoleAsync(uniqueId, request.RoleName);
+        if (!success)
+            return NotFound(new { error = new { code = "NOT_FOUND", message = "User or role not found" } });
+
+        var roles = await _adminService.GetUserRolesAsync(uniqueId);
+        return Ok(new { data = new { uniqueId, roles } });
+    }
+
+    [HttpDelete("users/{uniqueId}/roles/{roleName}")]
+    public async Task<IActionResult> RemoveRole(string uniqueId, string roleName)
+    {
+        var success = await _adminService.RemoveRoleAsync(uniqueId, roleName);
+        if (!success)
+            return NotFound(new { error = new { code = "NOT_FOUND", message = "User role assignment not found" } });
+
+        var roles = await _adminService.GetUserRolesAsync(uniqueId);
+        return Ok(new { data = new { uniqueId, roles } });
+    }
 }
 
 public class SetUserStatusRequest
 {
     public bool IsActive { get; set; }
+}
+
+public class RoleRequest
+{
+    public string RoleName { get; set; } = string.Empty;
 }
