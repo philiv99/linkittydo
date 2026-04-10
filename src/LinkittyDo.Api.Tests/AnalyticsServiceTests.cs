@@ -17,7 +17,7 @@ public class AnalyticsServiceTests
         return context;
     }
 
-    private static GameRecord CreateGameRecord(string userId, string phraseText, GameResult result, int score, DateTime playedAt, List<GameEvent>? events = null)
+    private static GameRecord CreateGameRecord(string userId, string phraseText, GameResult result, int score, DateTime playedAt, List<GameEvent>? events = null, string? phraseUniqueId = null)
     {
         var gameId = $"GAME-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
         return new GameRecord
@@ -25,6 +25,7 @@ public class AnalyticsServiceTests
             GameId = gameId,
             UserId = userId,
             PhraseText = phraseText,
+            PhraseUniqueId = phraseUniqueId ?? string.Empty,
             PhraseId = 1,
             Difficulty = 10,
             Result = result,
@@ -100,20 +101,20 @@ public class AnalyticsServiceTests
     public async Task RecomputePhrasePlayStats_ComputesRates()
     {
         using var context = CreateContext();
-        var phrase = "test phrase";
+        var phraseId = "PHR-0000000000001-TEST01";
         context.GameRecords.AddRange(
-            CreateGameRecord("u1", phrase, GameResult.Solved, 100, DateTime.UtcNow.AddDays(-3)),
-            CreateGameRecord("u2", phrase, GameResult.Solved, 200, DateTime.UtcNow.AddDays(-2)),
-            CreateGameRecord("u3", phrase, GameResult.Solved, 150, DateTime.UtcNow.AddDays(-1)),
-            CreateGameRecord("u4", phrase, GameResult.GaveUp, 0, DateTime.UtcNow.AddHours(-2)),
-            CreateGameRecord("u5", phrase, GameResult.GaveUp, 0, DateTime.UtcNow.AddHours(-1))
+            CreateGameRecord("u1", "test phrase", GameResult.Solved, 100, DateTime.UtcNow.AddDays(-3), phraseUniqueId: phraseId),
+            CreateGameRecord("u2", "test phrase", GameResult.Solved, 200, DateTime.UtcNow.AddDays(-2), phraseUniqueId: phraseId),
+            CreateGameRecord("u3", "test phrase", GameResult.Solved, 150, DateTime.UtcNow.AddDays(-1), phraseUniqueId: phraseId),
+            CreateGameRecord("u4", "test phrase", GameResult.GaveUp, 0, DateTime.UtcNow.AddHours(-2), phraseUniqueId: phraseId),
+            CreateGameRecord("u5", "test phrase", GameResult.GaveUp, 0, DateTime.UtcNow.AddHours(-1), phraseUniqueId: phraseId)
         );
         await context.SaveChangesAsync();
 
         var service = new AnalyticsService(context);
-        await service.RecomputePhrasePlayStatsAsync(phrase);
+        await service.RecomputePhrasePlayStatsAsync(phraseId);
 
-        var stats = await context.PhrasePlayStats.FindAsync(phrase);
+        var stats = await context.PhrasePlayStats.FindAsync(phraseId);
         Assert.NotNull(stats);
         Assert.Equal(5, stats.TimesPlayed);
         Assert.Equal(3, stats.TimesSolved);
@@ -128,17 +129,17 @@ public class AnalyticsServiceTests
     public async Task RecomputePhrasePlayStats_NoCalibrateUnder5Games()
     {
         using var context = CreateContext();
-        var phrase = "short phrase";
+        var phraseId = "PHR-0000000000002-TEST02";
         context.GameRecords.AddRange(
-            CreateGameRecord("u1", phrase, GameResult.Solved, 100, DateTime.UtcNow.AddDays(-1)),
-            CreateGameRecord("u2", phrase, GameResult.GaveUp, 0, DateTime.UtcNow)
+            CreateGameRecord("u1", "short phrase", GameResult.Solved, 100, DateTime.UtcNow.AddDays(-1), phraseUniqueId: phraseId),
+            CreateGameRecord("u2", "short phrase", GameResult.GaveUp, 0, DateTime.UtcNow, phraseUniqueId: phraseId)
         );
         await context.SaveChangesAsync();
 
         var service = new AnalyticsService(context);
-        await service.RecomputePhrasePlayStatsAsync(phrase);
+        await service.RecomputePhrasePlayStatsAsync(phraseId);
 
-        var stats = await context.PhrasePlayStats.FindAsync(phrase);
+        var stats = await context.PhrasePlayStats.FindAsync(phraseId);
         Assert.NotNull(stats);
         Assert.Null(stats.CalibratedDifficulty);
     }

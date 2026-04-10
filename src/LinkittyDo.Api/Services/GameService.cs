@@ -22,6 +22,8 @@ public class GameService : IGameService
     private readonly IGamePhraseService _phraseService;
     private readonly IGameRecordRepository _gameRecordRepository;
     private readonly IUserService _userService;
+    private readonly IAnalyticsService _analyticsService;
+    private readonly LinkittyDo.Api.Data.LinkittyDoDbContext _dbContext;
     private readonly ILogger<GameService> _logger;
 
     public GameService(
@@ -29,12 +31,16 @@ public class GameService : IGameService
         IGamePhraseService phraseService,
         IGameRecordRepository gameRecordRepository,
         IUserService userService,
+        IAnalyticsService analyticsService,
+        LinkittyDo.Api.Data.LinkittyDoDbContext dbContext,
         ILogger<GameService> logger)
     {
         _sessionStore = sessionStore;
         _phraseService = phraseService;
         _gameRecordRepository = gameRecordRepository;
         _userService = userService;
+        _analyticsService = analyticsService;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -84,6 +90,7 @@ public class GameService : IGameService
                 UserId = userId!,
                 PlayedAt = now,
                 PhraseId = phrase.Id,
+                PhraseUniqueId = phrase.UniqueId,
                 PhraseText = phrase.FullText,
                 Difficulty = difficulty,
                 Score = 0,
@@ -351,12 +358,40 @@ public class GameService : IGameService
 
         try
         {
+            // Save the GameRecord
             await _gameRecordRepository.CreateAsync(session.GameRecord);
+
+            // Persist GameEvents separately (EF Core ignores the Events navigation property on GameRecord)
+            if (session.GameRecord.Events.Count > 0)
+            {
+                _dbContext.GameEvents.AddRange(session.GameRecord.Events);
+                await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Persisted {Count} events for game {GameId}",
+                    session.GameRecord.Events.Count, session.GameRecord.GameId);
+            }
             
-            // Also update user's lifetime points
+            // Update user's lifetime points
             if (session.UserId != null && session.GameRecord.Score > 0)
             {
                 await _userService.AddPointsAsync(session.UserId, session.GameRecord.Score);
+            }
+
+            // Recompute analytics (fire-and-forget style but still await)
+            try
+            {
+                if (session.UserId != null)
+                {
+                    await _analyticsService.RecomputePlayerStatsAsync(session.UserId);
+                }
+                if (!string.IsNullOrEmpty(session.GameRecord.PhraseUniqueId))
+                {
+                    await _analyticsService.RecomputePhrasePlayStatsAsync(session.GameRecord.PhraseUniqueId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to recompute analytics for game {GameId}, data will be stale until next recompute",
+                    session.GameRecord.GameId);
             }
 
             _logger.LogInformation("Persisted game record {GameId} for user {UserId}",

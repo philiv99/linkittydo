@@ -115,6 +115,7 @@ export interface UserResponse {
   preferredDifficulty: number;
   gamesPlayed: number;
   createdAt: string;
+  roles?: string[];
 }
 
 export interface UpdateDifficultyRequest {

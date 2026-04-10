@@ -9,6 +9,7 @@ public class UserResponse
     public int PreferredDifficulty { get; set; }
     public int GamesPlayed { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<string> Roles { get; set; } = new();
 }
 
 public class DifficultyResponse

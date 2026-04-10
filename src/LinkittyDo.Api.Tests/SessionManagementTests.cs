@@ -1,6 +1,7 @@
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -18,11 +19,18 @@ public class SessionManagementTests
         var sessionStore = new InMemorySessionStore();
         var gameRecordRepoMock = new Mock<IGameRecordRepository>();
         var userServiceMock = new Mock<IUserService>();
+        var analyticsServiceMock = new Mock<IAnalyticsService>();
+        var dbContextOptions = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"SessionManagementTests_{Guid.NewGuid()}")
+            .Options;
+        var dbContext = new LinkittyDoDbContext(dbContextOptions);
         _service = new GameService(
             sessionStore,
             _phraseServiceMock.Object,
             gameRecordRepoMock.Object,
             userServiceMock.Object,
+            analyticsServiceMock.Object,
+            dbContext,
             loggerMock.Object);
     }
 

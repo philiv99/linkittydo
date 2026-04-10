@@ -72,7 +72,7 @@ public class AnalyticsService : IAnalyticsService
     public async Task RecomputePhrasePlayStatsAsync(string phraseUniqueId)
     {
         var games = await _context.GameRecords
-            .Where(g => g.PhraseText == phraseUniqueId && g.Result != GameResult.InProgress)
+            .Where(g => g.PhraseUniqueId == phraseUniqueId && g.Result != GameResult.InProgress)
             .ToListAsync();
 
         if (games.Count == 0) return;

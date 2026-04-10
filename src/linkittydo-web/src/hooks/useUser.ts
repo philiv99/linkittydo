@@ -47,6 +47,7 @@ const mapResponseToUser = (response: UserResponse): User => ({
   lifetimePoints: response.lifetimePoints,
   preferredDifficulty: response.preferredDifficulty,
   createdAt: response.createdAt,
+  roles: response.roles ?? [],
 });
 
 export const useUser = () => {

@@ -14,7 +14,8 @@ public class UserControllerTests
     public UserControllerTests()
     {
         _userServiceMock = new Mock<IUserService>();
-        _controller = new UserController(_userServiceMock.Object);
+        var roleServiceMock = new Mock<IRoleService>();
+        _controller = new UserController(_userServiceMock.Object, roleServiceMock.Object);
     }
 
     private static User CreateTestUser(string id = "USR-1234567890123-ABC123", string name = "TestUser", string email = "test@example.com")

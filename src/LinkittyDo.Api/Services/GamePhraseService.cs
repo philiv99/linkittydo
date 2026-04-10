@@ -373,6 +373,7 @@ Return only the phrase with no quotes or additional text.";
         return new Phrase
         {
             Id = phraseId,
+            UniqueId = gamePhrase.UniqueId,
             FullText = gamePhrase.Text,
             Difficulty = gamePhrase.Difficulty,
             Words = tokens.Select((token, index) => new PhraseWord
