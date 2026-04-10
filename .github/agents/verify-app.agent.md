@@ -11,6 +11,14 @@ You are a verification specialist for the LinkittyDo project. Your job is to tho
 
 Never change any files or folders in any other workspace folder except LinkittyDo.
 
+## Context Efficiency
+
+- Run automated checks (build, test, lint) first — they catch most issues with minimal context
+- Only investigate specific failures, do not read source files preemptively
+- For edge case testing, focus on the changed feature only, not the entire application
+- Report results as structured pass/fail tables, not verbose narratives
+- If all automated checks pass, skip manual verification unless specifically requested
+
 ## Verification Process
 
 ### 1. Static Analysis

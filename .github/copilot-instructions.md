@@ -529,14 +529,22 @@ This means each sprint's lessons are baked into the process docs. The next sprin
 
 Sprint context must survive across conversation sessions. Use these mechanisms:
 
-1. **`docs/agile/sprint-status.json`** (in repo): Tracks current sprint number, status, branch, approval state, and test metrics. Read this at the start of every sprint-related conversation.
+1. **`docs/agile/sprint-status.json`** (in repo): Tracks current sprint number, status, branch, approval state, test metrics, and **per-task progress** (`tasks` array with `{id, title, status}`). Read this at the start of every sprint-related conversation.
 
 2. **Copilot Memory** (`/memories/repo/`): Save sprint summaries after each retrospective. Include: sprint number, goal, result, key lesson, process changes made, and top backlog candidates.
 
 3. **Context limit handling**: If approaching the context limit during execution:
-   - Save progress to `/memories/repo/` and `sprint-status.json`
-   - Commit and push all work in progress
+   - Save progress to `/memories/repo/sprint-N-progress.md` with: branch name, completed tasks, remaining tasks, blockers, files being modified
+   - Update `docs/agile/sprint-status.json` with task-level status
+   - Commit and push all work in progress with `wip:` prefix
    - Notify the user that a new session is needed
+
+4. **Context efficiency rules** (added Sprint 35):
+   - Prefer targeted file reads over full-file reads
+   - Use `multi_replace_string_in_file` for batch edits
+   - Run builds/tests first, then only investigate failures
+   - Do not re-read files already in context
+   - Estimate task context cost before starting (Small: 5-10%, Medium: 15-25%, Large: 25-40%)
 
 When resuming a sprint in a new session:
 - Read `docs/agile/sprint-status.json` for current state

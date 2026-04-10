@@ -1,18 +1,25 @@
 {
   "current_sprint": {
-    "number": 34,
+    "number": 35,
     "status": "in-progress",
-    "branch": "feature/20260410-sprint-34",
+    "branch": "feature/20260410-sprint-35",
     "plan_approved": true,
-    "pr_number": null
+    "pr_number": null,
+    "tasks": [
+      { "id": 1, "title": "Add context-efficiency guidelines to agents", "status": "done" },
+      { "id": 2, "title": "Enhance sprint-status.json schema", "status": "done" },
+      { "id": 3, "title": "Add context budget estimation to Phase 3", "status": "in-progress" },
+      { "id": 4, "title": "Create session-handoff checklist", "status": "not-started" },
+      { "id": 5, "title": "Add memory-save instructions to copilot-instructions", "status": "not-started" }
+    ]
   },
   "last_completed": {
-    "number": 33,
+    "number": 34,
     "date": "2026-04-10",
     "result": "complete",
     "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "Dual-token systems cause re-login bugs; unified AuthContext with single token is manageable and testable"
+    "key_lesson": "Backlog drift accumulates silently - hygiene checklist in retro prevents it"
   },
   "test_metrics": {
     "backend_tests_passing": 294,

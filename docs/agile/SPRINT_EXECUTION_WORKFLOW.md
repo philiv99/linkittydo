@@ -130,6 +130,23 @@ Once the sprint plan is approved in Phase 1, proceed through all tasks without s
 
 **Only stop for reasons listed in [SPRINT_STOPPING_CRITERIA.md](SPRINT_STOPPING_CRITERIA.md).**
 
+### Context Budget Estimation (added Sprint 35)
+
+Before starting each task, estimate its context cost and track cumulative usage:
+
+| Task Size | Examples | Estimated Cost |
+|-----------|----------|----------------|
+| Small | Docs update, single-file edit, config change | ~5-10% |
+| Medium | Multi-file feature, writing tests, refactoring | ~15-25% |
+| Large | Research + implementation, architecture work, complex debugging | ~25-40% |
+
+**Rules**:
+1. Before each task: `cumulative% + estimated_cost% → if > 85%, save state first`
+2. Prefer targeted file reads over full-file reads to conserve context
+3. Use `multi_replace_string_in_file` for batch edits instead of sequential single edits
+4. If a sprint has >4 Medium tasks, plan for a session break and save to `sprint-status.json` tasks array
+5. At 85% context: save all task progress to `sprint-status.json`, commit WIP, push
+
 ### Test Failure Protocol
 
 All new tests introduced during the sprint MUST pass before the sprint can be marked complete.
