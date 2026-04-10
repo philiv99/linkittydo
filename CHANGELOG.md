@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **docs**: Sprint 37 — growing complexity management: code-architect update, codebase map, complexity budget, code-simplifier awareness
+- **docs**: Update code-architect agent with full current architecture (12 services, 9 controllers, EF Core, JWT, admin, analytics, simulation)
+- **docs**: Add Codebase Map to copilot-instructions.md for quick navigation reference
+- **docs**: Update code-simplifier with complexity awareness (God objects, hook bloat, inline styles, deep nesting signals)
+- **docs**: Add Complexity Check to SPRINT_EXECUTION_WORKFLOW.md Phase 2 (architecture review triggers)
 - **docs**: Sprint 36 — developer practice gaps: lessons-learned registry, pre-commit checklist, test expectations in plans, npm run build enforcement, retro lesson encoding
 - **docs**: Create Lessons Learned registry in copilot-instructions.md (L1-L11 indexed from 13 retrospectives)
 - **docs**: Add Pre-Commit Checklist to verify-app agent (unused imports, test coverage, API signatures, grep-before-delete)

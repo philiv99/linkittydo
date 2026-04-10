@@ -104,6 +104,13 @@ All prerequisites pass before proceeding to planning. If previous sprint's High-
   ```
 - [ ] Verify all builds and tests pass
 
+### Complexity Check (added Sprint 37)
+
+Before starting execution, review the sprint plan for complexity signals:
+- If the sprint adds **>3 new services** or **>2 new controllers**, flag for architecture review
+- If the sprint modifies **>15 files**, plan for intermediate commits after each task
+- If the sprint touches **>3 layers** (models + repositories + services + controllers + frontend), require a code-architect review before PR
+
 ### Gate
 
 All builds and tests must pass before starting execution.
