@@ -29,6 +29,14 @@ Clue generation pipeline:
 Hidden Word -> Datamuse Synonym -> DuckDuckGo Search -> URL Selection -> Validation
 ```
 
+## Context Efficiency
+
+- Use targeted `grep_search` for specific patterns rather than reading entire files
+- When reviewing architecture, read only the relevant service/controller interfaces, not implementations
+- Summarize findings incrementally — do not re-analyze files already reviewed
+- For dependency analysis, read only `.csproj` and `package.json`, not source files
+- Limit scope to the specific architectural question asked
+
 ## Responsibilities
 
 ### 1. Design Reviews

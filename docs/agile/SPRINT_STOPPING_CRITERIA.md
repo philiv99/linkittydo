@@ -86,6 +86,28 @@ If `current_usage% + estimated_task_cost% > 95%`, save state before starting the
 3. Commit and push all work in progress
 4. Notify the user that a new session is needed to continue
 
+### Session Handoff Checklist (added Sprint 35)
+
+When a session break is needed (context at 85%+ or session ending), follow this exact checklist:
+
+**Before ending the session:**
+- [ ] Update `sprint-status.json` → set `tasks` array with status for each item (done/in-progress/not-started)
+- [ ] Commit all work in progress with message: `wip: Sprint N - session break after task M`
+- [ ] Push to feature branch
+- [ ] Save to Copilot memory (`/memories/repo/sprint-N-progress.md`) with:
+  - Current branch name
+  - List of completed tasks with one-line summary of what was done
+  - List of remaining tasks
+  - Any blockers, open questions, or partial work state
+  - Files currently being modified
+
+**When resuming in a new session:**
+- [ ] Read `sprint-status.json` for current state
+- [ ] Read `/memories/repo/sprint-N-progress.md` for saved context
+- [ ] `git checkout {branch}` and `git pull`
+- [ ] Verify builds pass: `dotnet build` and `npm run build`
+- [ ] Continue from the first non-done task in `sprint-status.json`
+
 ### 7. Test Failure Escalation
 
 **Rule**: All new tests introduced during a sprint MUST pass before the sprint can be marked complete. A sprint with failing new tests is NOT done.

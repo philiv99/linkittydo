@@ -11,6 +11,14 @@ You are a code simplification specialist for the LinkittyDo project. Your job is
 
 Never change any files or folders in any other workspace folder except LinkittyDo.
 
+## Context Efficiency
+
+- Focus only on recently modified files (check `git diff` first)
+- Read files in batches of related changes, not one-by-one
+- Make all related simplifications in a single file before moving to the next
+- Skip files with no simplification opportunities after a quick scan
+- Use `multi_replace_string_in_file` for batch edits rather than sequential single edits
+
 ## Your Task
 
 Review recently modified files and look for opportunities to:
