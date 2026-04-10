@@ -214,7 +214,7 @@ export function AdminUsers() {
                         <div><span className="analytics-label">Avg Guesses/Game</span><br /><strong>{analytics.avgGuessesPerGame.toFixed(1)}</strong></div>
                       </div>
                     ) : (
-                      <span className="analytics-empty">No analytics available for this user</span>
+                      <span className="analytics-empty">No games played yet — stats will appear after the user completes a game.</span>
                     )}
                   </td>
                 </tr>

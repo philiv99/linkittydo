@@ -54,8 +54,22 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const errorData = await response.json().catch(() => null);
     throw new Error(errorData?.error?.message || `Request failed: ${response.status}`);
   }
+  if (response.status === 204) return undefined as T;
   const wrapper = await response.json();
   return wrapper.data;
+}
+
+async function handlePaginatedResponse<T>(response: Response): Promise<PaginatedResponse<T>> {
+  if (response.status === 401) {
+    clearAdminTokens();
+    window.location.href = '/linkittydo/admin/login';
+    throw new Error('Unauthorized');
+  }
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error?.message || `Request failed: ${response.status}`);
+  }
+  return response.json();
 }
 
 export const adminApi = {
@@ -95,13 +109,7 @@ export const adminApi = {
     if (isSimulated !== undefined) params.set('isSimulated', String(isSimulated));
     if (search) params.set('search', search);
     const response = await fetch(`${API_BASE_URL}/admin/users?${params}`, { headers: adminHeaders() });
-    if (response.status === 401) {
-      clearAdminTokens();
-      window.location.href = '/linkittydo/admin/login';
-      throw new Error('Unauthorized');
-    }
-    if (!response.ok) throw new Error('Failed to fetch users');
-    return response.json();
+    return handlePaginatedResponse<AdminUser>(response);
   },
 
   async setUserStatus(uniqueId: string, isActive: boolean): Promise<void> {
@@ -110,7 +118,7 @@ export const adminApi = {
       headers: adminHeaders(),
       body: JSON.stringify({ isActive }),
     });
-    if (!response.ok) throw new Error('Failed to update user status');
+    await handleResponse<void>(response);
   },
 
   async getPlayerAnalytics(uniqueId: string): Promise<PlayerAnalytics> {
@@ -125,13 +133,7 @@ export const adminApi = {
     if (filters?.result) params.set('result', filters.result);
     if (filters?.isSimulated !== undefined) params.set('isSimulated', String(filters.isSimulated));
     const response = await fetch(`${API_BASE_URL}/admin/games?${params}`, { headers: adminHeaders() });
-    if (response.status === 401) {
-      clearAdminTokens();
-      window.location.href = '/linkittydo/admin/login';
-      throw new Error('Unauthorized');
-    }
-    if (!response.ok) throw new Error('Failed to fetch games');
-    return response.json();
+    return handlePaginatedResponse<AdminGame>(response);
   },
 
   async getGameDetail(gameId: string): Promise<GameDetail> {
@@ -151,7 +153,7 @@ export const adminApi = {
       headers: adminHeaders(),
       body: JSON.stringify({ value }),
     });
-    if (!response.ok) throw new Error('Failed to update config');
+    await handleResponse<void>(response);
   },
 
   // Data Explorer
@@ -175,13 +177,7 @@ export const adminApi = {
     const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (isActive !== undefined) params.set('isActive', String(isActive));
     const response = await fetch(`${API_BASE_URL}/admin/phrases?${params}`, { headers: adminHeaders() });
-    if (response.status === 401) {
-      clearAdminTokens();
-      window.location.href = '/linkittydo/admin/login';
-      throw new Error('Unauthorized');
-    }
-    if (!response.ok) throw new Error('Failed to fetch phrases');
-    return response.json();
+    return handlePaginatedResponse<AdminPhrase>(response);
   },
 
   async createPhrase(text: string, difficulty: number): Promise<AdminPhrase> {
@@ -208,7 +204,7 @@ export const adminApi = {
       headers: adminHeaders(),
       body: JSON.stringify({ isActive }),
     });
-    if (!response.ok) throw new Error('Failed to update phrase status');
+    await handleResponse<void>(response);
   },
 
   async getPhraseStats(uniqueId: string): Promise<PhraseStats> {
