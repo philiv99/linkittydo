@@ -201,4 +201,37 @@ public class AnalyticsServiceTests
         Assert.Null(await service.GetPhrasePlayStatsAsync("test"));
         Assert.Empty(await service.GetTopCluesAsync("test"));
     }
+
+    [Fact]
+    public async Task GameRecord_PhraseUniqueId_PersistsAndFilters()
+    {
+        using var context = CreateContext();
+        var phraseId = "PHR-0000000000099-FILT01";
+        var otherPhraseId = "PHR-0000000000099-FILT02";
+
+        context.GameRecords.AddRange(
+            CreateGameRecord("u1", "target phrase", GameResult.Solved, 100, DateTime.UtcNow, phraseUniqueId: phraseId),
+            CreateGameRecord("u2", "target phrase", GameResult.GaveUp, 0, DateTime.UtcNow, phraseUniqueId: phraseId),
+            CreateGameRecord("u3", "other phrase", GameResult.Solved, 200, DateTime.UtcNow, phraseUniqueId: otherPhraseId)
+        );
+        await context.SaveChangesAsync();
+
+        // Verify the column is queryable and filters correctly
+        var filtered = await context.GameRecords
+            .Where(g => g.PhraseUniqueId == phraseId)
+            .ToListAsync();
+
+        Assert.Equal(2, filtered.Count);
+        Assert.All(filtered, g => Assert.Equal(phraseId, g.PhraseUniqueId));
+
+        // Verify analytics recomputation works end-to-end
+        var service = new AnalyticsService(context);
+        await service.RecomputePhrasePlayStatsAsync(phraseId);
+
+        var stats = await context.PhrasePlayStats.FindAsync(phraseId);
+        Assert.NotNull(stats);
+        Assert.Equal(2, stats.TimesPlayed);
+        Assert.Equal(1, stats.TimesSolved);
+        Assert.Equal(1, stats.TimesGaveUp);
+    }
 }

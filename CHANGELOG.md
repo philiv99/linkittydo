@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **fix**: Apply pending AddPhraseUniqueIdToGameRecord migration — column missing from DB caused MySqlException (#112)
+- **feat**: Auto-apply EF Core migrations on startup in Development environment (#112)
+- **test**: Add integration test for GameRecord PhraseUniqueId query and filter (#112)
 - **fix**: Persist GameEvents to database — events were ignored by EF Core (#103)
 - **fix**: Recompute PlayerStats after each game completion (#104)
 - **fix**: Recompute PhrasePlayStats after each game completion (#105)

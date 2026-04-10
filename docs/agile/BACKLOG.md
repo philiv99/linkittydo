@@ -95,6 +95,12 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 41 | App footer with version and status | P1 | 6 | Sticky footer showing app version, connection status, game timer, and keyboard shortcuts. Minimal height to preserve space. |
 | 42 | Default route to /play | P2 | 6 | Root route `/` should redirect to `/play` instead of the HomePage splash. Remove or simplify HomePage. |
 
+### Bug Fixes
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 112 | BUG: `Unknown column 'g.PhraseUniqueId' in 'field list'` — Migration not applied | P1 | 32 | The `AddPhraseUniqueIdToGameRecord` migration exists but was not applied to the running MySQL database. Any LINQ query touching `GameRecord.PhraseUniqueId` (e.g., `AnalyticsService.RecomputePhrasePlayStatsAsync`) throws `MySqlException`. Fix: apply pending migration, add startup migration check, verify all model-to-DB column mappings are consistent, add integration test. |
+
 ### Security & Production Readiness
 
 | # | Item | Priority | Sprint | Notes |
