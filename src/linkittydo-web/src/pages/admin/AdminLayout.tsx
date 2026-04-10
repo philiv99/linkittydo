@@ -1,13 +1,14 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { adminApi } from '../../services/adminApi';
+import { useAuth } from '../../contexts/AuthContext';
 import './AdminLayout.css';
 
 export function AdminLayout() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    adminApi.logout();
-    navigate('/admin/login');
+    logout();
+    navigate('/play');
   };
 
   return (

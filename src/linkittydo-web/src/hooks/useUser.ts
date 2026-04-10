@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api, clearTokens } from '../services/api';
+import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import type { User, UserResponse, RegisterRequest, LoginRequest, CreateUserRequest } from '../types';
 
 const STORAGE_KEY = 'linkittydo_user';
@@ -51,6 +52,8 @@ const mapResponseToUser = (response: UserResponse): User => ({
 });
 
 export const useUser = () => {
+  const auth = useAuth();
+
   const [user, setUser] = useState<User>(() => {
     const stored = getStoredUser();
     if (stored) {
@@ -120,7 +123,7 @@ export const useUser = () => {
     setError(null);
     
     try {
-      const authResponse = await api.register(request);
+      const authResponse = await auth.register(request);
       const newUser: User = {
         uniqueId: authResponse.uniqueId,
         name: authResponse.name,
@@ -139,14 +142,14 @@ export const useUser = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchAllUsers]);
+  }, [auth, fetchAllUsers]);
 
   const loginUser = useCallback(async (request: LoginRequest): Promise<boolean> => {
     setLoading(true);
     setError(null);
     
     try {
-      const authResponse = await api.login(request);
+      const authResponse = await auth.login(request);
       const serverUser = await api.getUser(authResponse.uniqueId);
       if (serverUser) {
         setUser({ ...mapResponseToUser(serverUser), roles: authResponse.roles ?? [] });
@@ -169,7 +172,7 @@ export const useUser = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchAllUsers]);
+  }, [auth, fetchAllUsers]);
 
   const updateUser = useCallback(async (request: CreateUserRequest): Promise<boolean> => {
     setLoading(true);
@@ -272,9 +275,9 @@ export const useUser = () => {
   }, []);
 
   const signOut = useCallback(() => {
-    clearTokens();
+    auth.logout();
     resetToGuest();
-  }, [resetToGuest]);
+  }, [auth, resetToGuest]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -283,7 +286,7 @@ export const useUser = () => {
   return {
     user,
     isGuest,
-    isAdmin: !isGuest && (user.roles ?? []).includes('Admin'),
+    isAdmin: auth.isAdmin,
     allUsers,
     loading,
     error,
