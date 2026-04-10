@@ -1,0 +1,81 @@
+.games-filter-bar {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.games-filter-label {
+  color: #a0aec0;
+  font-size: 0.85rem;
+}
+
+.games-filter-bar select {
+  padding: 0.4rem;
+  border-radius: 4px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #2a3a5c;
+}
+
+.game-id-cell {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.game-sim-badge {
+  margin-left: 0.5rem;
+}
+
+.game-phrase-cell {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-detail-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #2a3a5c;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.game-detail-btn:hover {
+  background: #16213e;
+}
+
+.game-detail-row {
+  background: #0f3460;
+  padding: 1rem;
+}
+
+.game-detail-meta {
+  margin-bottom: 0.75rem;
+}
+
+.game-events-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.game-events-table th {
+  padding: 0.4rem;
+  font-size: 0.75rem;
+  text-align: left;
+  color: #a0aec0;
+}
+
+.game-events-table td {
+  padding: 0.3rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+.games-empty {
+  text-align: center;
+  color: #a0aec0;
+  padding: 2rem;
+}

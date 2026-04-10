@@ -12,6 +12,7 @@ import type {
   AdminPhrase,
   PhraseStats,
   UserRoles,
+  AuditLogEntry,
 } from '../types/admin';
 
 const getApiBaseUrl = (): string => {
@@ -236,5 +237,25 @@ export const adminApi = {
       headers: adminHeaders(),
     });
     return handleResponse<UserRoles>(response);
+  },
+
+  // Audit Log
+  async getAuditLog(page = 1, pageSize = 50, action?: string, userId?: string, from?: string, to?: string): Promise<PaginatedResponse<AuditLogEntry>> {
+    const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString() });
+    if (action) params.append('action', action);
+    if (userId) params.append('userId', userId);
+    if (from) params.append('from', from);
+    if (to) params.append('to', to);
+    const response = await fetch(`${API_BASE_URL}/admin/audit-log?${params}`, {
+      headers: adminHeaders(),
+    });
+    return handleResponse<PaginatedResponse<AuditLogEntry>>(response);
+  },
+
+  async getAuditActions(): Promise<string[]> {
+    const response = await fetch(`${API_BASE_URL}/admin/audit-log/actions`, {
+      headers: adminHeaders(),
+    });
+    return handleResponse<string[]>(response);
   },
 };

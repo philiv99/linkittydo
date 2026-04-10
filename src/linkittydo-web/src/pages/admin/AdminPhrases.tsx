@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { AdminPhrase, PhraseStats } from '../../types/admin';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import './AdminPhrases.css';
 
 export const AdminPhrases = () => {
@@ -11,6 +12,7 @@ export const AdminPhrases = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{ phraseId: string; isActive: boolean } | null>(null);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -176,7 +178,7 @@ export const AdminPhrases = () => {
                   </button>
                   <button
                     className={`btn-action ${phrase.isActive ? 'deactivate' : 'activate'}`}
-                    onClick={() => handleStatusToggle(phrase.uniqueId, phrase.isActive)}
+                    onClick={() => setConfirmAction({ phraseId: phrase.uniqueId, isActive: phrase.isActive })}
                   >
                     {phrase.isActive ? 'Deactivate' : 'Activate'}
                   </button>
@@ -256,6 +258,22 @@ export const AdminPhrases = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {confirmAction && (
+        <ConfirmDialog
+          title={confirmAction.isActive ? 'Deactivate Phrase' : 'Activate Phrase'}
+          message={confirmAction.isActive
+            ? 'Are you sure you want to deactivate this phrase? It will no longer appear in games.'
+            : 'Are you sure you want to activate this phrase? It will start appearing in games.'}
+          confirmLabel={confirmAction.isActive ? 'Deactivate' : 'Activate'}
+          variant={confirmAction.isActive ? 'danger' : 'safe'}
+          onConfirm={async () => {
+            await handleStatusToggle(confirmAction.phraseId, confirmAction.isActive);
+            setConfirmAction(null);
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
       )}
     </div>
   );

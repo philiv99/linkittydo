@@ -36,6 +36,9 @@ export function AdminLayout() {
           <NavLink to="/admin/data" className={({ isActive }) => isActive ? 'active' : ''}>
             Data Explorer
           </NavLink>
+          <NavLink to="/admin/audit" className={({ isActive }) => isActive ? 'active' : ''}>
+            Audit Log
+          </NavLink>
         </nav>
         <div className="admin-sidebar-footer">
           <NavLink to="/play" className="back-to-game">Back to Game</NavLink>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { SiteConfigEntry } from '../../types/admin';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import './AdminConfig.css';
 
 export function AdminConfig() {
   const [configs, setConfigs] = useState<SiteConfigEntry[]>([]);
@@ -9,6 +11,7 @@ export function AdminConfig() {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   useEffect(() => {
     adminApi.getConfigs()
@@ -55,14 +58,14 @@ export function AdminConfig() {
         <tbody>
           {configs.map(config => (
             <tr key={config.key}>
-              <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{config.key}</td>
+              <td className="config-key">{config.key}</td>
               <td>
                 {editingKey === config.key ? (
                   config.valueType === 'bool' ? (
                     <select
                       value={editValue}
                       onChange={e => setEditValue(e.target.value)}
-                      style={{ padding: '0.3rem', background: '#0f3460', color: '#e0e0e0', border: '1px solid #2a3a5c', borderRadius: '4px' }}
+                      className="config-select"
                     >
                       <option value="true">true</option>
                       <option value="false">false</option>
@@ -72,35 +75,35 @@ export function AdminConfig() {
                       value={editValue}
                       onChange={e => setEditValue(e.target.value)}
                       rows={3}
-                      style={{ width: '100%', padding: '0.3rem', background: '#0f3460', color: '#e0e0e0', border: '1px solid #2a3a5c', borderRadius: '4px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                      className="config-textarea"
                     />
                   ) : (
                     <input
                       type={config.valueType === 'int' ? 'number' : 'text'}
                       value={editValue}
                       onChange={e => setEditValue(e.target.value)}
-                      style={{ padding: '0.3rem', background: '#0f3460', color: '#e0e0e0', border: '1px solid #2a3a5c', borderRadius: '4px', width: '200px' }}
+                      className="config-input"
                     />
                   )
                 ) : (
-                  <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{config.value}</span>
+                  <span className="config-value-display">{config.value}</span>
                 )}
               </td>
-              <td style={{ color: '#a0aec0', fontSize: '0.8rem' }}>{config.valueType}</td>
-              <td style={{ fontSize: '0.8rem' }}>{new Date(config.updatedAt).toLocaleDateString()}</td>
+              <td className="config-type">{config.valueType}</td>
+              <td className="config-date">{new Date(config.updatedAt).toLocaleDateString()}</td>
               <td>
                 {editingKey === config.key ? (
-                  <div style={{ display: 'flex', gap: '0.3rem' }}>
+                  <div className="config-actions">
                     <button
-                      onClick={handleSave}
+                      onClick={() => setShowSaveConfirm(true)}
                       disabled={saving}
-                      style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: 'none', background: '#48bb78', color: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
+                      className="config-save-btn"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setEditingKey(null)}
-                      style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #2a3a5c', background: 'transparent', color: '#a0aec0', cursor: 'pointer', fontSize: '0.8rem' }}
+                      className="config-cancel-btn"
                     >
                       Cancel
                     </button>
@@ -108,7 +111,7 @@ export function AdminConfig() {
                 ) : (
                   <button
                     onClick={() => handleEdit(config)}
-                    style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #2a3a5c', background: '#0f3460', color: '#e0e0e0', cursor: 'pointer', fontSize: '0.8rem' }}
+                    className="config-edit-btn"
                   >
                     Edit
                   </button>
@@ -117,10 +120,24 @@ export function AdminConfig() {
             </tr>
           ))}
           {configs.length === 0 && (
-            <tr><td colSpan={5} style={{ textAlign: 'center', color: '#a0aec0', padding: '2rem' }}>No configuration entries</td></tr>
+            <tr><td colSpan={5} className="config-empty">No configuration entries</td></tr>
           )}
         </tbody>
       </table>
+
+      {showSaveConfirm && (
+        <ConfirmDialog
+          title="Save Configuration"
+          message={`Are you sure you want to update "${editingKey}" to "${editValue}"?`}
+          confirmLabel="Save"
+          variant="safe"
+          onConfirm={async () => {
+            setShowSaveConfirm(false);
+            await handleSave();
+          }}
+          onCancel={() => setShowSaveConfirm(false)}
+        />
+      )}
     </div>
   );
 }

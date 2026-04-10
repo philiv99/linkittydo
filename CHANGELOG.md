@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-10
+- **feat**: Add reusable ConfirmDialog component for destructive admin actions (#97)
+- **feat**: Add audit log API endpoint and admin viewer page with filters (#98)
+- **chore**: Extract inline styles to CSS files for AdminDashboard, AdminGames, AdminConfig, AdminDataExplorer (#99)
+- **feat**: Add dashboard manual refresh button and auto-refresh toggle (30s) (#100)
 - **fix**: Fix 6 TypeScript build errors — GameBoard props, unused imports, test mocks, vitest config (#93)
 - **feat**: Add phrase admin CRUD API endpoints at /api/admin/phrases with pagination and stats (#102)
 - **feat**: Add user search parameter to admin GET /api/admin/users endpoint (#95)

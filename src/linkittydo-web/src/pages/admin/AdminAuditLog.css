@@ -1,0 +1,70 @@
+.audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.audit-filters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.audit-filters select,
+.audit-filters input {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+}
+
+.audit-filters button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #0f3460;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.audit-filters button:hover {
+  background: #16213e;
+}
+
+.audit-action-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #2a3a5c;
+  color: #a0aec0;
+}
+
+.audit-details {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: #a0aec0;
+}
+
+.audit-timestamp {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  white-space: nowrap;
+}
+
+.audit-empty {
+  text-align: center;
+  color: #a0aec0;
+  padding: 2rem;
+}

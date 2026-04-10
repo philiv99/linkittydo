@@ -140,3 +140,14 @@ export interface UserRoles {
   uniqueId: string;
   roles: string[];
 }
+
+export interface AuditLogEntry {
+  id: number;
+  userId: string | null;
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  details: string | null;
+  ipAddress: string | null;
+  timestamp: string;
+}

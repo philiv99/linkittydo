@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '../../services/adminApi';
 import type { AdminUser, PlayerAnalytics, UserRoles } from '../../types/admin';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import './AdminUsers.css';
 
 const ALL_ROLES = ['Admin', 'Moderator', 'Player'] as const;
@@ -18,6 +19,7 @@ export function AdminUsers() {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [roleToAssign, setRoleToAssign] = useState<Record<string, string>>({});
+  const [confirmAction, setConfirmAction] = useState<{ userId: string; isActive: boolean; name: string } | null>(null);
 
   const fetchUsers = useCallback(async (p: number, search?: string) => {
     setLoading(true);
@@ -183,7 +185,7 @@ export function AdminUsers() {
                 <td>
                   <button
                     className="admin-action-btn"
-                    onClick={() => handleToggleStatus(user.uniqueId, user.isActive)}
+                    onClick={() => setConfirmAction({ userId: user.uniqueId, isActive: user.isActive, name: user.name })}
                   >
                     {user.isActive ? 'Deactivate' : 'Activate'}
                   </button>
@@ -226,6 +228,22 @@ export function AdminUsers() {
         <span>Page {page} of {totalPages}</span>
         <button disabled={page >= totalPages} onClick={() => fetchUsers(page + 1, searchTerm || undefined)}>Next</button>
       </div>
+
+      {confirmAction && (
+        <ConfirmDialog
+          title={confirmAction.isActive ? 'Deactivate User' : 'Activate User'}
+          message={confirmAction.isActive
+            ? `Are you sure you want to deactivate "${confirmAction.name}"? They will no longer be able to log in.`
+            : `Are you sure you want to activate "${confirmAction.name}"?`}
+          confirmLabel={confirmAction.isActive ? 'Deactivate' : 'Activate'}
+          variant={confirmAction.isActive ? 'danger' : 'safe'}
+          onConfirm={async () => {
+            await handleToggleStatus(confirmAction.userId, confirmAction.isActive);
+            setConfirmAction(null);
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
     </div>
   );
 }
