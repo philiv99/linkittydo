@@ -194,7 +194,7 @@ public class UserService : IUserService
     {
         var users = await _repository.GetAllAsync();
         return users
-            .Where(u => !u.IsSimulated)
+            .Where(u => !u.IsSimulated && u.LifetimePoints > 0)
             .OrderByDescending(u => u.LifetimePoints)
             .ThenBy(u => u.Name)
             .Take(top);
@@ -204,9 +204,9 @@ public class UserService : IUserService
     {
         if (_dbContext != null)
         {
-            // Step 1: Get top users by points (simple, reliable query)
+            // Step 1: Get top users by points (only players who have actually played)
             var users = await _dbContext.Users
-                .Where(u => u.IsActive && !u.IsSimulated)
+                .Where(u => u.IsActive && !u.IsSimulated && u.LifetimePoints > 0)
                 .OrderByDescending(u => u.LifetimePoints)
                 .ThenBy(u => u.Name)
                 .Take(top)

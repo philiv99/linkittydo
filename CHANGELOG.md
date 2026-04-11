@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-11
+- **fix**: Sprint 45 — Filter leaderboard to only show players with LifetimePoints > 0, excluding users who never played (#130)
+- **fix**: Add tooltips to leaderboard column headers clarifying Rank, Points, Games, Solved, Best Score, and Streak
+- **test**: Add 3 new leaderboard tests — exclude zero-point users (JSON fallback + EF Core), empty results when all users have zero points
+
+### 2026-04-11
 - **fix**: Sprint 44 — switchUser now clears JWT auth state, preventing admin nav from persisting when switching to non-admin users (#129)
 - **fix**: AdminGuard redirects non-admin users to /play instead of showing static "Access Denied" page
 - **test**: Add 3 AdminGuard tests — admin access, unauthenticated redirect, non-admin redirect
