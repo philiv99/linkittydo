@@ -242,7 +242,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.UpdateUserAsync(uniqueId, request);
-            return Ok(new ApiResponse<UserResponse>(MapToResponse(user!), "User updated successfully"));
+            return Ok(new ApiResponse<UserResponse>(await MapToResponseWithRolesAsync(user!), "User updated successfully"));
         }
         catch (InvalidOperationException ex)
         {

@@ -1,28 +1,26 @@
 {
   "current_sprint": {
-    "number": 37,
+    "number": 38,
     "status": "complete",
-    "branch": "feature/20260410-sprint-37",
+    "branch": "feature/20260411-sprint-38",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Update code-architect agent with current architecture", "status": "done" },
-      { "id": 2, "title": "Update code-simplifier with complexity awareness", "status": "done" },
-      { "id": 3, "title": "Add Codebase Map to copilot-instructions", "status": "done" },
-      { "id": 4, "title": "Add complexity budget to workflow", "status": "done" },
-      { "id": 5, "title": "Update Backend Patterns section", "status": "done" }
+      { "id": 1, "title": "Implement token auto-refresh in AuthContext (#116)", "status": "done" },
+      { "id": 2, "title": "Fix roles in UpdateUser API response (#117)", "status": "done" },
+      { "id": 3, "title": "Mark completed backlog items #93-#115 as Done", "status": "done" }
     ]
   },
   "last_completed": {
-    "number": 37,
-    "date": "2026-04-10",
+    "number": 38,
+    "date": "2026-04-11",
     "result": "complete",
-    "items_completed": 5,
+    "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "Agent instructions must evolve with the codebase - outdated architecture context causes incorrect guidance"
+    "key_lesson": "Token refresh must be implemented alongside token expiry checks; silent auth loss creates confusing UX"
   },
   "test_metrics": {
-    "backend_tests_passing": 294,
+    "backend_tests_passing": 295,
     "frontend_tests_passing": 61,
     "lint_errors": 0
   },
@@ -49,6 +47,7 @@
     "sprint_34": { "pr": 41, "items": "Backlog drift fix, copilot-instructions updated (User model, data access, backend patterns, 60+ completed items)", "tests_after": 294 },
     "sprint_35": { "pr": 42, "items": "Context exhaustion prevention (agent efficiency, task tracking, session handoff, context budget)", "tests_after": 294 },
     "sprint_36": { "pr": 43, "items": "Developer practice gaps (lessons registry L1-L11, pre-commit checklist, test expectations, build enforcement)", "tests_after": 294 },
-    "sprint_37": { "pr": null, "items": "Growing complexity management (code-architect update, codebase map, complexity budget, simplifier awareness)", "tests_after": 294 }
+    "sprint_37": { "pr": null, "items": "Growing complexity management (code-architect update, codebase map, complexity budget, simplifier awareness)", "tests_after": 294 },
+    "sprint_38": { "pr": null, "items": "Admin auth fix (token auto-refresh, roles in UpdateUser response, backlog status cleanup)", "tests_after": 295 }
   }
 }
