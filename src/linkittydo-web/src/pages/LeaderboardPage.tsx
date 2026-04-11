@@ -54,6 +54,9 @@ export const LeaderboardPage: React.FC = () => {
               <th>Player</th>
               <th>Points</th>
               <th>Games</th>
+              <th>Solved</th>
+              <th>Best Score</th>
+              <th>Streak</th>
             </tr>
           </thead>
           <tbody>
@@ -71,6 +74,9 @@ export const LeaderboardPage: React.FC = () => {
                 <td className="name-cell">{entry.name}</td>
                 <td className="points-cell">{entry.lifetimePoints.toLocaleString()}</td>
                 <td className="games-cell">{entry.gamesPlayed}</td>
+                <td className="games-cell">{entry.gamesSolved}</td>
+                <td className="points-cell">{entry.bestScore.toLocaleString()}</td>
+                <td className="games-cell">{entry.currentStreak}</td>
               </tr>
             ))}
           </tbody>

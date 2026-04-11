@@ -118,18 +118,7 @@ public class UserController : ControllerBase
             });
         }
 
-        var users = (await _userService.GetLeaderboardAsync(top)).ToList();
-        var entries = new List<LeaderboardEntry>();
-        for (int i = 0; i < users.Count; i++)
-        {
-            entries.Add(new LeaderboardEntry
-            {
-                Rank = i + 1,
-                Name = users[i].Name,
-                LifetimePoints = users[i].LifetimePoints,
-                GamesPlayed = await _userService.GetGameCountAsync(users[i].UniqueId)
-            });
-        }
+        var entries = await _userService.GetLeaderboardEntriesAsync(top);
 
         return Ok(new ApiResponse<IEnumerable<LeaderboardEntry>>(entries));
     }

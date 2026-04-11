@@ -1,5 +1,6 @@
 using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LinkittyDo.Api.Services;
 
@@ -19,17 +20,20 @@ public interface IUserService
     Task<IEnumerable<GameRecord>> GetUserGamesAsync(string uniqueId);
     Task<int> GetGameCountAsync(string uniqueId);
     Task<IEnumerable<User>> GetLeaderboardAsync(int top = 10);
+    Task<IReadOnlyList<LeaderboardEntry>> GetLeaderboardEntriesAsync(int top = 10);
 }
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _repository;
     private readonly IGameRecordRepository _gameRecordRepository;
+    private readonly LinkittyDoDbContext? _dbContext;
 
-    public UserService(IUserRepository repository, IGameRecordRepository gameRecordRepository)
+    public UserService(IUserRepository repository, IGameRecordRepository gameRecordRepository, LinkittyDoDbContext? dbContext = null)
     {
         _repository = repository;
         _gameRecordRepository = gameRecordRepository;
+        _dbContext = dbContext;
     }
 
     /// <summary>
@@ -190,8 +194,60 @@ public class UserService : IUserService
     {
         var users = await _repository.GetAllAsync();
         return users
+            .Where(u => !u.IsSimulated)
             .OrderByDescending(u => u.LifetimePoints)
             .ThenBy(u => u.Name)
             .Take(top);
+    }
+
+    public async Task<IReadOnlyList<LeaderboardEntry>> GetLeaderboardEntriesAsync(int top = 10)
+    {
+        if (_dbContext != null)
+        {
+            var entries = await _dbContext.Users
+                .Where(u => u.IsActive && !u.IsSimulated)
+                .OrderByDescending(u => u.LifetimePoints)
+                .ThenBy(u => u.Name)
+                .Take(top)
+                .GroupJoin(
+                    _dbContext.PlayerStats,
+                    u => u.UniqueId,
+                    ps => ps.UserId,
+                    (u, stats) => new { User = u, Stats = stats })
+                .SelectMany(
+                    x => x.Stats.DefaultIfEmpty(),
+                    (x, stats) => new LeaderboardEntry
+                    {
+                        Name = x.User.Name,
+                        LifetimePoints = x.User.LifetimePoints,
+                        GamesPlayed = stats != null ? stats.GamesPlayed : 0,
+                        GamesSolved = stats != null ? stats.GamesSolved : 0,
+                        BestScore = stats != null ? stats.BestScore : 0,
+                        CurrentStreak = stats != null ? stats.CurrentStreak : 0
+                    })
+                .ToListAsync();
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                entries[i].Rank = i + 1;
+            }
+
+            return entries;
+        }
+
+        // Fallback for JSON provider (no DbContext)
+        var users = (await GetLeaderboardAsync(top)).ToList();
+        var result = new List<LeaderboardEntry>();
+        for (int i = 0; i < users.Count; i++)
+        {
+            result.Add(new LeaderboardEntry
+            {
+                Rank = i + 1,
+                Name = users[i].Name,
+                LifetimePoints = users[i].LifetimePoints,
+                GamesPlayed = await _gameRecordRepository.GetCountByUserIdAsync(users[i].UniqueId)
+            });
+        }
+        return result;
     }
 }

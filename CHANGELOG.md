@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-11
+- **feat**: Sprint 42 — Leaderboard excludes simulated users; shows only real player data from DB (#129)
+- **feat**: Leaderboard uses PlayerStats join for GamesPlayed, GamesSolved, BestScore, CurrentStreak (eliminates N+1 queries)
+- **feat**: Frontend leaderboard table displays Solved, Best Score, and Streak columns
+- **test**: Add 3 new backend tests — simulated user exclusion, fallback stats, fallback simulated exclusion; update controller test
+
 ### 2026-04-12
 - **feat**: Sprint 41 — Add PersistenceStatus enum (Saved/Failed/NotApplicable) to game responses; frontend toast on save failures (#125)
 - **feat**: Lazy-load game events in GameHistoryPage via getGameDetail API; expandable event timeline with loading states (#126)
