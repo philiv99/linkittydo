@@ -57,6 +57,6 @@
     "sprint_42": { "pr": 49, "items": "Leaderboard real data only (exclude simulated users, PlayerStats join, enriched columns)", "tests_after": 323 },
     "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 },
     "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
-    "sprint_45": { "pr": null, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 }
+    "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 }
   }
 }
