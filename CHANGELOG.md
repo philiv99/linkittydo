@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-11
+- **fix**: Sprint 43 — Rewrite leaderboard query from GroupJoin to two-query approach fixing missing names, zero stats, and order preservation
+- **fix**: Add fallback stats computation from GameRecords when PlayerStats table is empty
+- **fix**: Handle empty/null player names with "(unknown)" fallback in both backend and frontend
+- **test**: Add 6 new EF Core leaderboard tests — stats from PlayerStats, fallback from GameRecords, empty names, simulated/inactive exclusion, order preservation
+
+### 2026-04-11
 - **feat**: Sprint 42 — Leaderboard excludes simulated users; shows only real player data from DB (#129)
 - **feat**: Leaderboard uses PlayerStats join for GamesPlayed, GamesSolved, BestScore, CurrentStreak (eliminates N+1 queries)
 - **feat**: Frontend leaderboard table displays Solved, Best Score, and Streak columns

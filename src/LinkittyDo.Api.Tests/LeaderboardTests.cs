@@ -3,6 +3,7 @@ using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace LinkittyDo.Api.Tests;
@@ -183,5 +184,155 @@ public class LeaderboardTests
         Assert.Equal(1, resultEntries[0].GamesSolved);
         Assert.Equal(800, resultEntries[0].BestScore);
         Assert.Equal(2, resultEntries[1].Rank);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_FallbackHandlesEmptyNames()
+    {
+        var users = new List<User>
+        {
+            new() { UniqueId = "USR-1", Name = "", LifetimePoints = 1000 },
+            new() { UniqueId = "USR-2", Name = "  ", LifetimePoints = 500 }
+        };
+        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
+        _gameRecordRepoMock.Setup(r => r.GetCountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(0);
+
+        var result = (await _service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("(unknown)", result[0].Name);
+        Assert.Equal("(unknown)", result[1].Name);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_ReturnsStatsFromPlayerStats()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_Stats_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.AddRange(
+            new User { UniqueId = "USR-1", Name = "Alice", Email = "alice@test.com", LifetimePoints = 1000, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-2", Name = "Bob", Email = "bob@test.com", LifetimePoints = 500, IsActive = true, CreatedAt = DateTime.UtcNow }
+        );
+        context.PlayerStats.AddRange(
+            new PlayerStats { UserId = "USR-1", GamesPlayed = 5, GamesSolved = 3, BestScore = 800, CurrentStreak = 2, ComputedAt = DateTime.UtcNow },
+            new PlayerStats { UserId = "USR-2", GamesPlayed = 2, GamesSolved = 1, BestScore = 400, CurrentStreak = 0, ComputedAt = DateTime.UtcNow }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal(5, result[0].GamesPlayed);
+        Assert.Equal(3, result[0].GamesSolved);
+        Assert.Equal(800, result[0].BestScore);
+        Assert.Equal(2, result[0].CurrentStreak);
+        Assert.Equal("Bob", result[1].Name);
+        Assert.Equal(2, result[1].GamesPlayed);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_FallsBackToGameRecordsWhenNoPlayerStats()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_Fallback_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.Add(new User
+        {
+            UniqueId = "USR-1", Name = "Alice", Email = "alice@test.com",
+            LifetimePoints = 1000, IsActive = true, CreatedAt = DateTime.UtcNow
+        });
+        context.GameRecords.AddRange(
+            new GameRecord { GameId = "GAME-1", UserId = "USR-1", PhraseText = "test", PlayedAt = DateTime.UtcNow, CompletedAt = DateTime.UtcNow, Score = 800, Result = GameResult.Solved },
+            new GameRecord { GameId = "GAME-2", UserId = "USR-1", PhraseText = "test2", PlayedAt = DateTime.UtcNow, CompletedAt = DateTime.UtcNow, Score = 600, Result = GameResult.Solved },
+            new GameRecord { GameId = "GAME-3", UserId = "USR-1", PhraseText = "test3", PlayedAt = DateTime.UtcNow, CompletedAt = DateTime.UtcNow, Score = 200, Result = GameResult.GaveUp }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Single(result);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal(3, result[0].GamesPlayed);
+        Assert.Equal(2, result[0].GamesSolved);
+        Assert.Equal(800, result[0].BestScore);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_HandlesEmptyNames()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_EmptyNames_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.Add(new User
+        {
+            UniqueId = "USR-1", Name = "", Email = "noname@test.com",
+            LifetimePoints = 500, IsActive = true, CreatedAt = DateTime.UtcNow
+        });
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Single(result);
+        Assert.Equal("(unknown)", result[0].Name);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_ExcludesSimulatedAndInactiveUsers()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_Filter_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.AddRange(
+            new User { UniqueId = "USR-1", Name = "Alice", Email = "a@test.com", LifetimePoints = 1000, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "SIM-1", Name = "SimBot", Email = "sim@test.com", LifetimePoints = 9999, IsActive = true, IsSimulated = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-2", Name = "Deleted", Email = "d@test.com", LifetimePoints = 5000, IsActive = false, CreatedAt = DateTime.UtcNow }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Single(result);
+        Assert.Equal("Alice", result[0].Name);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_PreservesOrderByPointsThenName()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_Order_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.AddRange(
+            new User { UniqueId = "USR-1", Name = "Zara", Email = "z@test.com", LifetimePoints = 500, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-2", Name = "Alice", Email = "a@test.com", LifetimePoints = 500, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-3", Name = "Bob", Email = "b@test.com", LifetimePoints = 1000, IsActive = true, CreatedAt = DateTime.UtcNow }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(3, result.Count);
+        Assert.Equal("Bob", result[0].Name);     // 1000 pts
+        Assert.Equal("Alice", result[1].Name);   // 500 pts, A < Z
+        Assert.Equal("Zara", result[2].Name);    // 500 pts, Z > A
+        Assert.Equal(1, result[0].Rank);
+        Assert.Equal(2, result[1].Rank);
+        Assert.Equal(3, result[2].Rank);
     }
 }
