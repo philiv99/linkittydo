@@ -7,9 +7,9 @@ public interface IGameService
 {
     Task<GameSession> StartNewGameAsync(string? userId = null, int difficulty = 10);
     GameSession? GetGame(Guid sessionId);
-    GuessResponse SubmitGuess(Guid sessionId, GuessRequest request);
+    Task<GuessResponse> SubmitGuessAsync(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
-    GameState GiveUp(Guid sessionId);
+    Task<GameState> GiveUpAsync(Guid sessionId);
     void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url);
     int RemoveExpiredSessions(TimeSpan maxAge);
     int ActiveSessionCount { get; }
@@ -23,6 +23,7 @@ public class GameService : IGameService
     private readonly IGameRecordRepository _gameRecordRepository;
     private readonly IUserService _userService;
     private readonly IAnalyticsService _analyticsService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly LinkittyDo.Api.Data.LinkittyDoDbContext _dbContext;
     private readonly ILogger<GameService> _logger;
 
@@ -32,6 +33,7 @@ public class GameService : IGameService
         IGameRecordRepository gameRecordRepository,
         IUserService userService,
         IAnalyticsService analyticsService,
+        IUnitOfWork unitOfWork,
         LinkittyDo.Api.Data.LinkittyDoDbContext dbContext,
         ILogger<GameService> logger)
     {
@@ -40,6 +42,7 @@ public class GameService : IGameService
         _gameRecordRepository = gameRecordRepository;
         _userService = userService;
         _analyticsService = analyticsService;
+        _unitOfWork = unitOfWork;
         _dbContext = dbContext;
         _logger = logger;
     }
@@ -108,7 +111,7 @@ public class GameService : IGameService
         return _sessionStore.Get(sessionId);
     }
 
-    public GuessResponse SubmitGuess(Guid sessionId, GuessRequest request)
+    public async Task<GuessResponse> SubmitGuessAsync(Guid sessionId, GuessRequest request)
     {
         var session = GetGame(sessionId);
         if (session == null)
@@ -172,7 +175,7 @@ public class GameService : IGameService
             session.GameRecord.Result = GameResult.Solved;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            _ = PersistGameRecordAsync(session);
+            await PersistGameRecordAsync(session);
         }
 
         return new GuessResponse
@@ -211,7 +214,7 @@ public class GameService : IGameService
         };
     }
 
-    public GameState GiveUp(Guid sessionId)
+    public async Task<GameState> GiveUpAsync(Guid sessionId)
     {
         var session = GetGame(sessionId);
         if (session == null)
@@ -242,7 +245,7 @@ public class GameService : IGameService
             session.GameRecord.Score = 0;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            _ = PersistGameRecordAsync(session);
+            await PersistGameRecordAsync(session);
         }
 
         return GetGameState(sessionId);
@@ -358,25 +361,38 @@ public class GameService : IGameService
 
         try
         {
-            // Save the GameRecord
-            await _gameRecordRepository.CreateAsync(session.GameRecord);
+            // Wrap GameRecord + GameEvents in a transaction for atomicity
+            await _unitOfWork.BeginTransactionAsync();
 
-            // Persist GameEvents separately (EF Core ignores the Events navigation property on GameRecord)
-            if (session.GameRecord.Events.Count > 0)
+            try
             {
-                _dbContext.GameEvents.AddRange(session.GameRecord.Events);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogInformation("Persisted {Count} events for game {GameId}",
-                    session.GameRecord.Events.Count, session.GameRecord.GameId);
+                // Save the GameRecord
+                await _gameRecordRepository.CreateAsync(session.GameRecord);
+
+                // Persist GameEvents separately (EF Core ignores the Events navigation property on GameRecord)
+                if (session.GameRecord.Events.Count > 0)
+                {
+                    _dbContext.GameEvents.AddRange(session.GameRecord.Events);
+                    await _dbContext.SaveChangesAsync();
+                    _logger.LogInformation("Persisted {Count} events for game {GameId}",
+                        session.GameRecord.Events.Count, session.GameRecord.GameId);
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
             }
-            
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+
+            // Analytics recompute outside transaction — failure should not roll back game data
             // Update user's lifetime points
             if (session.UserId != null && session.GameRecord.Score > 0)
             {
                 await _userService.AddPointsAsync(session.UserId, session.GameRecord.Score);
             }
 
-            // Recompute analytics (fire-and-forget style but still await)
             try
             {
                 if (session.UserId != null)
@@ -405,6 +421,7 @@ public class GameService : IGameService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to persist game record {GameId}", session.GameRecord.GameId);
+            throw;
         }
     }
 }

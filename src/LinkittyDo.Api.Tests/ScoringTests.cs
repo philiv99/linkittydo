@@ -20,6 +20,7 @@ public class ScoringTests
         var gameRecordRepoMock = new Mock<IGameRecordRepository>();
         var userServiceMock = new Mock<IUserService>();
         var analyticsServiceMock = new Mock<IAnalyticsService>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
         var dbContextOptions = new DbContextOptionsBuilder<LinkittyDoDbContext>()
             .UseInMemoryDatabase(databaseName: $"ScoringTests_{Guid.NewGuid()}")
             .Options;
@@ -30,6 +31,7 @@ public class ScoringTests
             gameRecordRepoMock.Object,
             userServiceMock.Object,
             analyticsServiceMock.Object,
+            unitOfWorkMock.Object,
             dbContext,
             loggerMock.Object);
     }
@@ -154,7 +156,7 @@ public class ScoringTests
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync();
 
-        var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         Assert.True(result.IsCorrect);
         Assert.Equal(200, result.CurrentScore);
@@ -169,7 +171,7 @@ public class ScoringTests
         // Record a clue for word 1
         _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com");
 
-        var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         // 1 clue, 1 guess, no bonus: 100/(1*1) = 100
         Assert.Equal(100, result.CurrentScore);
@@ -182,9 +184,9 @@ public class ScoringTests
         var session = await _service.StartNewGameAsync();
 
         // Two wrong guesses first
-        _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "wrong1" });
-        _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "wrong2" });
-        var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "wrong1" });
+        await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "wrong2" });
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         // 0 clues (effective 1), 3 guesses, no first-guess bonus: 100/(1*3) = 33
         Assert.Equal(33, result.CurrentScore);
@@ -196,7 +198,7 @@ public class ScoringTests
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 60)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync(null, 60);
 
-        var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         // Hard base=200, first guess no clues: 200 * 2 = 400
         Assert.Equal(400, result.CurrentScore);
@@ -212,7 +214,7 @@ public class ScoringTests
         _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example1.com");
         _service.RecordClueEvent(session.SessionId, 1, "rapid", "https://example2.com");
 
-        var result = _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
         // 2 clues, 1 guess: 100/(2*1) = 50
         Assert.Equal(50, result.CurrentScore);

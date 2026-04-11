@@ -313,6 +313,24 @@ _Source: Comprehensive gap analysis of admin functionality (2026-04-10). Critica
 | 116 | BUG: Admin menu not visible for logged-in admin user | P1 | 38 | | **DEFECT**: AuthContext does not implement automatic token refresh. JWT expires after 60 minutes; on expiry, `isAdmin` becomes `false` while user data persists in localStorage — admin appears logged in but has no admin menu. `api.refreshToken()` exists but is never called. Fix: (1) attempt token refresh in AuthContext initialization when stored token is expired, (2) attempt refresh on the expiry-check interval before clearing, (3) on refresh failure, force complete sign-out (clear auth + user localStorage). |
 | 117 | BUG: Roles stripped from user state after profile operations | P1 | 38 | | **DEFECT**: `UserController.UpdateUser()`, `UpdateDifficulty()`, `AddPoints()`, and `GetAllUsers()` call `MapToResponse()` without roles. After any profile operation, the frontend receives a `UserResponse` with empty `Roles`, overwriting the user object and losing admin status. Fix: use `MapToResponseWithRolesAsync()` (or pass roles) in all endpoints that return `UserResponse`. |
 
+### Game Persistence Reliability
+
+_Source: Full-stack persistence gap analysis (2026-04-11). Critical gaps where game data is lost, partially saved, or never recorded._
+
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 118 | Await game record persistence (fix fire-and-forget) | P1 | 39 | | **CRITICAL**: `PersistGameRecordAsync` is called with `_ = PersistGameRecordAsync(session)` (not awaited) in both `SubmitGuess` and `GiveUp`. If the DB is down or the save fails, the frontend receives a success response but the game is never recorded. Fix: make `SubmitGuess` and `GiveUp` async, await persistence, and return error status to frontend if save fails. |
+| 119 | Wrap GameRecord + GameEvents save in UnitOfWork transaction | P1 | 39 | | **CRITICAL**: `PersistGameRecordAsync` saves GameRecord and GameEvents in two separate `SaveChangesAsync` calls. If step 1 succeeds but step 2 fails, a GameRecord exists with no events (orphaned). Fix: wrap both saves in `IUnitOfWork.BeginTransactionAsync`/`CommitTransactionAsync` for atomicity. |
+| 120 | Load GameEvents when reading GameRecords from DB | P1 | 39 | | `EfGameRecordRepository.GetByGameIdAsync()` and `GetByUserIdAsync()` return GameRecords with empty Events list because `entity.Ignore(e => e.Events)` prevents EF Include. Fix: add explicit join query or separate events loading method. Required for game history, admin game detail, and API game record endpoint. |
+| 121 | Persist GameRecord to DB at game start (not just on completion) | P1 | 40 | | GameRecord is created in memory at game start (`Result = InProgress`) but only inserted into DB when game ends. If the server crashes or session expires, no record of the game exists. Fix: save GameRecord to DB immediately on game start, then update on completion. |
+| 122 | Persist game events incrementally (not batch at end) | P1 | 40 | | Clue and guess events accumulate in the in-memory session and are only written to DB when the game ends. A crash mid-game loses all events. Fix: persist each event to the `GameEvents` table as it occurs, not as a batch at game end. |
+| 123 | Track abandoned/expired games in DB | P2 | 40 | | `SessionCleanupService` removes expired sessions from memory with no DB record. Fix: before removing an expired session with a GameRecord, set `Result = Abandoned`, `CompletedAt = now`, and persist to DB. Add `Abandoned` to `GameResult` enum. |
+| 124 | Make GameService methods async end-to-end | P1 | 39 | | `SubmitGuess` and `GiveUp` are synchronous methods that fire-and-forget async persistence. Callers (`GameController`) already have async signatures but discard Tasks. Fix: make `SubmitGuess`/`GiveUp` return `Task<>`, await persistence inside, propagate errors to controller for proper HTTP error responses. |
+| 125 | Add persistence failure response to frontend | P2 | 41 | | Frontend has no concept of "game completed but save failed". After fixing fire-and-forget (#118), update `GuessResponse` and `GameState` DTOs to include `persistenceStatus` field (saved/failed/pending). Frontend can show warning if game wasn't saved. |
+| 126 | Game history API endpoint with events | P2 | 41 | | `GET /api/user/{id}/games` returns GameRecords without events. `GET /api/game/{sessionId}/record` only works for active sessions. Add `GET /api/game/{gameId}/detail` endpoint that loads GameRecord + GameEvents from DB for any completed game. Frontend game history drill-down needs this. |
+| 127 | Populate GameSessions table for session recovery | P3 | 41 | | `GameSessions` table exists but is never written to. Persist session state (RevealedWords, scores, clue/guess counts) to this table on each state change. On server restart, reload active sessions from DB. Complements in-memory `InMemorySessionStore` as a write-through cache. |
+| 128 | Backend tests for game persistence paths | P1 | 39 | | No tests cover the persistence code paths in `PersistGameRecordAsync`. Add tests: (1) successful persist with events, (2) transaction rollback on partial failure, (3) analytics recompute after persist, (4) guest session skips persistence. |
+
 ### Advanced Linguistic Features
 
 | # | Item | Priority | Sprint | Notes |
@@ -343,6 +361,9 @@ Sprints are sequenced by dependencies and priority. Each sprint builds on the pr
 |--------|-------|-----------|--------------|
 | **30** | **Admin Critical Data Fixes** | #103, #104, #105, #106, #107, #112, #113 | Sprint 29 (admin UI) |
 | **31** | **Admin Quality & Completeness** | #108, #109, #110, #111 | Sprint 30 (data fixes) |
+| **39** | **Reliable Game Completion Persistence** | #118, #119, #120, #124, #128 | Sprint 38 |
+| **40** | **In-Progress Game Persistence** | #121, #122, #123 | Sprint 39 (reliable persistence) |
+| **41** | **Game Data Completeness & Frontend Integration** | #125, #126, #127 | Sprint 40 (incremental persistence) |
 | **1** | **Testing & API Foundation** | #1, #2, #3 | None — must be first |
 | **2** | **Difficulty & Scoring Engine** | #4, #5, #6, #7 | Sprint 1 (tests) |
 | **3** | **Frontend Architecture & History** | #8, #9, #10 | Sprint 1 (tests) |

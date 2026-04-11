@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-12
+- **feat**: Sprint 39 — Make SubmitGuess and GiveUp async end-to-end; persistence errors now propagate to caller (#124, #118)
+- **feat**: Wrap GameRecord + GameEvents persistence in UnitOfWork transaction for atomic saves (#119)
+- **feat**: Add GetByGameIdWithEventsAsync and GetByUserIdWithEventsAsync to IGameRecordRepository (#120)
+- **feat**: Add GET /api/game/detail/{gameId} endpoint for full game record with events (#120)
+- **test**: Add 11 new GamePersistenceTests covering transaction, rollback, guest skip, analytics isolation, event recording (#128)
+- **test**: Update ScoringTests, SessionManagementTests, GameControllerTests, GameServiceTests for async API (306 total)
+
 ### 2026-04-11
 - **fix**: Sprint 38 — Implement automatic token refresh in AuthContext; admin menu now persists across JWT expiry (#116)
 - **fix**: Include roles in UpdateUser API response to prevent admin status loss after profile edits (#117)
