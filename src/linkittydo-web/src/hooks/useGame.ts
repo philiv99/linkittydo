@@ -131,15 +131,17 @@ export function useGame() {
     return null;
   }, [gameState]);
 
-  const giveUp = useCallback(async (): Promise<void> => {
-    if (!gameState) return;
+  const giveUp = useCallback(async (): Promise<GameState | null> => {
+    if (!gameState) return null;
     
     try {
       const state = await api.giveUp(gameState.sessionId);
       setGameState(state);
+      return state;
     } catch (err) {
       setError('Failed to give up');
       console.error(err);
+      return null;
     }
   }, [gameState]);
 

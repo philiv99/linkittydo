@@ -9,6 +9,7 @@ public class GameState
     public List<WordState> Words { get; set; } = new();
     public int Score { get; set; }
     public bool IsComplete { get; set; }
+    public PersistenceStatus PersistenceStatus { get; set; } = PersistenceStatus.NotApplicable;
 }
 
 public class WordState

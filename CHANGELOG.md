@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **feat**: Sprint 41 — Add PersistenceStatus enum (Saved/Failed/NotApplicable) to game responses; frontend toast on save failures (#125)
+- **feat**: Lazy-load game events in GameHistoryPage via getGameDetail API; expandable event timeline with loading states (#126)
+- **feat**: Rewrite DatabaseSessionStore with full session recovery on startup; fix PhraseUniqueId storage bug (#127)
+- **feat**: Add GameRecordId to GameSessionRecord for cross-referencing sessions and game records
+- **feat**: Session state sync to DB after guess and clue events (not just game start)
+- **test**: Add 9 new tests — 4 persistence status, 2 game detail controller, 3 session recovery (320 backend, 61 frontend)
+- **fix**: Stale session cleanup now runs before active session query in LoadSessionsAsync
 - **feat**: Sprint 40 — Persist GameRecord to DB at game start (InProgress status); game completion updates existing record (#121)
 - **feat**: Persist game events (guesses, clues) incrementally to DB as they happen, not just at game end (#122)
 - **feat**: Add Abandoned status to GameResult; session cleanup marks expired registered games as Abandoned in DB (#123)

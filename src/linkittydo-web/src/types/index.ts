@@ -15,6 +15,7 @@ export interface GameState {
   words: WordState[];
   score: number;
   isComplete: boolean;
+  persistenceStatus: PersistenceStatus;
 }
 
 export interface GuessRequest {
@@ -22,11 +23,14 @@ export interface GuessRequest {
   guess: string;
 }
 
+export type PersistenceStatus = 'Saved' | 'Failed' | 'NotApplicable';
+
 export interface GuessResponse {
   isCorrect: boolean;
   isPhraseComplete: boolean;
   currentScore: number;
   revealedWord: string | null;
+  persistenceStatus: PersistenceStatus;
 }
 
 export interface ClueResponse {
@@ -66,7 +70,7 @@ export interface GameEndEvent extends GameEventBase {
 
 export type GameEvent = ClueEvent | GuessEvent | GameEndEvent;
 
-export type GameResult = 'InProgress' | 'Solved' | 'GaveUp';
+export type GameResult = 'InProgress' | 'Solved' | 'GaveUp' | 'Abandoned';
 
 export interface GameRecord {
   gameId: string;

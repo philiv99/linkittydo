@@ -45,6 +45,7 @@ export const GameBoard: React.FC = () => {
   const [streak, setStreak] = useState(0);
   const [showStreakAnimation, setShowStreakAnimation] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [persistenceWarning, setPersistenceWarning] = useState(false);
   const { playSequence, stopAll } = useAudioSequence();
   const { playCorrect, playIncorrect, playSolved, playGaveUp, setMuted, isMuted } = useSoundEffects();
   const [soundMuted, setSoundMuted] = useState(isMuted());
@@ -77,6 +78,10 @@ export const GameBoard: React.FC = () => {
 
   const handleGuess = async (wordIndex: number, guess: string): Promise<boolean> => {
     const response = await submitGuess(wordIndex, guess);
+    if (response?.persistenceStatus === 'Failed') {
+      setPersistenceWarning(true);
+      setTimeout(() => setPersistenceWarning(false), 5000);
+    }
     if (response?.isCorrect) {
       playCorrect();
       setStreak(prev => prev + 1);
@@ -131,6 +136,7 @@ export const GameBoard: React.FC = () => {
     setGaveUp(false);
     setStreak(0);
     setElapsedSeconds(0);
+    setPersistenceWarning(false);
     stopAll();
     const startRequest = !isGuest ? { 
       userId: user.uniqueId,
@@ -159,7 +165,11 @@ export const GameBoard: React.FC = () => {
   const handleGiveUp = useCallback(async () => {
     setGaveUp(true);
     playGaveUp();
-    await giveUp();
+    const state = await giveUp();
+    if (state?.persistenceStatus === 'Failed') {
+      setPersistenceWarning(true);
+      setTimeout(() => setPersistenceWarning(false), 5000);
+    }
   }, [giveUp, playGaveUp]);
 
   const handleSignOut = () => {
@@ -276,6 +286,13 @@ export const GameBoard: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Persistence warning toast */}
+      {persistenceWarning && (
+        <div className="persistence-warning" role="alert">
+          Warning: Game progress could not be saved. Your score may not be recorded.
+        </div>
+      )}
 
       {/* Clue Panel - primary content area */}
       <section className="clue-area">

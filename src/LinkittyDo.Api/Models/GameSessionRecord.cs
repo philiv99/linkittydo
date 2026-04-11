@@ -9,6 +9,7 @@ public class GameSessionRecord
     public string SessionId { get; set; } = string.Empty;
     public string? UserId { get; set; }
     public string PhraseUniqueId { get; set; } = string.Empty;
+    public string? GameRecordId { get; set; }
     public int Score { get; set; }
     public int Difficulty { get; set; }
     public string StateJson { get; set; } = "{}";

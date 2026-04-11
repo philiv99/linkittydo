@@ -14,6 +14,7 @@ vi.mock('../hooks/useUser', () => ({
 vi.mock('../services/api', () => ({
   api: {
     getUserGames: vi.fn(),
+    getGameDetail: vi.fn(),
   },
 }));
 
@@ -164,6 +165,7 @@ describe('GameHistoryPage', () => {
   it('expands game detail to show event timeline', async () => {
     mockUseUser.mockReturnValue(registeredUser);
     mockGetUserGames.mockResolvedValue(sampleGames);
+    vi.mocked(api.getGameDetail).mockResolvedValue(sampleGames[0]);
 
     render(
       <MemoryRouter>
@@ -179,7 +181,9 @@ describe('GameHistoryPage', () => {
     // Click the first game card header to expand
     await user.click(screen.getByText('the quick brown fox'));
 
-    expect(screen.getByText('Event Timeline')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Event Timeline')).toBeInTheDocument();
+    });
   });
 
   it('navigates to /play when Go Play is clicked (guest)', async () => {

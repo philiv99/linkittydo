@@ -157,6 +157,7 @@ public class GameService : IGameService
         }
 
         // Record guess event for non-guest sessions
+        var persistenceStatus = PersistenceStatus.NotApplicable;
         if (!session.IsGuestSession && session.GameRecord != null)
         {
             var guessEvent = new GuessEvent
@@ -177,12 +178,17 @@ public class GameService : IGameService
             {
                 _dbContext.GameEvents.Add(guessEvent);
                 await _dbContext.SaveChangesAsync();
+                persistenceStatus = PersistenceStatus.Saved;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to persist guess event for game {GameId}", session.GameRecord.GameId);
+                persistenceStatus = PersistenceStatus.Failed;
             }
         }
+
+        // Sync session state to DB for recovery
+        _sessionStore.Set(session.SessionId, session);
 
         var isComplete = session.RevealedWords.All(kv => kv.Value);
         
@@ -200,7 +206,16 @@ public class GameService : IGameService
             session.GameRecord.Result = GameResult.Solved;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            await PersistGameCompletionAsync(session, endEvent);
+            try
+            {
+                await PersistGameCompletionAsync(session, endEvent);
+                persistenceStatus = PersistenceStatus.Saved;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist game completion for game {GameId}", session.GameRecord.GameId);
+                persistenceStatus = PersistenceStatus.Failed;
+            }
         }
 
         return new GuessResponse
@@ -208,7 +223,8 @@ public class GameService : IGameService
             IsCorrect = isCorrect,
             IsPhraseComplete = isComplete,
             CurrentScore = session.Score,
-            RevealedWord = isCorrect ? word.Text : null
+            RevealedWord = isCorrect ? word.Text : null,
+            PersistenceStatus = persistenceStatus
         };
     }
 
@@ -256,6 +272,8 @@ public class GameService : IGameService
         // Set score to 0 for giving up
         session.Score = 0;
         
+        var persistenceStatus = PersistenceStatus.NotApplicable;
+
         // Record game end event for non-guest sessions
         if (!session.IsGuestSession && session.GameRecord != null)
         {
@@ -271,10 +289,21 @@ public class GameService : IGameService
             session.GameRecord.Score = 0;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            await PersistGameCompletionAsync(session, endEvent);
+            try
+            {
+                await PersistGameCompletionAsync(session, endEvent);
+                persistenceStatus = PersistenceStatus.Saved;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist give-up for game {GameId}", session.GameRecord.GameId);
+                persistenceStatus = PersistenceStatus.Failed;
+            }
         }
 
-        return GetGameState(sessionId);
+        var state = GetGameState(sessionId);
+        state.PersistenceStatus = persistenceStatus;
+        return state;
     }
 
     public async Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url)
@@ -318,6 +347,9 @@ public class GameService : IGameService
         {
             _logger.LogWarning(ex, "Failed to persist clue event for game {GameId}", session.GameRecord.GameId);
         }
+
+        // Sync session state to DB for recovery
+        _sessionStore.Set(session.SessionId, session);
     }
 
     /// <summary>
