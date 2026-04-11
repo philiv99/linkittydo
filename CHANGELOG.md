@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-11
+- **feat**: Sprint 47 — Games Manager shows player name instead of Game ID in game list (#132)
+- **feat**: Rich event detail view — clue events show URL link, phrase word, search term with relationship type; guess events show result and points; game end shows reason (#133)
+- **feat**: Add RelationshipType to ClueEvent tracking synonym/antonym/trigger/homophone/similar relationship to original word (#134)
+- **feat**: Full date+time formatting in Played column and event timestamps (#135)
+- **test**: Add 3 new GamesManager tests — player name inclusion, clue event with relationship type, guess event detail
+
+### 2026-04-11
 - **feat**: Sprint 46 — Admin hard-delete user endpoint (`DELETE /api/admin/users/{uniqueId}`) permanently removes user and all related data (#131)
 - **test**: Add 4 new AdminHardDelete tests — full cascade delete, other users unaffected, nonexistent user, user with no related data
 

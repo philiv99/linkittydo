@@ -31,9 +31,17 @@ public class GamesManagerService : IGamesManagerService
             .Take(pageSize)
             .ToListAsync();
 
+        // Fetch player names for all userIds in this page
+        var userIds = games.Select(g => g.UserId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+        var userNames = await _context.Users
+            .Where(u => userIds.Contains(u.UniqueId))
+            .Select(u => new { u.UniqueId, u.Name })
+            .ToDictionaryAsync(u => u.UniqueId, u => u.Name);
+
         return new GameSearchResult
         {
             Games = games,
+            PlayerNames = userNames,
             TotalCount = totalCount,
             Page = page,
             PageSize = pageSize

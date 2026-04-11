@@ -57,6 +57,12 @@ public class ClueEvent : GameEvent
     /// The URL that was shown as the clue
     /// </summary>
     public string Url { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// The type of relationship between the search term and the original word
+    /// (synonym, similar, trigger, antonym, homophone)
+    /// </summary>
+    public string? RelationshipType { get; set; }
 }
 
 /// <summary>

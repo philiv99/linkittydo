@@ -36,6 +36,7 @@ public class GamesManagerController : ControllerBase
             {
                 g.GameId,
                 g.UserId,
+                PlayerName = searchResult.PlayerNames.TryGetValue(g.UserId ?? "", out var name) ? name : "Unknown",
                 g.PhraseText,
                 g.Difficulty,
                 Result = g.Result.ToString(),
@@ -63,6 +64,9 @@ public class GamesManagerController : ControllerBase
 
         var events = await _gamesManager.GetGameEventsAsync(gameId);
 
+        // Split phrase into words for word-index lookups
+        var phraseWords = game.PhraseText?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+
         return Ok(new
         {
             data = new
@@ -77,12 +81,38 @@ public class GamesManagerController : ControllerBase
                 game.PlayedAt,
                 game.CompletedAt,
                 EventCount = events.Count,
-                Events = events.Select(e => new
+                Events = events.Select(e =>
                 {
-                    e.Id,
-                    e.EventType,
-                    e.SequenceNumber,
-                    e.Timestamp
+                    var baseObj = new Dictionary<string, object?>
+                    {
+                        ["id"] = e.Id,
+                        ["eventType"] = e.EventType,
+                        ["sequenceNumber"] = e.SequenceNumber,
+                        ["timestamp"] = e.Timestamp
+                    };
+
+                    if (e is ClueEvent clue)
+                    {
+                        baseObj["wordIndex"] = clue.WordIndex;
+                        baseObj["phraseWord"] = clue.WordIndex < phraseWords.Length ? phraseWords[clue.WordIndex] : null;
+                        baseObj["searchTerm"] = clue.SearchTerm;
+                        baseObj["url"] = clue.Url;
+                        baseObj["relationshipType"] = clue.RelationshipType;
+                    }
+                    else if (e is GuessEvent guess)
+                    {
+                        baseObj["wordIndex"] = guess.WordIndex;
+                        baseObj["phraseWord"] = guess.WordIndex < phraseWords.Length ? phraseWords[guess.WordIndex] : null;
+                        baseObj["guessText"] = guess.GuessText;
+                        baseObj["isCorrect"] = guess.IsCorrect;
+                        baseObj["pointsAwarded"] = guess.PointsAwarded;
+                    }
+                    else if (e is GameEndEvent end)
+                    {
+                        baseObj["reason"] = end.Reason;
+                    }
+
+                    return baseObj;
                 })
             }
         });

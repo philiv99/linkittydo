@@ -10,7 +10,7 @@ public interface IGameService
     Task<GuessResponse> SubmitGuessAsync(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
     Task<GameState> GiveUpAsync(Guid sessionId);
-    Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url);
+    Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url, string? relationshipType = null);
     Task<int> RemoveExpiredSessionsAsync(TimeSpan maxAge);
     int ActiveSessionCount { get; }
     Task<GameRecord?> GetGameRecordAsync(Guid sessionId);
@@ -306,7 +306,7 @@ public class GameService : IGameService
         return state;
     }
 
-    public async Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url)
+    public async Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url, string? relationshipType = null)
     {
         var session = GetGame(sessionId);
         if (session == null)
@@ -333,6 +333,7 @@ public class GameService : IGameService
             WordIndex = wordIndex,
             SearchTerm = searchTerm,
             Url = url,
+            RelationshipType = relationshipType,
             Timestamp = DateTime.UtcNow
         };
         session.GameRecord.Events.Add(clueEvent);

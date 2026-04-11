@@ -23,6 +23,10 @@
   font-size: 0.8rem;
 }
 
+.game-player-cell {
+  font-weight: 500;
+}
+
 .game-sim-badge {
   margin-left: 0.5rem;
 }
@@ -78,4 +82,94 @@
   text-align: center;
   color: #a0aec0;
   padding: 2rem;
+}
+
+/* Event detail styles */
+.event-badge {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.event-clue {
+  background: #2d3748;
+  color: #63b3ed;
+}
+
+.event-guess {
+  background: #2d3748;
+  color: #fbd38d;
+}
+
+.event-end {
+  background: #2d3748;
+  color: #fc8181;
+}
+
+.event-detail-cell {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.event-search-term {
+  font-style: italic;
+  color: #90cdf4;
+}
+
+.event-guess-text {
+  color: #fbd38d;
+}
+
+.event-clue-link {
+  color: #63b3ed;
+  text-decoration: none;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.event-clue-link:hover {
+  text-decoration: underline;
+}
+
+.relationship-badge {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rel-synonym {
+  background: #2f855a;
+  color: #c6f6d5;
+}
+
+.rel-similar {
+  background: #2b6cb0;
+  color: #bee3f8;
+}
+
+.rel-antonym {
+  background: #9b2c2c;
+  color: #fed7d7;
+}
+
+.rel-trigger {
+  background: #744210;
+  color: #fefcbf;
+}
+
+.rel-homophone {
+  background: #553c9a;
+  color: #e9d8fd;
+}
+
+.rel-direct {
+  background: #4a5568;
+  color: #e2e8f0;
 }

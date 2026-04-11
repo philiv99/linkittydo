@@ -80,6 +80,7 @@ public class SimulationService : ISimulationService
                     WordIndex = i,
                     SearchTerm = words[i],
                     Url = $"https://simulated.example.com/{words[i]}",
+                    RelationshipType = "synonym",
                     Timestamp = now.AddSeconds(seq * profile.AvgActionDelaySeconds)
                 });
             }
