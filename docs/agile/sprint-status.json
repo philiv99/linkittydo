@@ -1,24 +1,28 @@
 {
   "current_sprint": {
-    "number": 42,
+    "number": 43,
     "status": "complete",
-    "branch": "feature/20260411-sprint-42",
+    "branch": "feature/20260411-sprint-43",
     "plan_approved": true,
-    "pr_number": 49,
+    "pr_number": 50,
     "tasks": [
-      { "id": 1, "title": "Leaderboard shows only real player data from DB (#129)", "status": "complete" }
+      { "id": 1, "title": "Rewrite leaderboard query (two-query approach)", "status": "complete" },
+      { "id": 2, "title": "Add fallback stats from GameRecords", "status": "complete" },
+      { "id": 3, "title": "Handle empty names with (unknown) fallback", "status": "complete" },
+      { "id": 4, "title": "Add EF Core leaderboard integration tests", "status": "complete" },
+      { "id": 5, "title": "Verify builds pass", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 42,
+    "number": 43,
     "date": "2026-04-11",
     "result": "complete",
-    "items_completed": 1,
+    "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "When service methods do N+1 queries to compose API responses, move the join to the data layer (EF Core GroupJoin) early"
+    "key_lesson": "EF Core GroupJoin+SelectMany+Take is unreliable for LEFT JOIN; prefer two separate queries joined in memory for correctness and readability"
   },
   "test_metrics": {
-    "backend_tests_passing": 323,
+    "backend_tests_passing": 329,
     "frontend_tests_passing": 61,
     "lint_errors": 0
   },
@@ -50,6 +54,7 @@
     "sprint_39": { "pr": 46, "items": "Reliable game completion persistence (async end-to-end, transactional saves, event-loading queries)", "tests_after": 306 },
     "sprint_40": { "pr": 47, "items": "In-progress game persistence (persist at start, incremental events, abandoned tracking)", "tests_after": 311 },
     "sprint_41": { "pr": 48, "items": "Game data completeness (PersistenceStatus DTOs, lazy-load events, session recovery, DatabaseSessionStore rewrite)", "tests_after": 320 },
-    "sprint_42": { "pr": 49, "items": "Leaderboard real data only (exclude simulated users, PlayerStats join, enriched columns)", "tests_after": 323 }
+    "sprint_42": { "pr": 49, "items": "Leaderboard real data only (exclude simulated users, PlayerStats join, enriched columns)", "tests_after": 323 },
+    "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 }
   }
 }

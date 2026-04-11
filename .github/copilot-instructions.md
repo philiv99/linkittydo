@@ -424,6 +424,8 @@ These lessons are extracted from sprint retrospectives. Check them before making
 - **L13** (Sprint 38): API endpoints returning user data must consistently include roles. A single endpoint missing roles can silently strip admin privileges.
 - **L14** (Sprint 41): When a method has both cleanup and load responsibilities, always run cleanup unconditionally before the load path to avoid early returns skipping cleanup.
 - **L15** (Sprint 41): Integration tests for Singleton services that create DI scopes internally must use DbContextOptions factory pattern, not shared DbContext instances.
+- **L16** (Sprint 43): Avoid EF Core GroupJoin+SelectMany+Take for production queries. Prefer two separate queries joined in memory — more readable, testable, and correct.
+- **L17** (Sprint 43): Pre-computed tables (e.g., PlayerStats) need fallback paths. Always provide fallback computation from source data so users never see stale zeros.
 
 ---
 
