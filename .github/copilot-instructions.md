@@ -420,6 +420,8 @@ These lessons are extracted from sprint retrospectives. Check them before making
 ### Sprint Process
 - **L10** (Sprint 9): Pre-sprint research (checking what is already done, validating assumptions) saves significant effort. Always verify backlog items are still relevant before planning.
 - **L11** (Sprint 3): When a sprint plan changes scope, update BACKLOG.md sprint columns immediately to prevent downstream confusion.
+- **L12** (Sprint 38): When implementing token expiry handling, always implement token refresh at the same time. Expiry-without-refresh creates silent UX degradation.
+- **L13** (Sprint 38): API endpoints returning user data must consistently include roles. A single endpoint missing roles can silently strip admin privileges.
 
 ---
 
