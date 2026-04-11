@@ -1,4 +1,5 @@
 using LinkittyDo.Api.Controllers;
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,15 @@ public class GameControllerTests
 {
     private readonly Mock<IGameService> _gameServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<IGameRecordRepository> _gameRecordRepoMock;
     private readonly GameController _controller;
 
     public GameControllerTests()
     {
         _gameServiceMock = new Mock<IGameService>();
         _userServiceMock = new Mock<IUserService>();
-        _controller = new GameController(_gameServiceMock.Object, _userServiceMock.Object);
+        _gameRecordRepoMock = new Mock<IGameRecordRepository>();
+        _controller = new GameController(_gameServiceMock.Object, _userServiceMock.Object, _gameRecordRepoMock.Object);
     }
 
     private static GameSession CreateTestSession(bool isGuest = true)
@@ -144,7 +147,7 @@ public class GameControllerTests
         };
 
         _gameServiceMock.Setup(s => s.GetGame(session.SessionId)).Returns(session);
-        _gameServiceMock.Setup(s => s.SubmitGuess(session.SessionId, request)).Returns(guessResponse);
+        _gameServiceMock.Setup(s => s.SubmitGuessAsync(session.SessionId, request)).ReturnsAsync(guessResponse);
 
         var result = await _controller.SubmitGuess(session.SessionId, request);
 
@@ -173,7 +176,7 @@ public class GameControllerTests
         var guessResponse = new GuessResponse { IsCorrect = true, IsPhraseComplete = true, CurrentScore = 300 };
 
         _gameServiceMock.Setup(s => s.GetGame(session.SessionId)).Returns(session);
-        _gameServiceMock.Setup(s => s.SubmitGuess(session.SessionId, request)).Returns(guessResponse);
+        _gameServiceMock.Setup(s => s.SubmitGuessAsync(session.SessionId, request)).ReturnsAsync(guessResponse);
 
         var result = await _controller.SubmitGuess(session.SessionId, request);
 
@@ -190,7 +193,7 @@ public class GameControllerTests
         state.IsComplete = true;
 
         _gameServiceMock.Setup(s => s.GetGame(session.SessionId)).Returns(session);
-        _gameServiceMock.Setup(s => s.GiveUp(session.SessionId)).Returns(state);
+        _gameServiceMock.Setup(s => s.GiveUpAsync(session.SessionId)).ReturnsAsync(state);
 
         var result = await _controller.GiveUp(session.SessionId);
 

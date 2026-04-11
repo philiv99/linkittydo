@@ -9,7 +9,9 @@ namespace LinkittyDo.Api.Data;
 public interface IGameRecordRepository
 {
     Task<GameRecord?> GetByGameIdAsync(string gameId);
+    Task<GameRecord?> GetByGameIdWithEventsAsync(string gameId);
     Task<IEnumerable<GameRecord>> GetByUserIdAsync(string userId, int page = 1, int pageSize = 20);
+    Task<IEnumerable<GameRecord>> GetByUserIdWithEventsAsync(string userId, int page = 1, int pageSize = 20);
     Task<GameRecord> CreateAsync(GameRecord record);
     Task<GameRecord?> UpdateAsync(GameRecord record);
     Task<int> GetCountByUserIdAsync(string userId);

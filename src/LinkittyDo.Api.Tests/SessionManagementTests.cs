@@ -20,6 +20,7 @@ public class SessionManagementTests
         var gameRecordRepoMock = new Mock<IGameRecordRepository>();
         var userServiceMock = new Mock<IUserService>();
         var analyticsServiceMock = new Mock<IAnalyticsService>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
         var dbContextOptions = new DbContextOptionsBuilder<LinkittyDoDbContext>()
             .UseInMemoryDatabase(databaseName: $"SessionManagementTests_{Guid.NewGuid()}")
             .Options;
@@ -30,6 +31,7 @@ public class SessionManagementTests
             gameRecordRepoMock.Object,
             userServiceMock.Object,
             analyticsServiceMock.Object,
+            unitOfWorkMock.Object,
             dbContext,
             loggerMock.Object);
     }
@@ -108,7 +110,7 @@ public class SessionManagementTests
         session.LastActivityAt = DateTime.UtcNow.AddHours(-1);
         var oldActivity = session.LastActivityAt;
 
-        _service.SubmitGuess(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+        _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" }).GetAwaiter().GetResult();
 
         Assert.True(session.LastActivityAt > oldActivity);
     }

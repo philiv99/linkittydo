@@ -1,3 +1,4 @@
+using LinkittyDo.Api.Data;
 using LinkittyDo.Api.Models;
 using LinkittyDo.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,13 @@ public class GameController : ControllerBase
 {
     private readonly IGameService _gameService;
     private readonly IUserService _userService;
+    private readonly IGameRecordRepository _gameRecordRepository;
 
-    public GameController(IGameService gameService, IUserService userService)
+    public GameController(IGameService gameService, IUserService userService, IGameRecordRepository gameRecordRepository)
     {
         _gameService = gameService;
         _userService = userService;
+        _gameRecordRepository = gameRecordRepository;
     }
 
     /// <summary>
@@ -75,7 +78,7 @@ public class GameController : ControllerBase
             });
         }
 
-        var response = _gameService.SubmitGuess(sessionId, request);
+        var response = await _gameService.SubmitGuessAsync(sessionId, request);
         
         return Ok(new ApiResponse<GuessResponse>(response));
     }
@@ -99,7 +102,7 @@ public class GameController : ControllerBase
             });
         }
 
-        var state = _gameService.GiveUp(sessionId);
+        var state = await _gameService.GiveUpAsync(sessionId);
         
         return Ok(new ApiResponse<GameState>(state));
     }
@@ -136,5 +139,27 @@ public class GameController : ControllerBase
         }
 
         return Ok(new ApiResponse<GameRecord>(session.GameRecord));
+    }
+
+    /// <summary>
+    /// Get a completed game record with all events from the database
+    /// </summary>
+    [HttpGet("detail/{gameId}")]
+    public async Task<ActionResult<ApiResponse<GameRecord>>> GetGameDetail(string gameId)
+    {
+        var record = await _gameRecordRepository.GetByGameIdWithEventsAsync(gameId);
+        if (record == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "GAME_NOT_FOUND",
+                    Message = "Game record not found"
+                }
+            });
+        }
+
+        return Ok(new ApiResponse<GameRecord>(record, "Game record retrieved successfully"));
     }
 }

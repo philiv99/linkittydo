@@ -41,6 +41,12 @@ public class JsonGameRecordRepository : IGameRecordRepository
         }
     }
 
+    public Task<GameRecord?> GetByGameIdWithEventsAsync(string gameId)
+    {
+        // JSON repository already embeds events in the record
+        return GetByGameIdAsync(gameId);
+    }
+
     public async Task<IEnumerable<GameRecord>> GetByUserIdAsync(string userId, int page = 1, int pageSize = 20)
     {
         await _semaphore.WaitAsync();
@@ -66,6 +72,12 @@ public class JsonGameRecordRepository : IGameRecordRepository
         {
             _semaphore.Release();
         }
+    }
+
+    public Task<IEnumerable<GameRecord>> GetByUserIdWithEventsAsync(string userId, int page = 1, int pageSize = 20)
+    {
+        // JSON repository already embeds events in the record
+        return GetByUserIdAsync(userId, page, pageSize);
     }
 
     public async Task<GameRecord> CreateAsync(GameRecord record)

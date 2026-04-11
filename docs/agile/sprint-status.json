@@ -1,14 +1,16 @@
 {
   "current_sprint": {
-    "number": 38,
+    "number": 39,
     "status": "complete",
-    "branch": "feature/20260411-sprint-38",
+    "branch": "feature/20260411-sprint-39",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Implement token auto-refresh in AuthContext (#116)", "status": "done" },
-      { "id": 2, "title": "Fix roles in UpdateUser API response (#117)", "status": "done" },
-      { "id": 3, "title": "Mark completed backlog items #93-#115 as Done", "status": "done" }
+      { "id": 1, "title": "Make GameService methods async end-to-end (#124)", "status": "complete" },
+      { "id": 2, "title": "Await game record persistence / fix fire-and-forget (#118)", "status": "complete" },
+      { "id": 3, "title": "Wrap GameRecord + GameEvents in UnitOfWork transaction (#119)", "status": "complete" },
+      { "id": 4, "title": "Load GameEvents when reading GameRecords from DB (#120)", "status": "complete" },
+      { "id": 5, "title": "Backend tests for game persistence paths (#128)", "status": "complete" }
     ]
   },
   "last_completed": {
@@ -20,7 +22,7 @@
     "key_lesson": "Token refresh must be implemented alongside token expiry checks; silent auth loss creates confusing UX"
   },
   "test_metrics": {
-    "backend_tests_passing": 295,
+    "backend_tests_passing": 306,
     "frontend_tests_passing": 61,
     "lint_errors": 0
   },
