@@ -34,7 +34,7 @@ public class SessionCleanupService : BackgroundService
             await Task.Delay(_cleanupInterval, stoppingToken);
             using var scope = _serviceProvider.CreateScope();
             var gameService = scope.ServiceProvider.GetRequiredService<IGameService>();
-            gameService.RemoveExpiredSessions(_sessionTtl);
+            await gameService.RemoveExpiredSessionsAsync(_sessionTtl);
         }
     }
 }

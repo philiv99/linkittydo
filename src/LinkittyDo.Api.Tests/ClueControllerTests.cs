@@ -107,7 +107,7 @@ public class ClueControllerTests
 
         await _controller.GetClue(session.SessionId, 1);
 
-        _gameServiceMock.Verify(s => s.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com/clue"), Times.Once);
+        _gameServiceMock.Verify(s => s.RecordClueEventAsync(session.SessionId, 1, "fast", "https://example.com/clue"), Times.Once);
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class ClueControllerTests
 
         await _controller.GetClue(session.SessionId, 1);
 
-        _gameServiceMock.Verify(s => s.RecordClueEvent(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _gameServiceMock.Verify(s => s.RecordClueEventAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

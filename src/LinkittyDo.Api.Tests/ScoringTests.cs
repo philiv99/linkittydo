@@ -169,7 +169,7 @@ public class ScoringTests
         var session = await _service.StartNewGameAsync("USR-1");
 
         // Record a clue for word 1
-        _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "fast", "https://example.com");
 
         var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
@@ -211,8 +211,8 @@ public class ScoringTests
         var session = await _service.StartNewGameAsync("USR-1");
 
         // Record 2 clues for word 1
-        _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example1.com");
-        _service.RecordClueEvent(session.SessionId, 1, "rapid", "https://example2.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "fast", "https://example1.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "rapid", "https://example2.com");
 
         var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
 
@@ -227,7 +227,7 @@ public class ScoringTests
         var session = await _service.StartNewGameAsync();
 
         // Record clue for guest (no GameRecord but clue count should still be tracked)
-        _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "fast", "https://example.com");
 
         // Verify the clue count is tracked on the session
         Assert.Equal(1, session.ClueCountPerWord[1]);

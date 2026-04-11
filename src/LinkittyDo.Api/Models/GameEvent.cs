@@ -107,5 +107,6 @@ public enum GameResult
 {
     InProgress,
     Solved,
-    GaveUp
+    GaveUp,
+    Abandoned
 }

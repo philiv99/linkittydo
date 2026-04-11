@@ -232,7 +232,7 @@ public class GameServiceTests
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-123", 10)).ReturnsAsync(CreateTestPhrase());
         var session = await _service.StartNewGameAsync("USR-123");
 
-        _service.RecordClueEvent(session.SessionId, 1, "fast", "https://example.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "fast", "https://example.com");
 
         var clueEvent = session.GameRecord!.Events.OfType<ClueEvent>().Single();
         Assert.Equal(1, clueEvent.WordIndex);
