@@ -4,7 +4,7 @@
     "status": "complete",
     "branch": "feature/20260411-sprint-46",
     "plan_approved": true,
-    "pr_number": null,
+    "pr_number": 53,
     "tasks": [
       { "id": 1, "title": "Add HardDeleteUserAsync to IAdminService and AdminService", "status": "complete" },
       { "id": 2, "title": "Add DELETE /api/admin/users/{uniqueId} endpoint", "status": "complete" },
@@ -58,6 +58,6 @@
     "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 },
     "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
     "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 },
-    "sprint_46": { "pr": null, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 339 }
+    "sprint_46": { "pr": 53, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 339 }
   }
 }
