@@ -58,11 +58,13 @@ public class ClueService : IClueService
         var leftContext = GetLeftContext(session.Phrase.Words, wordIndex);
         var rightContext = GetRightContext(session.Phrase.Words, wordIndex);
         
-        var searchTerm = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex], session.Difficulty, leftContext, rightContext);
+        var searchResult = await GetUnusedSynonymAsync(word.Text, session.UsedClueTerms[wordIndex], session.Difficulty, leftContext, rightContext);
+        var searchTerm = searchResult.Term;
+        var relationshipType = searchResult.RelationshipType;
         
         // Track that we've used this term
         session.UsedClueTerms[wordIndex].Add(searchTerm);
-        _logger.LogInformation("Selected search term '{SearchTerm}' for word '{Word}'", searchTerm, word.Text);
+        _logger.LogInformation("Selected search term '{SearchTerm}' ({RelationshipType}) for word '{Word}'", searchTerm, relationshipType, word.Text);
 
         // Search for actual URLs using the synonym, considering difficulty
         var clueUrl = await GetSearchResultUrlAsync(searchTerm, session.UsedClueUrls, session.Difficulty);
@@ -81,7 +83,8 @@ public class ClueService : IClueService
         return new ClueResponse
         {
             Url = clueUrl,
-            SearchTerm = searchTerm
+            SearchTerm = searchTerm,
+            RelationshipType = relationshipType
         };
     }
 
@@ -220,7 +223,7 @@ public class ClueService : IClueService
         return true;
     }
 
-    private async Task<string> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms, int difficulty = 10, string? leftContext = null, string? rightContext = null)
+    private async Task<(string Term, string RelationshipType)> GetUnusedSynonymAsync(string word, HashSet<string> usedTerms, int difficulty = 10, string? leftContext = null, string? rightContext = null)
     {
         try
         {
@@ -246,19 +249,19 @@ public class ClueService : IClueService
                 // Select synonym based on difficulty:
                 // Easy: pick from top-scored (most similar) synonyms
                 // Hard: pick from bottom-scored (most distant) synonyms
-                var selectedSynonym = SelectSynonymByDifficulty(availableSynonyms, difficulty);
+                var selected = SelectScoredWordByDifficulty(availableSynonyms, difficulty);
                 _logger.LogInformation("Selected synonym '{Synonym}' for word '{Word}' (difficulty {Difficulty}, from {Count} available)", 
-                    selectedSynonym, word, difficulty, availableSynonyms.Count);
-                return selectedSynonym;
+                    selected.Word, word, difficulty, availableSynonyms.Count);
+                return (selected.Word, selected.RelationshipType);
             }
             // Fallback: use the word itself if no synonyms available
             _logger.LogInformation("No unused synonyms available for '{Word}', using original word", word);
-            return word;
+            return (word, "direct");
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to get synonyms for '{Word}', using fallback", word);
-            return word;
+            return (word, "direct");
         }
     }
 
@@ -268,8 +271,13 @@ public class ClueService : IClueService
     /// </summary>
     internal static string SelectSynonymByDifficulty(List<ScoredWord> synonyms, int difficulty)
     {
-        if (synonyms.Count == 0) return string.Empty;
-        if (synonyms.Count == 1) return synonyms[0].Word;
+        return SelectScoredWordByDifficulty(synonyms, difficulty).Word;
+    }
+
+    internal static ScoredWord SelectScoredWordByDifficulty(List<ScoredWord> synonyms, int difficulty)
+    {
+        if (synonyms.Count == 0) return new ScoredWord();
+        if (synonyms.Count == 1) return synonyms[0];
 
         // Sort by score descending (highest = most similar)
         var sorted = synonyms.OrderByDescending(s => s.Score).ToList();
@@ -278,7 +286,7 @@ public class ClueService : IClueService
         {
             // Easy: pick from top third (closest synonyms)
             var topCount = Math.Max(1, sorted.Count / 3);
-            return sorted[new Random().Next(topCount)].Word;
+            return sorted[new Random().Next(topCount)];
         }
         else if (difficulty <= 50)
         {
@@ -286,21 +294,21 @@ public class ClueService : IClueService
             var start = sorted.Count / 4;
             var end = sorted.Count * 3 / 4;
             var range = Math.Max(1, end - start);
-            return sorted[start + new Random().Next(range)].Word;
+            return sorted[start + new Random().Next(range)];
         }
         else if (difficulty <= 80)
         {
             // Hard: pick from bottom half (more distant)
             var bottomStart = sorted.Count / 2;
             var range = Math.Max(1, sorted.Count - bottomStart);
-            return sorted[bottomStart + new Random().Next(range)].Word;
+            return sorted[bottomStart + new Random().Next(range)];
         }
         else
         {
             // Expert: pick from bottom third (most distant)
             var bottomStart = sorted.Count * 2 / 3;
             var range = Math.Max(1, sorted.Count - bottomStart);
-            return sorted[bottomStart + new Random().Next(range)].Word;
+            return sorted[bottomStart + new Random().Next(range)];
         }
     }
 
@@ -361,8 +369,8 @@ public class ClueService : IClueService
         if (!string.IsNullOrEmpty(rightContext))
             contextualMlUrl += $"&rc={HttpUtility.UrlEncode(rightContext)}";
         
-        var synonymTask = FetchDatamuseScoredWordsAsync(synonymUrl);
-        var similarTask = FetchDatamuseScoredWordsAsync(contextualMlUrl);
+        var synonymTask = FetchDatamuseScoredWordsAsync(synonymUrl, "synonym");
+        var similarTask = FetchDatamuseScoredWordsAsync(contextualMlUrl, "similar");
         
         var tasks = new List<Task<List<ScoredWord>>> { synonymTask, similarTask };
         
@@ -370,21 +378,21 @@ public class ClueService : IClueService
         if (difficulty > 50)
         {
             tasks.Add(FetchDatamuseScoredWordsAsync(
-                $"https://api.datamuse.com/words?rel_trg={encodedWord}&max=10"));
+                $"https://api.datamuse.com/words?rel_trg={encodedWord}&max=10", "trigger"));
         }
         
         // For hard difficulty: add antonyms (opposite meaning = harder clue)
         if (difficulty > 60)
         {
             tasks.Add(FetchDatamuseScoredWordsAsync(
-                $"https://api.datamuse.com/words?rel_ant={encodedWord}&max=8"));
+                $"https://api.datamuse.com/words?rel_ant={encodedWord}&max=8", "antonym"));
         }
         
         // For expert difficulty: add homophones (sound-alike = tricky clue)
         if (difficulty > 80)
         {
             tasks.Add(FetchDatamuseScoredWordsAsync(
-                $"https://api.datamuse.com/words?rel_hom={encodedWord}&max=5"));
+                $"https://api.datamuse.com/words?rel_hom={encodedWord}&max=5", "homophone"));
         }
 
         await Task.WhenAll(tasks);
@@ -394,10 +402,10 @@ public class ClueService : IClueService
             results.AddRange(await task);
         }
 
-        // Deduplicate by word, keeping highest score
+        // Deduplicate by word, keeping highest score and first relationship type
         var deduped = results
             .GroupBy(w => w.Word, StringComparer.OrdinalIgnoreCase)
-            .Select(g => new ScoredWord { Word = g.Key, Score = g.Max(x => x.Score) })
+            .Select(g => { var best = g.OrderByDescending(x => x.Score).First(); return new ScoredWord { Word = g.Key, Score = best.Score, RelationshipType = best.RelationshipType }; })
             .ToList();
         
         // Cache the result
@@ -407,7 +415,7 @@ public class ClueService : IClueService
         return deduped;
     }
 
-    private async Task<List<ScoredWord>> FetchDatamuseScoredWordsAsync(string url)
+    private async Task<List<ScoredWord>> FetchDatamuseScoredWordsAsync(string url, string relationshipType = "synonym")
     {
         try
         {
@@ -416,7 +424,7 @@ public class ClueService : IClueService
             var words = JsonSerializer.Deserialize<List<DatamuseWord>>(response);
             var result = words?
                 .Where(w => !string.IsNullOrEmpty(w.word))
-                .Select(w => new ScoredWord { Word = w.word, Score = w.score })
+                .Select(w => new ScoredWord { Word = w.word, Score = w.score, RelationshipType = relationshipType })
                 .ToList() ?? new List<ScoredWord>();
             _logger.LogDebug("Datamuse returned {Count} words", result.Count);
             return result;
@@ -438,6 +446,7 @@ public class ClueService : IClueService
     {
         public string Word { get; set; } = string.Empty;
         public int Score { get; set; }
+        public string RelationshipType { get; set; } = "synonym";
     }
 
     private class CachedSynonyms

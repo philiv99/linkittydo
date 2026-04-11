@@ -1,28 +1,28 @@
 {
   "current_sprint": {
-    "number": 46,
+    "number": 47,
     "status": "complete",
-    "branch": "feature/20260411-sprint-46",
+    "branch": "feature/20260411-sprint-47",
     "plan_approved": true,
-    "pr_number": 53,
+    "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Add HardDeleteUserAsync to IAdminService and AdminService", "status": "complete" },
-      { "id": 2, "title": "Add DELETE /api/admin/users/{uniqueId} endpoint", "status": "complete" },
-      { "id": 3, "title": "Add 4 unit tests for hard-delete", "status": "complete" },
-      { "id": 4, "title": "Verify backend build passes", "status": "complete" },
-      { "id": 5, "title": "Run full test suite", "status": "complete" }
+      { "id": 1, "title": "Add RelationshipType to ClueEvent + ClueService refactor", "status": "complete" },
+      { "id": 2, "title": "Show player name instead of Game ID in game list", "status": "complete" },
+      { "id": 3, "title": "Rich event detail view with polymorphic data", "status": "complete" },
+      { "id": 4, "title": "Date+time formatting in list and detail", "status": "complete" },
+      { "id": 5, "title": "Add 3 unit tests for new functionality", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 46,
+    "number": 47,
     "date": "2026-04-11",
     "result": "complete",
     "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "InMemory EF Core provider does not support transactions; tests must use ConfigureWarnings to suppress TransactionIgnoredWarning"
+    "key_lesson": "When adding provenance tracking (e.g., RelationshipType) to aggregated data, tag at source (FetchDatamuse call site) and preserve through dedup rather than reconstructing after"
   },
   "test_metrics": {
-    "backend_tests_passing": 336,
+    "backend_tests_passing": 339,
     "frontend_tests_passing": 64,
     "lint_errors": 0
   },
@@ -58,6 +58,7 @@
     "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 },
     "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
     "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 },
-    "sprint_46": { "pr": 53, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 339 }
+    "sprint_46": { "pr": 53, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 336 },
+    "sprint_47": { "pr": null, "items": "Games Manager detail enhancement (player names, rich events, RelationshipType, date+time)", "tests_after": 339 }
   }
 }

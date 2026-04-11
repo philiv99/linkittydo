@@ -111,6 +111,10 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
 | 131 | Admin hard-delete user | P1 | 46 | Admin ability to permanently delete a user and ALL related data (GameRecords, GameEvents, GameSessions, UserRoles, PlayerStats, AuditLog entries). Uses transactional delete to maintain data integrity. Adds `DELETE /api/admin/users/{uniqueId}` endpoint with `[Authorize(Policy = "RequireAdmin")]`. Must delete in correct FK order to avoid constraint violations. |
+| 132 | Games Manager: show player name and hide Game ID | P1 | 47 | Game list table shows Game ID (truncated) which is useless to admins. Replace with player name by joining GameRecords with Users table. Backend: update SearchGames endpoint to include `playerName`. Frontend: replace Game ID column with Player column. |
+| 133 | Games Manager: rich event detail view | P1 | 47 | Game detail events only show type and timestamp. Expand to show: clue events with URL link, phrase word, search term; guess events with word, guess text, correct/incorrect badge, points; game end with reason. Backend: return full polymorphic event data from GetGameDetail. Frontend: render rich event rows. |
+| 134 | Add RelationshipType to ClueEvent | P1 | 47 | ClueEvent stores SearchTerm but not what type of relationship it has to the original word (synonym, antonym, trigger, homophone, similar). Add `RelationshipType` string property to ClueEvent, EF Core migration, update ClueService to track which Datamuse endpoint produced the selected term. |
+| 135 | Games Manager: date+time formatting | P2 | 47 | Played column shows date only, event timestamps show time only. Both should show full date and time. |
 
 ### Security & Production Readiness
 

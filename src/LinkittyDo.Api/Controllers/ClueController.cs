@@ -80,7 +80,7 @@ public class ClueController : ControllerBase
         // Record the clue event for non-guest sessions
         if (!string.IsNullOrEmpty(clue.Url))
         {
-            await _gameService.RecordClueEventAsync(sessionId, wordIndex, clue.SearchTerm, clue.Url);
+            await _gameService.RecordClueEventAsync(sessionId, wordIndex, clue.SearchTerm, clue.Url, clue.RelationshipType);
         }
         
         return Ok(new ApiResponse<ClueResponse>(clue));

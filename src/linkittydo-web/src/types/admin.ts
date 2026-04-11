@@ -53,6 +53,7 @@ export interface PlayerAnalytics {
 export interface AdminGame {
   gameId: string;
   userId: string;
+  playerName: string;
   phraseText: string;
   difficulty: number;
   result: string;
@@ -72,6 +73,18 @@ export interface GameEventSummary {
   eventType: string;
   sequenceNumber: number;
   timestamp: string;
+  // Clue event fields
+  wordIndex?: number;
+  phraseWord?: string;
+  searchTerm?: string;
+  url?: string;
+  relationshipType?: string;
+  // Guess event fields
+  guessText?: string;
+  isCorrect?: boolean;
+  pointsAwarded?: number;
+  // Game end fields
+  reason?: string;
 }
 
 export interface SiteConfigEntry {

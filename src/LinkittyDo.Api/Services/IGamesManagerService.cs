@@ -5,6 +5,7 @@ namespace LinkittyDo.Api.Services;
 public class GameSearchResult
 {
     public IReadOnlyList<GameRecord> Games { get; set; } = Array.Empty<GameRecord>();
+    public Dictionary<string, string> PlayerNames { get; set; } = new();
     public int TotalCount { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }
