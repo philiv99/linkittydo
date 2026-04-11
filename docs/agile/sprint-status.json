@@ -4,7 +4,7 @@
     "status": "complete",
     "branch": "feature/20260411-sprint-47",
     "plan_approved": true,
-    "pr_number": null,
+    "pr_number": 54,
     "tasks": [
       { "id": 1, "title": "Add RelationshipType to ClueEvent + ClueService refactor", "status": "complete" },
       { "id": 2, "title": "Show player name instead of Game ID in game list", "status": "complete" },
@@ -59,6 +59,6 @@
     "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
     "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 },
     "sprint_46": { "pr": 53, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 336 },
-    "sprint_47": { "pr": null, "items": "Games Manager detail enhancement (player names, rich events, RelationshipType, date+time)", "tests_after": 339 }
+    "sprint_47": { "pr": 54, "items": "Games Manager detail enhancement (player names, rich events, RelationshipType, date+time)", "tests_after": 339 }
   }
 }
