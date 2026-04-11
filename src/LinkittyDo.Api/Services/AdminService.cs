@@ -159,11 +159,9 @@ public class AdminService : IAdminService
             .ToListAsync();
         _context.GameRecords.RemoveRange(gameRecords);
 
-        // 3. Delete GameSessions
-        var sessions = await _context.GameSessions
-            .Where(s => s.UserId == uniqueId)
-            .ToListAsync();
-        _context.GameSessions.RemoveRange(sessions);
+        // 3. Delete GameSessions (use raw SQL to avoid unmapped GameRecordId column)
+        await _context.Database.ExecuteSqlRawAsync(
+            "DELETE FROM GameSessions WHERE UserId = {0}", uniqueId);
 
         // 4. Delete UserRoles
         var userRoles = await _context.UserRoles
