@@ -218,3 +218,10 @@
     justify-content: space-between;
   }
 }
+
+.detail-loading,
+.detail-empty {
+  color: #aaa;
+  font-style: italic;
+  padding: 0.5rem 0;
+}

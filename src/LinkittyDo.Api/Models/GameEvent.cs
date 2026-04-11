@@ -110,3 +110,13 @@ public enum GameResult
     GaveUp,
     Abandoned
 }
+
+/// <summary>
+/// Indicates whether game data was persisted to the database
+/// </summary>
+public enum PersistenceStatus
+{
+    Saved,
+    Failed,
+    NotApplicable
+}

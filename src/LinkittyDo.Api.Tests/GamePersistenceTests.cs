@@ -124,7 +124,7 @@ public class GamePersistenceTests
     }
 
     [Fact]
-    public async Task SubmitGuessAsync_CompletionUpdateError_RollsBack()
+    public async Task SubmitGuessAsync_CompletionUpdateError_ReturnsFailed()
     {
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-1", 10)).ReturnsAsync(CreateTestPhrase());
         _gameRecordRepoMock.Setup(r => r.UpdateAsync(It.IsAny<GameRecord>()))
@@ -134,23 +134,23 @@ public class GamePersistenceTests
         await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
         await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 2, Guess = "brown" });
 
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 3, Guess = "fox" }));
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 3, Guess = "fox" });
 
+        Assert.Equal(PersistenceStatus.Failed, result.PersistenceStatus);
         _unitOfWorkMock.Verify(u => u.RollbackTransactionAsync(default), Times.Once);
     }
 
     [Fact]
-    public async Task GiveUpAsync_UpdateError_RollsBack()
+    public async Task GiveUpAsync_UpdateError_ReturnsFailed()
     {
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-1", 10)).ReturnsAsync(CreateTestPhrase());
         _gameRecordRepoMock.Setup(r => r.UpdateAsync(It.IsAny<GameRecord>()))
             .ThrowsAsync(new InvalidOperationException("DB update failed"));
         var session = await _service.StartNewGameAsync("USR-1");
 
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _service.GiveUpAsync(session.SessionId));
+        var state = await _service.GiveUpAsync(session.SessionId);
 
+        Assert.Equal(PersistenceStatus.Failed, state.PersistenceStatus);
         _unitOfWorkMock.Verify(u => u.RollbackTransactionAsync(default), Times.Once);
     }
 
@@ -288,5 +288,51 @@ public class GamePersistenceTests
 
         Assert.Equal(1, removed);
         _gameRecordRepoMock.Verify(r => r.UpdateAsync(It.IsAny<GameRecord>()), Times.Never);
+    }
+
+    // --- Persistence status tests (#125) ---
+
+    [Fact]
+    public async Task SubmitGuessAsync_RegisteredUser_ReturnsSavedStatus()
+    {
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-1", 10)).ReturnsAsync(CreateTestPhrase());
+        var session = await _service.StartNewGameAsync("USR-1");
+
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+
+        Assert.Equal(PersistenceStatus.Saved, result.PersistenceStatus);
+    }
+
+    [Fact]
+    public async Task SubmitGuessAsync_GuestSession_ReturnsNotApplicableStatus()
+    {
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
+        var session = await _service.StartNewGameAsync();
+
+        var result = await _service.SubmitGuessAsync(session.SessionId, new GuessRequest { WordIndex = 1, Guess = "quick" });
+
+        Assert.Equal(PersistenceStatus.NotApplicable, result.PersistenceStatus);
+    }
+
+    [Fact]
+    public async Task GiveUpAsync_RegisteredUser_ReturnsSavedStatus()
+    {
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync("USR-1", 10)).ReturnsAsync(CreateTestPhrase());
+        var session = await _service.StartNewGameAsync("USR-1");
+
+        var state = await _service.GiveUpAsync(session.SessionId);
+
+        Assert.Equal(PersistenceStatus.Saved, state.PersistenceStatus);
+    }
+
+    [Fact]
+    public async Task GiveUpAsync_GuestSession_ReturnsNotApplicableStatus()
+    {
+        _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
+        var session = await _service.StartNewGameAsync();
+
+        var state = await _service.GiveUpAsync(session.SessionId);
+
+        Assert.Equal(PersistenceStatus.NotApplicable, state.PersistenceStatus);
     }
 }

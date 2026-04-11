@@ -25,6 +25,8 @@ export const GameHistoryPage: React.FC = () => {
   const [games, setGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedGameId, setExpandedGameId] = useState<string | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
+  const [detailCache, setDetailCache] = useState<Record<string, GameEvent[]>>({});
 
   useEffect(() => {
     if (isGuest) {
@@ -74,8 +76,27 @@ export const GameHistoryPage: React.FC = () => {
     );
   }
 
-  const toggleExpand = (gameId: string) => {
-    setExpandedGameId(prev => prev === gameId ? null : gameId);
+  const toggleExpand = async (gameId: string) => {
+    if (expandedGameId === gameId) {
+      setExpandedGameId(null);
+      return;
+    }
+    setExpandedGameId(gameId);
+
+    // Fetch events from the detail endpoint if not cached
+    if (!detailCache[gameId]) {
+      setLoadingDetail(gameId);
+      try {
+        const detail = await api.getGameDetail(gameId);
+        if (detail) {
+          setDetailCache(prev => ({ ...prev, [gameId]: detail.events }));
+        }
+      } catch {
+        // Silent fail — expand shows empty state
+      } finally {
+        setLoadingDetail(null);
+      }
+    }
   };
 
   const renderEvent = (event: GameEvent, idx: number) => {
@@ -127,7 +148,7 @@ export const GameHistoryPage: React.FC = () => {
               </div>
               <div className="history-card-meta">
                 <span className={`history-result ${game.result.toLowerCase()}`}>
-                  {game.result === 'Solved' ? 'Solved' : game.result === 'GaveUp' ? 'Gave Up' : 'In Progress'}
+                  {game.result === 'Solved' ? 'Solved' : game.result === 'GaveUp' ? 'Gave Up' : game.result === 'Abandoned' ? 'Abandoned' : 'In Progress'}
                 </span>
                 <span className="history-score">{game.score} pts</span>
                 <span className="history-difficulty">Diff: {game.difficulty}</span>
@@ -135,12 +156,20 @@ export const GameHistoryPage: React.FC = () => {
               </div>
             </div>
 
-            {expandedGameId === game.gameId && game.events.length > 0 && (
+            {expandedGameId === game.gameId && (
               <div className="history-card-detail">
-                <h4>Event Timeline</h4>
-                <ul className="event-timeline">
-                  {game.events.map((event, idx) => renderEvent(event, idx))}
-                </ul>
+                {loadingDetail === game.gameId ? (
+                  <p className="detail-loading">Loading event timeline...</p>
+                ) : (detailCache[game.gameId]?.length ?? 0) > 0 ? (
+                  <>
+                    <h4>Event Timeline</h4>
+                    <ul className="event-timeline">
+                      {detailCache[game.gameId].map((event, idx) => renderEvent(event, idx))}
+                    </ul>
+                  </>
+                ) : (
+                  <p className="detail-empty">No events recorded for this game.</p>
+                )}
               </div>
             )}
           </div>

@@ -62,6 +62,7 @@ const defaultGameState = {
   ],
   score: 0,
   isComplete: false,
+  persistenceStatus: 'NotApplicable' as const,
 };
 
 const defaultUserState = {

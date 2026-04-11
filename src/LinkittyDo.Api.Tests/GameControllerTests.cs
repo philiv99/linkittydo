@@ -247,4 +247,45 @@ public class GameControllerTests
 
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
+
+    // --- Game detail endpoint tests (#126) ---
+
+    [Fact]
+    public async Task GetGameDetail_ReturnsRecordWithEvents_WhenFound()
+    {
+        var gameId = "GAME-1234567890000-A1B2C3";
+        var record = new GameRecord
+        {
+            GameId = gameId,
+            UserId = "USR-1",
+            PlayedAt = DateTime.UtcNow,
+            PhraseText = "the quick brown fox",
+            Difficulty = 10,
+            Result = GameResult.Solved,
+            Score = 300,
+            Events = new List<GameEvent>
+            {
+                new GuessEvent { GameId = gameId, SequenceNumber = 0, WordIndex = 1, GuessText = "quick", IsCorrect = true, PointsAwarded = 100 },
+                new GameEndEvent { GameId = gameId, SequenceNumber = 1, Reason = "solved" }
+            }
+        };
+        _gameRecordRepoMock.Setup(r => r.GetByGameIdWithEventsAsync(gameId)).ReturnsAsync(record);
+
+        var result = await _controller.GetGameDetail(gameId);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<GameRecord>>(okResult.Value);
+        Assert.Equal(gameId, response.Data.GameId);
+        Assert.Equal(2, response.Data.Events.Count);
+    }
+
+    [Fact]
+    public async Task GetGameDetail_Returns404_WhenNotFound()
+    {
+        _gameRecordRepoMock.Setup(r => r.GetByGameIdWithEventsAsync("nonexistent")).ReturnsAsync((GameRecord?)null);
+
+        var result = await _controller.GetGameDetail("nonexistent");
+
+        Assert.IsType<NotFoundObjectResult>(result.Result);
+    }
 }

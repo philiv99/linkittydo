@@ -316,4 +316,12 @@ export const api = {
 
     return data;
   },
+
+  async getGameDetail(gameId: string): Promise<GameRecord | null> {
+    const response = await fetch(`${API_BASE_URL}/game/detail/${encodeURIComponent(gameId)}`);
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error('Failed to get game detail');
+    const wrapper: ApiResponse<GameRecord> = await response.json();
+    return wrapper.data;
+  },
 };

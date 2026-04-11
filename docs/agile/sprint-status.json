@@ -1,27 +1,27 @@
 {
   "current_sprint": {
-    "number": 40,
-    "status": "in-progress",
-    "branch": "feature/20260412-sprint-40",
+    "number": 41,
+    "status": "complete",
+    "branch": "feature/20260412-sprint-41",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Persist GameRecord to DB at game start (#121)", "status": "not-started" },
-      { "id": 2, "title": "Persist events incrementally as they happen (#122)", "status": "not-started" },
-      { "id": 3, "title": "Track abandoned/expired games (#123)", "status": "not-started" },
-      { "id": 4, "title": "Backend tests for in-progress persistence (#128)", "status": "not-started" }
+      { "id": 1, "title": "Game persistence status on frontend (#125)", "status": "complete" },
+      { "id": 2, "title": "Game detail API with full events (#126)", "status": "complete" },
+      { "id": 3, "title": "Session recovery for in-progress games (#127)", "status": "complete" },
+      { "id": 4, "title": "Backend + frontend tests for new features (#128)", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 39,
+    "number": 41,
     "date": "2026-04-12",
     "result": "complete",
-    "items_completed": 5,
+    "items_completed": 3,
     "items_carried_over": 0,
-    "key_lesson": "Full-stack gap analysis before sprint planning makes task breakdown straightforward; interface-first changes make downstream updates mechanical"
+    "key_lesson": "Stale cleanup must run before active query to avoid early return skipping cleanup; session recovery DB tests need separate seed/verify contexts to avoid disposed scope issues"
   },
   "test_metrics": {
-    "backend_tests_passing": 306,
+    "backend_tests_passing": 320,
     "frontend_tests_passing": 61,
     "lint_errors": 0
   },
@@ -50,6 +50,8 @@
     "sprint_36": { "pr": 43, "items": "Developer practice gaps (lessons registry L1-L11, pre-commit checklist, test expectations, build enforcement)", "tests_after": 294 },
     "sprint_37": { "pr": null, "items": "Growing complexity management (code-architect update, codebase map, complexity budget, simplifier awareness)", "tests_after": 294 },
     "sprint_38": { "pr": null, "items": "Admin auth fix (token auto-refresh, roles in UpdateUser response, backlog status cleanup)", "tests_after": 295 },
-    "sprint_39": { "pr": 46, "items": "Reliable game completion persistence (async end-to-end, transactional saves, event-loading queries)", "tests_after": 306 }
+    "sprint_39": { "pr": 46, "items": "Reliable game completion persistence (async end-to-end, transactional saves, event-loading queries)", "tests_after": 306 },
+    "sprint_40": { "pr": 47, "items": "In-progress game persistence (persist at start, incremental events, abandoned tracking)", "tests_after": 311 },
+    "sprint_41": { "pr": null, "items": "Game data completeness (PersistenceStatus DTOs, lazy-load events, session recovery, DatabaseSessionStore rewrite)", "tests_after": 320 }
   }
 }

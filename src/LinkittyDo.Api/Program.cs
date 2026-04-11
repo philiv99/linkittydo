@@ -211,6 +211,17 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase) && app.Envi
     await db.Database.MigrateAsync();
 }
 
+// Recover active game sessions from database on startup
+if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+{
+    var sessionStore = app.Services.GetRequiredService<ISessionStore>();
+    if (sessionStore is DatabaseSessionStore dbSessionStore)
+    {
+        var sessionMaxAge = TimeSpan.FromHours(24);
+        await dbSessionStore.LoadSessionsAsync(sessionMaxAge);
+    }
+}
+
 // Configure the HTTP request pipeline
 // Enable Swagger in all environments for API documentation
 app.UseSwagger();

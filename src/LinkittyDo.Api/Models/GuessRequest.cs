@@ -20,4 +20,5 @@ public class GuessResponse
     public bool IsPhraseComplete { get; set; }
     public int CurrentScore { get; set; }
     public string? RevealedWord { get; set; }
+    public PersistenceStatus PersistenceStatus { get; set; } = PersistenceStatus.NotApplicable;
 }
