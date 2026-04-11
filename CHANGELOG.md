@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-11
+- **feat**: Sprint 46 — Admin hard-delete user endpoint (`DELETE /api/admin/users/{uniqueId}`) permanently removes user and all related data (#131)
+- **test**: Add 4 new AdminHardDelete tests — full cascade delete, other users unaffected, nonexistent user, user with no related data
+
+### 2026-04-11
 - **fix**: Sprint 45 — Filter leaderboard to only show players with LifetimePoints > 0, excluding users who never played (#130)
 - **fix**: Add tooltips to leaderboard column headers clarifying Rank, Points, Games, Solved, Best Score, and Streak
 - **test**: Add 3 new leaderboard tests — exclude zero-point users (JSON fallback + EF Core), empty results when all users have zero points

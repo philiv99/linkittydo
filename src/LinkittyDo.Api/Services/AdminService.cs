@@ -131,4 +131,63 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> HardDeleteUserAsync(string uniqueId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UniqueId == uniqueId);
+        if (user == null) return false;
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        // 1. Delete GameEvents for all the user's games
+        var gameIds = await _context.GameRecords
+            .Where(g => g.UserId == uniqueId)
+            .Select(g => g.GameId)
+            .ToListAsync();
+
+        if (gameIds.Count > 0)
+        {
+            var events = await _context.GameEvents
+                .Where(e => gameIds.Contains(e.GameId))
+                .ToListAsync();
+            _context.GameEvents.RemoveRange(events);
+        }
+
+        // 2. Delete GameRecords
+        var gameRecords = await _context.GameRecords
+            .Where(g => g.UserId == uniqueId)
+            .ToListAsync();
+        _context.GameRecords.RemoveRange(gameRecords);
+
+        // 3. Delete GameSessions
+        var sessions = await _context.GameSessions
+            .Where(s => s.UserId == uniqueId)
+            .ToListAsync();
+        _context.GameSessions.RemoveRange(sessions);
+
+        // 4. Delete UserRoles
+        var userRoles = await _context.UserRoles
+            .Where(ur => ur.UserId == uniqueId)
+            .ToListAsync();
+        _context.UserRoles.RemoveRange(userRoles);
+
+        // 5. Delete PlayerStats
+        var playerStats = await _context.PlayerStats.FindAsync(uniqueId);
+        if (playerStats != null)
+            _context.PlayerStats.Remove(playerStats);
+
+        // 6. Delete AuditLog entries for this user
+        var auditEntries = await _context.AuditLog
+            .Where(a => a.UserId == uniqueId)
+            .ToListAsync();
+        _context.AuditLog.RemoveRange(auditEntries);
+
+        // 7. Delete the User record
+        _context.Users.Remove(user);
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return true;
+    }
 }

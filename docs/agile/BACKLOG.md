@@ -106,6 +106,12 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 129 | BUG: Admin navigation persists after switching to non-admin user | P1 | 44 | When an admin user switches to a non-admin user (e.g., Tom), the Admin nav link and admin page access persist because `switchUser` only updates the displayed user profile via `api.getUser()` without re-authenticating. The JWT (with admin role) stays in AuthContext, so `isAdmin` remains true. Fix: `switchUser` must clear auth state (logout JWT) when switching users, forcing `isAdmin` to derive from the switched user's actual roles, not a stale JWT. Also: when current user lacks admin role, force-redirect away from admin pages and hide admin nav. |
 | 130 | BUG: Leaderboard shows rows without real player stats and names not displaying | P1 | 45 | Leaderboard shows all active non-simulated users regardless of whether they have actually played a game. Users with 0 games, 0 points appear with blank stats. Additionally, player names may not display correctly. Fix: (1) Backend — filter leaderboard to only include users with `GamesPlayed > 0` or `LifetimePoints > 0`, (2) Frontend — remove any canned/prepopulated rows, (3) Verify the Name column is populated correctly from the database, (4) Clarify Rank column (sequential 1-based index, medals for top 3). |
 
+### Admin Features
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 131 | Admin hard-delete user | P1 | 46 | Admin ability to permanently delete a user and ALL related data (GameRecords, GameEvents, GameSessions, UserRoles, PlayerStats, AuditLog entries). Uses transactional delete to maintain data integrity. Adds `DELETE /api/admin/users/{uniqueId}` endpoint with `[Authorize(Policy = "RequireAdmin")]`. Must delete in correct FK order to avoid constraint violations. |
+
 ### Security & Production Readiness
 
 | # | Item | Priority | Sprint | Notes |
