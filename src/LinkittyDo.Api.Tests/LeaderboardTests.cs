@@ -335,4 +335,67 @@ public class LeaderboardTests
         Assert.Equal(2, result[1].Rank);
         Assert.Equal(3, result[2].Rank);
     }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_ExcludesUsersWithZeroPoints()
+    {
+        var users = new List<User>
+        {
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 500 },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 0 },
+            new() { UniqueId = "USR-3", Name = "Charlie", LifetimePoints = 100 }
+        };
+        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
+
+        var result = (await _service.GetLeaderboardAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal("Charlie", result[1].Name);
+        Assert.DoesNotContain(result, u => u.Name == "Bob");
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_ExcludesUsersWithZeroPoints()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_ZeroPoints_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.AddRange(
+            new User { UniqueId = "USR-1", Name = "Alice", Email = "a@test.com", LifetimePoints = 500, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-2", Name = "NeverPlayed", Email = "np@test.com", LifetimePoints = 0, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-3", Name = "Bob", Email = "b@test.com", LifetimePoints = 100, IsActive = true, CreatedAt = DateTime.UtcNow }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal("Bob", result[1].Name);
+        Assert.DoesNotContain(result, e => e.Name == "NeverPlayed");
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_EfCore_ReturnsEmptyWhenAllUsersHaveZeroPoints()
+    {
+        var options = new DbContextOptionsBuilder<LinkittyDoDbContext>()
+            .UseInMemoryDatabase(databaseName: $"Leaderboard_AllZero_{Guid.NewGuid()}")
+            .Options;
+
+        using var context = new LinkittyDoDbContext(options);
+        context.Users.AddRange(
+            new User { UniqueId = "USR-1", Name = "NoPlay1", Email = "np1@test.com", LifetimePoints = 0, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new User { UniqueId = "USR-2", Name = "NoPlay2", Email = "np2@test.com", LifetimePoints = 0, IsActive = true, CreatedAt = DateTime.UtcNow }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new UserService(_repoMock.Object, _gameRecordRepoMock.Object, context);
+        var result = (await service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Empty(result);
+    }
 }

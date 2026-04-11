@@ -50,13 +50,13 @@ export const LeaderboardPage: React.FC = () => {
         <table className="leaderboard-table" aria-label="Player rankings">
           <thead>
             <tr>
-              <th>Rank</th>
+              <th title="Position based on lifetime points">Rank</th>
               <th>Player</th>
-              <th>Points</th>
-              <th>Games</th>
-              <th>Solved</th>
-              <th>Best Score</th>
-              <th>Streak</th>
+              <th title="Total lifetime points earned">Points</th>
+              <th title="Total games played">Games</th>
+              <th title="Games solved successfully">Solved</th>
+              <th title="Highest score in a single game">Best Score</th>
+              <th title="Current consecutive wins">Streak</th>
             </tr>
           </thead>
           <tbody>

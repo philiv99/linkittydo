@@ -1,20 +1,20 @@
 {
   "current_sprint": {
-    "number": 43,
+    "number": 45,
     "status": "complete",
-    "branch": "feature/20260411-sprint-43",
+    "branch": "feature/20260411-sprint-45",
     "plan_approved": true,
-    "pr_number": 50,
+    "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Rewrite leaderboard query (two-query approach)", "status": "complete" },
-      { "id": 2, "title": "Add fallback stats from GameRecords", "status": "complete" },
-      { "id": 3, "title": "Handle empty names with (unknown) fallback", "status": "complete" },
-      { "id": 4, "title": "Add EF Core leaderboard integration tests", "status": "complete" },
+      { "id": 1, "title": "Filter backend leaderboard query (LifetimePoints > 0)", "status": "complete" },
+      { "id": 2, "title": "Verify names display correctly", "status": "complete" },
+      { "id": 3, "title": "Add rank column tooltips", "status": "complete" },
+      { "id": 4, "title": "Update leaderboard tests (+3 new)", "status": "complete" },
       { "id": 5, "title": "Verify builds pass", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 43,
+    "number": 45,
     "date": "2026-04-11",
     "result": "complete",
     "items_completed": 5,
@@ -22,8 +22,8 @@
     "key_lesson": "EF Core GroupJoin+SelectMany+Take is unreliable for LEFT JOIN; prefer two separate queries joined in memory for correctness and readability"
   },
   "test_metrics": {
-    "backend_tests_passing": 329,
-    "frontend_tests_passing": 61,
+    "backend_tests_passing": 332,
+    "frontend_tests_passing": 64,
     "lint_errors": 0
   },
   "sprint_history": {
@@ -55,6 +55,8 @@
     "sprint_40": { "pr": 47, "items": "In-progress game persistence (persist at start, incremental events, abandoned tracking)", "tests_after": 311 },
     "sprint_41": { "pr": 48, "items": "Game data completeness (PersistenceStatus DTOs, lazy-load events, session recovery, DatabaseSessionStore rewrite)", "tests_after": 320 },
     "sprint_42": { "pr": 49, "items": "Leaderboard real data only (exclude simulated users, PlayerStats join, enriched columns)", "tests_after": 323 },
-    "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 }
+    "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 },
+    "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
+    "sprint_45": { "pr": null, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 }
   }
 }
