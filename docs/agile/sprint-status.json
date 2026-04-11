@@ -4,7 +4,7 @@
     "status": "complete",
     "branch": "feature/20260412-sprint-41",
     "plan_approved": true,
-    "pr_number": null,
+    "pr_number": 48,
     "tasks": [
       { "id": 1, "title": "Game persistence status on frontend (#125)", "status": "complete" },
       { "id": 2, "title": "Game detail API with full events (#126)", "status": "complete" },
@@ -52,6 +52,6 @@
     "sprint_38": { "pr": null, "items": "Admin auth fix (token auto-refresh, roles in UpdateUser response, backlog status cleanup)", "tests_after": 295 },
     "sprint_39": { "pr": 46, "items": "Reliable game completion persistence (async end-to-end, transactional saves, event-loading queries)", "tests_after": 306 },
     "sprint_40": { "pr": 47, "items": "In-progress game persistence (persist at start, incremental events, abandoned tracking)", "tests_after": 311 },
-    "sprint_41": { "pr": null, "items": "Game data completeness (PersistenceStatus DTOs, lazy-load events, session recovery, DatabaseSessionStore rewrite)", "tests_after": 320 }
+    "sprint_41": { "pr": 48, "items": "Game data completeness (PersistenceStatus DTOs, lazy-load events, session recovery, DatabaseSessionStore rewrite)", "tests_after": 320 }
   }
 }
