@@ -52,6 +52,16 @@
   background: #16213e;
 }
 
+.admin-action-btn.delete-btn {
+  background: #742a2a;
+  border-color: #e53e3e55;
+  color: #fc8181;
+}
+
+.admin-action-btn.delete-btn:hover {
+  background: #9b2c2c;
+}
+
 .sim-badge {
   margin-left: 0.5rem;
 }

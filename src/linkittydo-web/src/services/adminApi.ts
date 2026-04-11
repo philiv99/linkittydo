@@ -198,6 +198,14 @@ export const adminApi = {
     return handleResponse<UserRoles>(response);
   },
 
+  async hardDeleteUser(uniqueId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${encodeURIComponent(uniqueId)}`, {
+      method: 'DELETE',
+      headers: adminHeaders(),
+    });
+    await handleResponse<void>(response);
+  },
+
   // Audit Log
   async getAuditLog(page = 1, pageSize = 50, action?: string, userId?: string, from?: string, to?: string): Promise<PaginatedResponse<AuditLogEntry>> {
     const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString() });

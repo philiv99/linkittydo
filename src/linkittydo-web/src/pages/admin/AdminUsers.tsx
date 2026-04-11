@@ -20,6 +20,7 @@ export function AdminUsers() {
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [roleToAssign, setRoleToAssign] = useState<Record<string, string>>({});
   const [confirmAction, setConfirmAction] = useState<{ userId: string; isActive: boolean; name: string } | null>(null);
+  const [deleteAction, setDeleteAction] = useState<{ userId: string; name: string } | null>(null);
 
   const fetchUsers = useCallback(async (p: number, search?: string) => {
     setLoading(true);
@@ -65,6 +66,19 @@ export function AdminUsers() {
       setUsers(prev => prev.map(u => u.uniqueId === uniqueId ? { ...u, isActive: !currentActive } : u));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
+    }
+  };
+
+  const handleHardDelete = async (uniqueId: string) => {
+    try {
+      await adminApi.hardDeleteUser(uniqueId);
+      setUsers(prev => prev.filter(u => u.uniqueId !== uniqueId));
+      if (selectedUser === uniqueId) {
+        setSelectedUser(null);
+        setAnalytics(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete user');
     }
   };
 
@@ -195,6 +209,12 @@ export function AdminUsers() {
                   >
                     {selectedUser === user.uniqueId ? 'Hide Stats' : 'Stats'}
                   </button>
+                  <button
+                    className="admin-action-btn delete-btn"
+                    onClick={() => setDeleteAction({ userId: user.uniqueId, name: user.name })}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
               {selectedUser === user.uniqueId && (
@@ -242,6 +262,20 @@ export function AdminUsers() {
             setConfirmAction(null);
           }}
           onCancel={() => setConfirmAction(null)}
+        />
+      )}
+
+      {deleteAction && (
+        <ConfirmDialog
+          title="Permanently Delete User"
+          message={`This will permanently delete "${deleteAction.name}" and ALL their data (games, stats, roles, audit log). This cannot be undone.`}
+          confirmLabel="Delete Permanently"
+          variant="danger"
+          onConfirm={async () => {
+            await handleHardDelete(deleteAction.userId);
+            setDeleteAction(null);
+          }}
+          onCancel={() => setDeleteAction(null)}
         />
       )}
     </div>
