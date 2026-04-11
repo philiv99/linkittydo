@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **feat**: Sprint 40 — Persist GameRecord to DB at game start (InProgress status); game completion updates existing record (#121)
+- **feat**: Persist game events (guesses, clues) incrementally to DB as they happen, not just at game end (#122)
+- **feat**: Add Abandoned status to GameResult; session cleanup marks expired registered games as Abandoned in DB (#123)
+- **feat**: Make RecordClueEvent and RemoveExpiredSessions async across interface, service, controller, and cleanup service
+- **test**: Add/update GamePersistenceTests for start-persist, incremental events, abandoned tracking, rollback (311 total)
 - **feat**: Sprint 39 — Make SubmitGuess and GiveUp async end-to-end; persistence errors now propagate to caller (#124, #118)
 - **feat**: Wrap GameRecord + GameEvents persistence in UnitOfWork transaction for atomic saves (#119)
 - **feat**: Add GetByGameIdWithEventsAsync and GetByUserIdWithEventsAsync to IGameRecordRepository (#120)

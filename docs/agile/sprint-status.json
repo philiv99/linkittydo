@@ -1,25 +1,24 @@
 {
   "current_sprint": {
-    "number": 39,
-    "status": "complete",
-    "branch": "feature/20260411-sprint-39",
+    "number": 40,
+    "status": "in-progress",
+    "branch": "feature/20260412-sprint-40",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Make GameService methods async end-to-end (#124)", "status": "complete" },
-      { "id": 2, "title": "Await game record persistence / fix fire-and-forget (#118)", "status": "complete" },
-      { "id": 3, "title": "Wrap GameRecord + GameEvents in UnitOfWork transaction (#119)", "status": "complete" },
-      { "id": 4, "title": "Load GameEvents when reading GameRecords from DB (#120)", "status": "complete" },
-      { "id": 5, "title": "Backend tests for game persistence paths (#128)", "status": "complete" }
+      { "id": 1, "title": "Persist GameRecord to DB at game start (#121)", "status": "not-started" },
+      { "id": 2, "title": "Persist events incrementally as they happen (#122)", "status": "not-started" },
+      { "id": 3, "title": "Track abandoned/expired games (#123)", "status": "not-started" },
+      { "id": 4, "title": "Backend tests for in-progress persistence (#128)", "status": "not-started" }
     ]
   },
   "last_completed": {
-    "number": 38,
-    "date": "2026-04-11",
+    "number": 39,
+    "date": "2026-04-12",
     "result": "complete",
-    "items_completed": 3,
+    "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "Token refresh must be implemented alongside token expiry checks; silent auth loss creates confusing UX"
+    "key_lesson": "Full-stack gap analysis before sprint planning makes task breakdown straightforward; interface-first changes make downstream updates mechanical"
   },
   "test_metrics": {
     "backend_tests_passing": 306,
@@ -50,6 +49,7 @@
     "sprint_35": { "pr": 42, "items": "Context exhaustion prevention (agent efficiency, task tracking, session handoff, context budget)", "tests_after": 294 },
     "sprint_36": { "pr": 43, "items": "Developer practice gaps (lessons registry L1-L11, pre-commit checklist, test expectations, build enforcement)", "tests_after": 294 },
     "sprint_37": { "pr": null, "items": "Growing complexity management (code-architect update, codebase map, complexity budget, simplifier awareness)", "tests_after": 294 },
-    "sprint_38": { "pr": null, "items": "Admin auth fix (token auto-refresh, roles in UpdateUser response, backlog status cleanup)", "tests_after": 295 }
+    "sprint_38": { "pr": null, "items": "Admin auth fix (token auto-refresh, roles in UpdateUser response, backlog status cleanup)", "tests_after": 295 },
+    "sprint_39": { "pr": 46, "items": "Reliable game completion persistence (async end-to-end, transactional saves, event-loading queries)", "tests_after": 306 }
   }
 }

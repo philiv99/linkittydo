@@ -73,7 +73,7 @@ public class SessionManagementTests
         // Manually set LastActivityAt to the past
         session.LastActivityAt = DateTime.UtcNow.AddHours(-25);
 
-        var removed = _service.RemoveExpiredSessions(TimeSpan.FromHours(24));
+        var removed = await _service.RemoveExpiredSessionsAsync(TimeSpan.FromHours(24));
         Assert.Equal(1, removed);
         Assert.Equal(0, _service.ActiveSessionCount);
     }
@@ -84,7 +84,7 @@ public class SessionManagementTests
         _phraseServiceMock.Setup(s => s.GetPhraseForUserAsync(null, 10)).ReturnsAsync(CreateTestPhrase());
         await _service.StartNewGameAsync();
 
-        var removed = _service.RemoveExpiredSessions(TimeSpan.FromHours(24));
+        var removed = await _service.RemoveExpiredSessionsAsync(TimeSpan.FromHours(24));
         Assert.Equal(0, removed);
         Assert.Equal(1, _service.ActiveSessionCount);
     }
@@ -124,7 +124,7 @@ public class SessionManagementTests
         session.LastActivityAt = DateTime.UtcNow.AddHours(-1);
         var oldActivity = session.LastActivityAt;
 
-        _service.RecordClueEvent(session.SessionId, 1, "fast", "http://example.com");
+        await _service.RecordClueEventAsync(session.SessionId, 1, "fast", "http://example.com");
 
         Assert.True(session.LastActivityAt > oldActivity);
     }
@@ -132,7 +132,7 @@ public class SessionManagementTests
     [Fact]
     public async Task RemoveExpiredSessions_ReturnsZeroWhenEmpty()
     {
-        var removed = _service.RemoveExpiredSessions(TimeSpan.FromHours(24));
+        var removed = await _service.RemoveExpiredSessionsAsync(TimeSpan.FromHours(24));
         Assert.Equal(0, removed);
     }
 }

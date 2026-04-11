@@ -10,8 +10,8 @@ public interface IGameService
     Task<GuessResponse> SubmitGuessAsync(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
     Task<GameState> GiveUpAsync(Guid sessionId);
-    void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url);
-    int RemoveExpiredSessions(TimeSpan maxAge);
+    Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url);
+    Task<int> RemoveExpiredSessionsAsync(TimeSpan maxAge);
     int ActiveSessionCount { get; }
     Task<GameRecord?> GetGameRecordAsync(Guid sessionId);
 }
@@ -84,7 +84,7 @@ public class GameService : IGameService
             session.RevealedWords[word.Index] = false;
         }
 
-        // Create game record for non-guest users
+        // Create game record for non-guest users and persist to DB immediately
         if (!session.IsGuestSession)
         {
             session.GameRecord = new GameRecord
@@ -100,6 +100,18 @@ public class GameService : IGameService
                 Result = GameResult.InProgress,
                 Events = new List<GameEvent>()
             };
+
+            try
+            {
+                await _gameRecordRepository.CreateAsync(session.GameRecord);
+                _logger.LogInformation("Persisted InProgress GameRecord {GameId} for user {UserId}",
+                    session.GameRecord.GameId, userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist initial GameRecord for user {UserId}", userId);
+                throw;
+            }
         }
 
         _sessionStore.Set(session.SessionId, session);
@@ -147,7 +159,7 @@ public class GameService : IGameService
         // Record guess event for non-guest sessions
         if (!session.IsGuestSession && session.GameRecord != null)
         {
-            session.GameRecord.Events.Add(new GuessEvent
+            var guessEvent = new GuessEvent
             {
                 GameId = session.GameRecord.GameId,
                 SequenceNumber = session.GameRecord.Events.Count,
@@ -156,26 +168,39 @@ public class GameService : IGameService
                 IsCorrect = isCorrect,
                 PointsAwarded = pointsAwarded,
                 Timestamp = DateTime.UtcNow
-            });
+            };
+            session.GameRecord.Events.Add(guessEvent);
             session.GameRecord.Score = session.Score;
+
+            // Persist event incrementally
+            try
+            {
+                _dbContext.GameEvents.Add(guessEvent);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to persist guess event for game {GameId}", session.GameRecord.GameId);
+            }
         }
 
         var isComplete = session.RevealedWords.All(kv => kv.Value);
         
-        // If phrase is complete, mark game as solved and persist
+        // If phrase is complete, mark game as solved and persist final state
         if (isComplete && !session.IsGuestSession && session.GameRecord != null)
         {
-            session.GameRecord.Events.Add(new GameEndEvent
+            var endEvent = new GameEndEvent
             {
                 GameId = session.GameRecord.GameId,
                 SequenceNumber = session.GameRecord.Events.Count,
                 Reason = "solved",
                 Timestamp = DateTime.UtcNow
-            });
+            };
+            session.GameRecord.Events.Add(endEvent);
             session.GameRecord.Result = GameResult.Solved;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            await PersistGameRecordAsync(session);
+            await PersistGameCompletionAsync(session, endEvent);
         }
 
         return new GuessResponse
@@ -234,24 +259,25 @@ public class GameService : IGameService
         // Record game end event for non-guest sessions
         if (!session.IsGuestSession && session.GameRecord != null)
         {
-            session.GameRecord.Events.Add(new GameEndEvent
+            var endEvent = new GameEndEvent
             {
                 GameId = session.GameRecord.GameId,
                 SequenceNumber = session.GameRecord.Events.Count,
                 Reason = "gaveup",
                 Timestamp = DateTime.UtcNow
-            });
+            };
+            session.GameRecord.Events.Add(endEvent);
             session.GameRecord.Result = GameResult.GaveUp;
             session.GameRecord.Score = 0;
             session.GameRecord.CompletedAt = DateTime.UtcNow;
 
-            await PersistGameRecordAsync(session);
+            await PersistGameCompletionAsync(session, endEvent);
         }
 
         return GetGameState(sessionId);
     }
 
-    public void RecordClueEvent(Guid sessionId, int wordIndex, string searchTerm, string url)
+    public async Task RecordClueEventAsync(Guid sessionId, int wordIndex, string searchTerm, string url)
     {
         var session = GetGame(sessionId);
         if (session == null)
@@ -271,7 +297,7 @@ public class GameService : IGameService
             return;
         }
 
-        session.GameRecord.Events.Add(new ClueEvent
+        var clueEvent = new ClueEvent
         {
             GameId = session.GameRecord.GameId,
             SequenceNumber = session.GameRecord.Events.Count,
@@ -279,7 +305,19 @@ public class GameService : IGameService
             SearchTerm = searchTerm,
             Url = url,
             Timestamp = DateTime.UtcNow
-        });
+        };
+        session.GameRecord.Events.Add(clueEvent);
+
+        // Persist event incrementally
+        try
+        {
+            _dbContext.GameEvents.Add(clueEvent);
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to persist clue event for game {GameId}", session.GameRecord.GameId);
+        }
     }
 
     /// <summary>
@@ -325,22 +363,42 @@ public class GameService : IGameService
 
     public int ActiveSessionCount => _sessionStore.Count;
 
-    public int RemoveExpiredSessions(TimeSpan maxAge)
+    public async Task<int> RemoveExpiredSessionsAsync(TimeSpan maxAge)
     {
         var cutoff = DateTime.UtcNow - maxAge;
         var expired = _sessionStore.GetAll()
             .Where(kv => kv.Value.LastActivityAt < cutoff)
-            .Select(kv => kv.Key)
+            .Select(kv => kv.Value)
             .ToList();
 
-        foreach (var key in expired)
+        var abandonedCount = 0;
+        foreach (var session in expired)
         {
-            _sessionStore.Remove(key);
+            // Mark registered user games as abandoned in DB
+            if (!session.IsGuestSession && session.GameRecord != null)
+            {
+                try
+                {
+                    session.GameRecord.Result = GameResult.Abandoned;
+                    session.GameRecord.CompletedAt = DateTime.UtcNow;
+                    await _gameRecordRepository.UpdateAsync(session.GameRecord);
+                    abandonedCount++;
+                    _logger.LogInformation("Marked game {GameId} as Abandoned for user {UserId}",
+                        session.GameRecord.GameId, session.UserId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to mark game {GameId} as Abandoned",
+                        session.GameRecord.GameId);
+                }
+            }
+            _sessionStore.Remove(session.SessionId);
         }
 
         if (expired.Count > 0)
         {
-            _logger.LogInformation("Removed {Count} expired sessions (older than {MaxAge})", expired.Count, maxAge);
+            _logger.LogInformation("Removed {Count} expired sessions (older than {MaxAge}), {Abandoned} marked as abandoned",
+                expired.Count, maxAge, abandonedCount);
         }
 
         return expired.Count;
@@ -355,28 +413,23 @@ public class GameService : IGameService
         return session.GameRecord;
     }
 
-    private async Task PersistGameRecordAsync(GameSession session)
+    private async Task PersistGameCompletionAsync(GameSession session, GameEndEvent endEvent)
     {
         if (session.GameRecord == null || session.IsGuestSession) return;
 
         try
         {
-            // Wrap GameRecord + GameEvents in a transaction for atomicity
+            // Wrap GameRecord update + GameEndEvent in a transaction for atomicity
             await _unitOfWork.BeginTransactionAsync();
 
             try
             {
-                // Save the GameRecord
-                await _gameRecordRepository.CreateAsync(session.GameRecord);
+                // Update the existing GameRecord (created at game start)
+                await _gameRecordRepository.UpdateAsync(session.GameRecord);
 
-                // Persist GameEvents separately (EF Core ignores the Events navigation property on GameRecord)
-                if (session.GameRecord.Events.Count > 0)
-                {
-                    _dbContext.GameEvents.AddRange(session.GameRecord.Events);
-                    await _dbContext.SaveChangesAsync();
-                    _logger.LogInformation("Persisted {Count} events for game {GameId}",
-                        session.GameRecord.Events.Count, session.GameRecord.GameId);
-                }
+                // Persist the GameEndEvent
+                _dbContext.GameEvents.Add(endEvent);
+                await _dbContext.SaveChangesAsync();
 
                 await _unitOfWork.CommitTransactionAsync();
             }
