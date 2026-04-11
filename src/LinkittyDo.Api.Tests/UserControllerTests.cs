@@ -9,13 +9,14 @@ namespace LinkittyDo.Api.Tests;
 public class UserControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<IRoleService> _roleServiceMock;
     private readonly UserController _controller;
 
     public UserControllerTests()
     {
         _userServiceMock = new Mock<IUserService>();
-        var roleServiceMock = new Mock<IRoleService>();
-        _controller = new UserController(_userServiceMock.Object, roleServiceMock.Object);
+        _roleServiceMock = new Mock<IRoleService>();
+        _controller = new UserController(_userServiceMock.Object, _roleServiceMock.Object);
     }
 
     private static User CreateTestUser(string id = "USR-1234567890123-ABC123", string name = "TestUser", string email = "test@example.com")
@@ -154,6 +155,28 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ApiResponse<UserResponse>>(okResult.Value);
         Assert.Equal("UpdatedName", response.Data!.Name);
+    }
+
+    [Fact]
+    public async Task UpdateUser_ReturnsRolesInResponse()
+    {
+        var existingUser = CreateTestUser();
+        var updatedUser = CreateTestUser(name: "AdminUser", email: "admin@test.com");
+        var request = new UpdateUserRequest { Name = "AdminUser", Email = "admin@test.com" };
+
+        _userServiceMock.Setup(s => s.GetUserByIdAsync("USR-1234567890123-ABC123")).ReturnsAsync(existingUser);
+        _userServiceMock.Setup(s => s.IsNameAvailableAsync("AdminUser", "USR-1234567890123-ABC123")).ReturnsAsync(true);
+        _userServiceMock.Setup(s => s.IsEmailAvailableAsync("admin@test.com", "USR-1234567890123-ABC123")).ReturnsAsync(true);
+        _userServiceMock.Setup(s => s.UpdateUserAsync("USR-1234567890123-ABC123", request)).ReturnsAsync(updatedUser);
+        _roleServiceMock.Setup(s => s.GetUserRolesAsync("USR-1234567890123-ABC123"))
+            .ReturnsAsync(new List<string> { "Admin", "Player" });
+
+        var result = await _controller.UpdateUser("USR-1234567890123-ABC123", request);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<UserResponse>>(okResult.Value);
+        Assert.Contains("Admin", response.Data!.Roles);
+        Assert.Contains("Player", response.Data.Roles);
     }
 
     [Fact]

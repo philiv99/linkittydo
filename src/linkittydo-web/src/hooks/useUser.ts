@@ -98,6 +98,16 @@ export const useUser = () => {
     fetchAllUsers();
   }, [fetchAllUsers]);
 
+  // Register auth-lost callback to reset user when token refresh fails
+  useEffect(() => {
+    auth.onAuthLost.current = () => {
+      const guest = createGuestUser();
+      setUser(guest);
+      setError(null);
+    };
+    return () => { auth.onAuthLost.current = null; };
+  }, [auth.onAuthLost]);
+
   // Sync user data from server if logged in
   useEffect(() => {
     const syncUser = async () => {

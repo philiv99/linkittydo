@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-11
+- **fix**: Sprint 38 — Implement automatic token refresh in AuthContext; admin menu now persists across JWT expiry (#116)
+- **fix**: Include roles in UpdateUser API response to prevent admin status loss after profile edits (#117)
+- **test**: Add UpdateUser_ReturnsRolesInResponse backend test (295 total)
+- **chore**: Mark backlog items #93-#115 as Done per sprint history (sprints 28-31)
+
 ### 2026-04-10
 - **docs**: Sprint 37 — growing complexity management: code-architect update, codebase map, complexity budget, code-simplifier awareness
 - **docs**: Update code-architect agent with full current architecture (12 services, 9 controllers, EF Core, JWT, admin, analytics, simulation)

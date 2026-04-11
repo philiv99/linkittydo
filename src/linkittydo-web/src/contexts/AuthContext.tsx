@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { api, getStoredToken, clearTokens } from '../services/api';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { api, getStoredToken, getStoredRefreshToken, clearTokens } from '../services/api';
 import type { RegisterRequest, LoginRequest, AuthResponse } from '../types';
 
 function parseJwtPayload(token: string): Record<string, unknown> | null {
@@ -47,15 +47,18 @@ interface AuthContextValue {
   register: (request: RegisterRequest) => Promise<AuthResponse>;
   logout: () => void;
   clearError: () => void;
+  onAuthLost: React.MutableRefObject<(() => void) | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const onAuthLost = useRef<(() => void) | null>(null);
+
   const [token, setToken] = useState<string | null>(() => {
     const stored = getStoredToken();
     if (stored && !isTokenExpired(stored)) return stored;
-    if (stored) clearTokens();
+    // Don't clear here — we'll attempt refresh in useEffect
     return null;
   });
 
@@ -79,18 +82,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!token && !isTokenExpired(token);
   const isAdmin = isAuthenticated && roles.some(r => r.toLowerCase() === 'admin');
 
-  // Clear expired tokens on interval
+  const attemptTokenRefresh = useCallback(async (): Promise<boolean> => {
+    const refreshToken = getStoredRefreshToken();
+    if (!refreshToken) return false;
+    try {
+      const response = await api.refreshToken();
+      if (response) {
+        setToken(response.accessToken);
+        setAuthUser({
+          uniqueId: response.uniqueId,
+          name: response.name,
+          email: response.email,
+          roles: response.roles ?? [],
+        });
+        return true;
+      }
+    } catch {
+      // Refresh failed
+    }
+    return false;
+  }, []);
+
+  const handleAuthExpired = useCallback(() => {
+    clearTokens();
+    setToken(null);
+    setAuthUser(null);
+    onAuthLost.current?.();
+  }, []);
+
+  // On mount: if token is expired, attempt refresh
   useEffect(() => {
-    const interval = setInterval(() => {
+    const stored = getStoredToken();
+    if (stored && isTokenExpired(stored)) {
+      attemptTokenRefresh().then(success => {
+        if (!success) handleAuthExpired();
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Periodic check: refresh before expiry or handle expired token
+  useEffect(() => {
+    const interval = setInterval(async () => {
       const current = getStoredToken();
       if (current && isTokenExpired(current)) {
-        clearTokens();
-        setToken(null);
-        setAuthUser(null);
+        const refreshed = await attemptTokenRefresh();
+        if (!refreshed) handleAuthExpired();
       }
     }, 60_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [attemptTokenRefresh, handleAuthExpired]);
 
   const login = useCallback(async (request: LoginRequest): Promise<AuthResponse> => {
     setLoading(true);
@@ -187,6 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
       clearError: clearAuthError,
+      onAuthLost,
     }}>
       {children}
     </AuthContext.Provider>
