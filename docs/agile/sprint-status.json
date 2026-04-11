@@ -1,28 +1,28 @@
 {
   "current_sprint": {
-    "number": 45,
+    "number": 46,
     "status": "complete",
-    "branch": "feature/20260411-sprint-45",
+    "branch": "feature/20260411-sprint-46",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Filter backend leaderboard query (LifetimePoints > 0)", "status": "complete" },
-      { "id": 2, "title": "Verify names display correctly", "status": "complete" },
-      { "id": 3, "title": "Add rank column tooltips", "status": "complete" },
-      { "id": 4, "title": "Update leaderboard tests (+3 new)", "status": "complete" },
-      { "id": 5, "title": "Verify builds pass", "status": "complete" }
+      { "id": 1, "title": "Add HardDeleteUserAsync to IAdminService and AdminService", "status": "complete" },
+      { "id": 2, "title": "Add DELETE /api/admin/users/{uniqueId} endpoint", "status": "complete" },
+      { "id": 3, "title": "Add 4 unit tests for hard-delete", "status": "complete" },
+      { "id": 4, "title": "Verify backend build passes", "status": "complete" },
+      { "id": 5, "title": "Run full test suite", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 45,
+    "number": 46,
     "date": "2026-04-11",
     "result": "complete",
     "items_completed": 5,
     "items_carried_over": 0,
-    "key_lesson": "EF Core GroupJoin+SelectMany+Take is unreliable for LEFT JOIN; prefer two separate queries joined in memory for correctness and readability"
+    "key_lesson": "InMemory EF Core provider does not support transactions; tests must use ConfigureWarnings to suppress TransactionIgnoredWarning"
   },
   "test_metrics": {
-    "backend_tests_passing": 332,
+    "backend_tests_passing": 336,
     "frontend_tests_passing": 64,
     "lint_errors": 0
   },
@@ -57,6 +57,7 @@
     "sprint_42": { "pr": 49, "items": "Leaderboard real data only (exclude simulated users, PlayerStats join, enriched columns)", "tests_after": 323 },
     "sprint_43": { "pr": 50, "items": "Leaderboard data accuracy (two-query rewrite, fallback stats from GameRecords, empty name handling)", "tests_after": 329 },
     "sprint_44": { "pr": 51, "items": "Admin nav role enforcement (clear auth on user switch, AdminGuard redirect, tests)", "tests_after": 332 },
-    "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 }
+    "sprint_45": { "pr": 52, "items": "Leaderboard real player data (filter zero-point users, column tooltips, tests)", "tests_after": 335 },
+    "sprint_46": { "pr": null, "items": "Admin hard-delete user (cascade delete all related data, transactional, 4 tests)", "tests_after": 339 }
   }
 }

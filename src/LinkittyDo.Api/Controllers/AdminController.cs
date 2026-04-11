@@ -106,6 +106,16 @@ public class AdminController : ControllerBase
         var roles = await _adminService.GetUserRolesAsync(uniqueId);
         return Ok(new { data = new { uniqueId, roles } });
     }
+
+    [HttpDelete("users/{uniqueId}")]
+    public async Task<IActionResult> HardDeleteUser(string uniqueId)
+    {
+        var success = await _adminService.HardDeleteUserAsync(uniqueId);
+        if (!success)
+            return NotFound(new { error = new { code = "USER_NOT_FOUND", message = "User not found" } });
+
+        return NoContent();
+    }
 }
 
 public class SetUserStatusRequest
