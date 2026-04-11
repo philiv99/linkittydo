@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-11
+- **fix**: Sprint 44 — switchUser now clears JWT auth state, preventing admin nav from persisting when switching to non-admin users (#129)
+- **fix**: AdminGuard redirects non-admin users to /play instead of showing static "Access Denied" page
+- **test**: Add 3 AdminGuard tests — admin access, unauthenticated redirect, non-admin redirect
+
+### 2026-04-11
 - **fix**: Sprint 43 — Rewrite leaderboard query from GroupJoin to two-query approach fixing missing names, zero stats, and order preservation
 - **fix**: Add fallback stats computation from GameRecords when PlayerStats table is empty
 - **fix**: Handle empty/null player names with "(unknown)" fallback in both backend and frontend

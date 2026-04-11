@@ -210,6 +210,8 @@ export const useUser = () => {
     try {
       const response = await api.getUser(uniqueId);
       if (response) {
+        // Clear auth state so admin privileges from previous JWT don't persist
+        auth.logout();
         const switchedUser = mapResponseToUser(response);
         setUser(switchedUser);
         return true;
@@ -223,7 +225,7 @@ export const useUser = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [auth]);
 
   const updateDifficulty = useCallback(async (difficulty: number): Promise<boolean> => {
     if (isGuest) {
