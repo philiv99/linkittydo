@@ -204,48 +204,84 @@ public class UserService : IUserService
     {
         if (_dbContext != null)
         {
-            var entries = await _dbContext.Users
+            // Step 1: Get top users by points (simple, reliable query)
+            var users = await _dbContext.Users
                 .Where(u => u.IsActive && !u.IsSimulated)
                 .OrderByDescending(u => u.LifetimePoints)
                 .ThenBy(u => u.Name)
                 .Take(top)
-                .GroupJoin(
-                    _dbContext.PlayerStats,
-                    u => u.UniqueId,
-                    ps => ps.UserId,
-                    (u, stats) => new { User = u, Stats = stats })
-                .SelectMany(
-                    x => x.Stats.DefaultIfEmpty(),
-                    (x, stats) => new LeaderboardEntry
-                    {
-                        Name = x.User.Name,
-                        LifetimePoints = x.User.LifetimePoints,
-                        GamesPlayed = stats != null ? stats.GamesPlayed : 0,
-                        GamesSolved = stats != null ? stats.GamesSolved : 0,
-                        BestScore = stats != null ? stats.BestScore : 0,
-                        CurrentStreak = stats != null ? stats.CurrentStreak : 0
-                    })
                 .ToListAsync();
 
-            for (int i = 0; i < entries.Count; i++)
+            if (users.Count == 0)
+                return new List<LeaderboardEntry>();
+
+            // Step 2: Get PlayerStats for these users
+            var userIds = users.Select(u => u.UniqueId).ToList();
+            var statsDict = await _dbContext.PlayerStats
+                .Where(ps => userIds.Contains(ps.UserId))
+                .ToDictionaryAsync(ps => ps.UserId);
+
+            // Step 3: For users missing PlayerStats, compute from GameRecords directly
+            var missingIds = userIds.Where(id => !statsDict.ContainsKey(id)).ToList();
+            Dictionary<string, (int Played, int Solved, int Best, int Streak)> fallbackStats = new();
+            if (missingIds.Count > 0)
             {
-                entries[i].Rank = i + 1;
+                var records = await _dbContext.GameRecords
+                    .Where(g => missingIds.Contains(g.UserId) && g.Result != GameResult.InProgress)
+                    .ToListAsync();
+
+                foreach (var group in records.GroupBy(g => g.UserId))
+                {
+                    var games = group.OrderByDescending(g => g.CompletedAt ?? g.PlayedAt).ToList();
+                    int streak = 0;
+                    foreach (var g in games)
+                    {
+                        if (g.Result == GameResult.Solved) streak++;
+                        else break;
+                    }
+                    fallbackStats[group.Key] = (
+                        Played: games.Count,
+                        Solved: games.Count(g => g.Result == GameResult.Solved),
+                        Best: games.Count > 0 ? games.Max(g => g.Score) : 0,
+                        Streak: streak
+                    );
+                }
+            }
+
+            // Step 4: Build entries preserving original order
+            var entries = new List<LeaderboardEntry>();
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                statsDict.TryGetValue(user.UniqueId, out var stats);
+                fallbackStats.TryGetValue(user.UniqueId, out var fb);
+
+                entries.Add(new LeaderboardEntry
+                {
+                    Rank = i + 1,
+                    Name = string.IsNullOrWhiteSpace(user.Name) ? "(unknown)" : user.Name,
+                    LifetimePoints = user.LifetimePoints,
+                    GamesPlayed = stats?.GamesPlayed ?? fb.Played,
+                    GamesSolved = stats?.GamesSolved ?? fb.Solved,
+                    BestScore = stats?.BestScore ?? fb.Best,
+                    CurrentStreak = stats?.CurrentStreak ?? fb.Streak
+                });
             }
 
             return entries;
         }
 
         // Fallback for JSON provider (no DbContext)
-        var users = (await GetLeaderboardAsync(top)).ToList();
+        var fallbackUsers = (await GetLeaderboardAsync(top)).ToList();
         var result = new List<LeaderboardEntry>();
-        for (int i = 0; i < users.Count; i++)
+        for (int i = 0; i < fallbackUsers.Count; i++)
         {
             result.Add(new LeaderboardEntry
             {
                 Rank = i + 1,
-                Name = users[i].Name,
-                LifetimePoints = users[i].LifetimePoints,
-                GamesPlayed = await _gameRecordRepository.GetCountByUserIdAsync(users[i].UniqueId)
+                Name = string.IsNullOrWhiteSpace(fallbackUsers[i].Name) ? "(unknown)" : fallbackUsers[i].Name,
+                LifetimePoints = fallbackUsers[i].LifetimePoints,
+                GamesPlayed = await _gameRecordRepository.GetCountByUserIdAsync(fallbackUsers[i].UniqueId)
             });
         }
         return result;

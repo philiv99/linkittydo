@@ -71,7 +71,7 @@ export const LeaderboardPage: React.FC = () => {
                     entry.rank
                   )}
                 </td>
-                <td className="name-cell">{entry.name}</td>
+                <td className="name-cell">{entry.name || '(unknown)'}</td>
                 <td className="points-cell">{entry.lifetimePoints.toLocaleString()}</td>
                 <td className="games-cell">{entry.gamesPlayed}</td>
                 <td className="games-cell">{entry.gamesSolved}</td>
