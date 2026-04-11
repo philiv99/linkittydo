@@ -10,14 +10,8 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAdmin) {
-    // Logged in but not an admin — show access denied
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1>Access Denied</h1>
-        <p>You do not have admin privileges.</p>
-        <a href="/linkittydo/play">Return to game</a>
-      </div>
-    );
+    // Logged in but not an admin — redirect to play
+    return <Navigate to="/play" replace />;
   }
 
   return <>{children}</>;

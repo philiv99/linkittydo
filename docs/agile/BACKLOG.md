@@ -103,6 +103,8 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 113 | BUG: Admin users forced to re-login when navigating to admin pages | P1 | 33 | Dual token system: player login stores JWT in `linkittydo_token`, but `AdminGuard` and `adminApi` only read from `linkittydo_admin_token`. Admin users who logged in as players must login a second time. Fix: unify to a single token, have `adminApi` use the shared token, update `AdminGuard`. |
 | 114 | Introduce AuthContext for centralized auth state | P1 | 33 | Auth state is scattered across `useUser` hook, `api.ts` token functions, and `adminApi.ts` token functions. Create a React Context (`AuthContext`) providing token, user, roles, isAdmin to the entire component tree. Eliminates direct localStorage reads from multiple modules. |
 | 115 | Remove redundant admin login page and token storage | P2 | 33 | `AdminLogin.tsx` duplicates the player login flow against the same backend endpoint. `adminApi.ts` maintains separate `ADMIN_TOKEN_KEY`/`ADMIN_REFRESH_TOKEN_KEY`. Remove these in favor of the unified auth layer. Redirect `/admin/login` to the main login flow. |
+| 129 | BUG: Admin navigation persists after switching to non-admin user | P1 | 44 | When an admin user switches to a non-admin user (e.g., Tom), the Admin nav link and admin page access persist because `switchUser` only updates the displayed user profile via `api.getUser()` without re-authenticating. The JWT (with admin role) stays in AuthContext, so `isAdmin` remains true. Fix: `switchUser` must clear auth state (logout JWT) when switching users, forcing `isAdmin` to derive from the switched user's actual roles, not a stale JWT. Also: when current user lacks admin role, force-redirect away from admin pages and hide admin nav. |
+| 130 | BUG: Leaderboard shows rows without real player stats and names not displaying | P1 | 45 | Leaderboard shows all active non-simulated users regardless of whether they have actually played a game. Users with 0 games, 0 points appear with blank stats. Additionally, player names may not display correctly. Fix: (1) Backend — filter leaderboard to only include users with `GamesPlayed > 0` or `LifetimePoints > 0`, (2) Frontend — remove any canned/prepopulated rows, (3) Verify the Name column is populated correctly from the database, (4) Clarify Rank column (sequential 1-based index, medals for top 3). |
 
 ### Security & Production Readiness
 
@@ -370,6 +372,8 @@ Sprints are sequenced by dependencies and priority. Each sprint builds on the pr
 | **39** | **Reliable Game Completion Persistence** | #118, #119, #120, #124, #128 | Sprint 38 |
 | **40** | **In-Progress Game Persistence** | #121, #122, #123 | Sprint 39 (reliable persistence) |
 | **41** | **Game Data Completeness & Frontend Integration** | #125, #126, #127 | Sprint 40 (incremental persistence) |
+| **44** | **Admin Nav Role Enforcement** | #129 | Sprint 43 |
+| **45** | **Leaderboard Real Player Data** | #130 | Sprint 44 |
 | **1** | **Testing & API Foundation** | #1, #2, #3 | None — must be first |
 | **2** | **Difficulty & Scoring Engine** | #4, #5, #6, #7 | Sprint 1 (tests) |
 | **3** | **Frontend Architecture & History** | #8, #9, #10 | Sprint 1 (tests) |
