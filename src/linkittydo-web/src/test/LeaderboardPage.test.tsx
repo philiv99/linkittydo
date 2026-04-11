@@ -23,8 +23,8 @@ describe('LeaderboardPage', () => {
 
   it('renders leaderboard entries after loading', async () => {
     vi.mocked(api.getLeaderboard).mockResolvedValue([
-      { rank: 1, name: 'Alice', lifetimePoints: 1000, gamesPlayed: 5 },
-      { rank: 2, name: 'Bob', lifetimePoints: 500, gamesPlayed: 3 },
+      { rank: 1, name: 'Alice', lifetimePoints: 1000, gamesPlayed: 5, gamesSolved: 4, bestScore: 800, currentStreak: 2 },
+      { rank: 2, name: 'Bob', lifetimePoints: 500, gamesPlayed: 3, gamesSolved: 2, bestScore: 400, currentStreak: 1 },
     ]);
 
     render(
@@ -71,9 +71,9 @@ describe('LeaderboardPage', () => {
 
   it('displays medal icons for top 3 ranks', async () => {
     vi.mocked(api.getLeaderboard).mockResolvedValue([
-      { rank: 1, name: 'Gold', lifetimePoints: 3000, gamesPlayed: 10 },
-      { rank: 2, name: 'Silver', lifetimePoints: 2000, gamesPlayed: 8 },
-      { rank: 3, name: 'Bronze', lifetimePoints: 1000, gamesPlayed: 5 },
+      { rank: 1, name: 'Gold', lifetimePoints: 3000, gamesPlayed: 10, gamesSolved: 8, bestScore: 900, currentStreak: 3 },
+      { rank: 2, name: 'Silver', lifetimePoints: 2000, gamesPlayed: 8, gamesSolved: 6, bestScore: 700, currentStreak: 2 },
+      { rank: 3, name: 'Bronze', lifetimePoints: 1000, gamesPlayed: 5, gamesSolved: 3, bestScore: 500, currentStreak: 1 },
     ]);
 
     render(
@@ -91,7 +91,7 @@ describe('LeaderboardPage', () => {
 
   it('has proper ARIA attributes', async () => {
     vi.mocked(api.getLeaderboard).mockResolvedValue([
-      { rank: 1, name: 'Alice', lifetimePoints: 1000, gamesPlayed: 5 },
+      { rank: 1, name: 'Alice', lifetimePoints: 1000, gamesPlayed: 5, gamesSolved: 4, bestScore: 800, currentStreak: 2 },
     ]);
 
     render(

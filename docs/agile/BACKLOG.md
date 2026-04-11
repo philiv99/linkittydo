@@ -331,6 +331,12 @@ _Source: Full-stack persistence gap analysis (2026-04-11). Critical gaps where g
 | 127 | Populate GameSessions table for session recovery | P3 | 41 | Done | `GameSessions` table exists but is never written to. Persist session state (RevealedWords, scores, clue/guess counts) to this table on each state change. On server restart, reload active sessions from DB. Complements in-memory `InMemorySessionStore` as a write-through cache. |
 | 128 | Backend tests for game persistence paths | P1 | 39 | | No tests cover the persistence code paths in `PersistGameRecordAsync`. Add tests: (1) successful persist with events, (2) transaction rollback on partial failure, (3) analytics recompute after persist, (4) guest session skips persistence. |
 
+### Leaderboard Data Quality
+
+| # | Item | Priority | Sprint | Status | Notes |
+|---|------|----------|--------|--------|-------|
+| 129 | Leaderboard shows only real player data from DB | P1 | 42 | | **DEFECT**: `GetLeaderboardAsync` calls `GetAllAsync()` which returns ALL active users including simulated (SIM-prefix) users. Leaderboard must exclude simulated users. Additionally, the controller uses N+1 `GetGameCountAsync` calls per user instead of joining with `PlayerStats` table. Fix: (1) filter out `IsSimulated` users in `GetLeaderboardAsync`, (2) use `PlayerStats` join for GamesPlayed/GamesSolved/BestScore/CurrentStreak data, (3) update `LeaderboardEntry` model to include richer stats, (4) update frontend to display real DB data with expanded columns. |
+
 ### Advanced Linguistic Features
 
 | # | Item | Priority | Sprint | Notes |

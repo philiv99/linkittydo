@@ -150,6 +150,9 @@ export interface LeaderboardEntry {
   name: string;
   lifetimePoints: number;
   gamesPlayed: number;
+  gamesSolved: number;
+  bestScore: number;
+  currentStreak: number;
 }
 
 export interface ErrorResponse {

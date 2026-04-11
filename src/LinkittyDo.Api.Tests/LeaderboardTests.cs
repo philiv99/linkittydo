@@ -83,6 +83,69 @@ public class LeaderboardTests
     }
 
     [Fact]
+    public async Task GetLeaderboardAsync_ExcludesSimulatedUsers()
+    {
+        var users = new List<User>
+        {
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000 },
+            new() { UniqueId = "SIM-1", Name = "SimBot1", LifetimePoints = 5000, IsSimulated = true },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500 },
+            new() { UniqueId = "SIM-2", Name = "SimBot2", LifetimePoints = 3000, IsSimulated = true }
+        };
+        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
+
+        var result = (await _service.GetLeaderboardAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal("Bob", result[1].Name);
+        Assert.DoesNotContain(result, u => u.IsSimulated);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_FallbackReturnsEntriesWithStats()
+    {
+        // Without DbContext (JSON provider fallback), uses N+1 game count queries
+        var users = new List<User>
+        {
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000 },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500 }
+        };
+        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
+        _gameRecordRepoMock.Setup(r => r.GetCountByUserIdAsync("USR-1")).ReturnsAsync(5);
+        _gameRecordRepoMock.Setup(r => r.GetCountByUserIdAsync("USR-2")).ReturnsAsync(3);
+
+        var result = (await _service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(1, result[0].Rank);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal(1000, result[0].LifetimePoints);
+        Assert.Equal(5, result[0].GamesPlayed);
+        Assert.Equal(2, result[1].Rank);
+        Assert.Equal("Bob", result[1].Name);
+        Assert.Equal(3, result[1].GamesPlayed);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardEntriesAsync_FallbackExcludesSimulatedUsers()
+    {
+        var users = new List<User>
+        {
+            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000 },
+            new() { UniqueId = "SIM-1", Name = "SimBot", LifetimePoints = 9999, IsSimulated = true },
+            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500 }
+        };
+        _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
+        _gameRecordRepoMock.Setup(r => r.GetCountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(1);
+
+        var result = (await _service.GetLeaderboardEntriesAsync(10)).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.DoesNotContain(result, e => e.Name == "SimBot");
+    }
+
+    [Fact]
     public async Task LeaderboardEndpoint_InvalidTop_ReturnsBadRequest()
     {
         var serviceMock = new Mock<IUserService>();
@@ -98,14 +161,12 @@ public class LeaderboardTests
     public async Task LeaderboardEndpoint_ValidTop_ReturnsRankedEntries()
     {
         var serviceMock = new Mock<IUserService>();
-        var users = new List<User>
+        var entries = new List<LeaderboardEntry>
         {
-            new() { UniqueId = "USR-1", Name = "Alice", LifetimePoints = 1000 },
-            new() { UniqueId = "USR-2", Name = "Bob", LifetimePoints = 500 }
+            new() { Rank = 1, Name = "Alice", LifetimePoints = 1000, GamesPlayed = 2, GamesSolved = 1, BestScore = 800, CurrentStreak = 1 },
+            new() { Rank = 2, Name = "Bob", LifetimePoints = 500, GamesPlayed = 1, GamesSolved = 1, BestScore = 500, CurrentStreak = 1 }
         };
-        serviceMock.Setup(s => s.GetLeaderboardAsync(10)).ReturnsAsync(users);
-        serviceMock.Setup(s => s.GetGameCountAsync("USR-1")).ReturnsAsync(2);
-        serviceMock.Setup(s => s.GetGameCountAsync("USR-2")).ReturnsAsync(1);
+        serviceMock.Setup(s => s.GetLeaderboardEntriesAsync(10)).ReturnsAsync(entries);
         var roleServiceMock = new Mock<IRoleService>();
         var controller = new UserController(serviceMock.Object, roleServiceMock.Object);
 
@@ -113,12 +174,14 @@ public class LeaderboardTests
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ApiResponse<IEnumerable<LeaderboardEntry>>>(okResult.Value);
-        var entries = response.Data!.ToList();
-        Assert.Equal(2, entries.Count);
-        Assert.Equal(1, entries[0].Rank);
-        Assert.Equal("Alice", entries[0].Name);
-        Assert.Equal(1000, entries[0].LifetimePoints);
-        Assert.Equal(2, entries[0].GamesPlayed);
-        Assert.Equal(2, entries[1].Rank);
+        var resultEntries = response.Data!.ToList();
+        Assert.Equal(2, resultEntries.Count);
+        Assert.Equal(1, resultEntries[0].Rank);
+        Assert.Equal("Alice", resultEntries[0].Name);
+        Assert.Equal(1000, resultEntries[0].LifetimePoints);
+        Assert.Equal(2, resultEntries[0].GamesPlayed);
+        Assert.Equal(1, resultEntries[0].GamesSolved);
+        Assert.Equal(800, resultEntries[0].BestScore);
+        Assert.Equal(2, resultEntries[1].Rank);
     }
 }

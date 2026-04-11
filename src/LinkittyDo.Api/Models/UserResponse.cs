@@ -36,6 +36,9 @@ public class LeaderboardEntry
     public string Name { get; set; } = string.Empty;
     public int LifetimePoints { get; set; }
     public int GamesPlayed { get; set; }
+    public int GamesSolved { get; set; }
+    public int BestScore { get; set; }
+    public int CurrentStreak { get; set; }
 }
 
 public class ErrorResponse
