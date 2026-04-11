@@ -335,7 +335,7 @@ _Source: Full-stack persistence gap analysis (2026-04-11). Critical gaps where g
 
 | # | Item | Priority | Sprint | Status | Notes |
 |---|------|----------|--------|--------|-------|
-| 129 | Leaderboard shows only real player data from DB | P1 | 42 | | **DEFECT**: `GetLeaderboardAsync` calls `GetAllAsync()` which returns ALL active users including simulated (SIM-prefix) users. Leaderboard must exclude simulated users. Additionally, the controller uses N+1 `GetGameCountAsync` calls per user instead of joining with `PlayerStats` table. Fix: (1) filter out `IsSimulated` users in `GetLeaderboardAsync`, (2) use `PlayerStats` join for GamesPlayed/GamesSolved/BestScore/CurrentStreak data, (3) update `LeaderboardEntry` model to include richer stats, (4) update frontend to display real DB data with expanded columns. |
+| 129 | Leaderboard shows only real player data from DB | P1 | 42 | Done | **DEFECT**: `GetLeaderboardAsync` calls `GetAllAsync()` which returns ALL active users including simulated (SIM-prefix) users. Leaderboard must exclude simulated users. Additionally, the controller uses N+1 `GetGameCountAsync` calls per user instead of joining with `PlayerStats` table. Fix: (1) filter out `IsSimulated` users in `GetLeaderboardAsync`, (2) use `PlayerStats` join for GamesPlayed/GamesSolved/BestScore/CurrentStreak data, (3) update `LeaderboardEntry` model to include richer stats, (4) update frontend to display real DB data with expanded columns. |
 
 ### Advanced Linguistic Features
 
