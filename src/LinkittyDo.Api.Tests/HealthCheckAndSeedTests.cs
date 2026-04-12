@@ -11,54 +11,6 @@ using Moq;
 
 namespace LinkittyDo.Api.Tests;
 
-public class HealthCheckTests
-{
-    [Fact]
-    public async Task JsonStorageHealthCheck_Healthy_WhenAllDirectoriesExist()
-    {
-        // Create temporary directories
-        var tempDir = Path.Combine(Path.GetTempPath(), $"linkittydo-test-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(Path.Combine(tempDir, "Users"));
-        Directory.CreateDirectory(Path.Combine(tempDir, "Phrases"));
-        Directory.CreateDirectory(Path.Combine(tempDir, "GameRecords"));
-
-        try
-        {
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "DataDirectory", tempDir }
-                })
-                .Build();
-
-            var check = new JsonStorageHealthCheck(config);
-            var result = await check.CheckHealthAsync(new HealthCheckContext());
-
-            Assert.Equal(HealthStatus.Healthy, result.Status);
-        }
-        finally
-        {
-            Directory.Delete(tempDir, true);
-        }
-    }
-
-    [Fact]
-    public async Task JsonStorageHealthCheck_Degraded_WhenDirectoriesMissing()
-    {
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "DataDirectory", Path.Combine(Path.GetTempPath(), $"nonexistent-{Guid.NewGuid():N}") }
-            })
-            .Build();
-
-        var check = new JsonStorageHealthCheck(config);
-        var result = await check.CheckHealthAsync(new HealthCheckContext());
-
-        Assert.Equal(HealthStatus.Degraded, result.Status);
-    }
-}
-
 public class DatabaseSeedServiceTests
 {
     [Fact]

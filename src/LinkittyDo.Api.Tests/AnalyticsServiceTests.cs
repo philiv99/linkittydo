@@ -191,18 +191,6 @@ public class AnalyticsServiceTests
     }
 
     [Fact]
-    public async Task NoOpAnalyticsService_ReturnsDefaults()
-    {
-        var service = new NoOpAnalyticsService();
-        await service.RecomputePlayerStatsAsync("test");
-        await service.RecomputePhrasePlayStatsAsync("test");
-        await service.RecomputeClueEffectivenessAsync();
-        Assert.Null(await service.GetPlayerStatsAsync("test"));
-        Assert.Null(await service.GetPhrasePlayStatsAsync("test"));
-        Assert.Empty(await service.GetTopCluesAsync("test"));
-    }
-
-    [Fact]
     public async Task GameRecord_PhraseUniqueId_PersistsAndFilters()
     {
         using var context = CreateContext();

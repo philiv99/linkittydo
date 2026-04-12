@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **chore**: Sprint 49 — Remove legacy JSON data files and JSON repository code (#140)
+- **chore**: Remove `DataProvider` feature flag — MySQL is now the sole data provider
+- **chore**: Delete JSON repository classes (`JsonUserRepository`, `JsonGamePhraseRepository`, `JsonGameRecordRepository`)
+- **chore**: Delete `JsonToMySqlMigrationService`, `MigrationController`, `JsonStorageHealthCheck`
+- **chore**: Delete `NoOpRoleService`, `NoOpAuditService`, `NoOpAnalyticsService`, `InMemorySiteConfigService`
+- **chore**: Remove 109 phrase JSON files, 3 user JSON files, and empty GameRecords directory
+- **chore**: Remove `.csproj` JSON copy rule
+- **test**: Remove 18 tests for deleted JSON/NoOp code; 321 backend tests passing
 - **fix**: Sprint 48 — Fix 7 CI ESLint errors across UserManageModal, UserModal, AuthContext
 - **fix**: Replace setState-in-effect patterns with state adjustment during render and onChange handlers (#136, #137)
 - **fix**: Remove unused `allUsers` prop from UserModal (#138)

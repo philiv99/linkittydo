@@ -1,27 +1,29 @@
 {
   "current_sprint": {
-    "number": 48,
+    "number": 49,
     "status": "complete",
-    "branch": "feature/20260412-sprint-48",
+    "branch": "feature/20260412-sprint-49",
     "plan_approved": true,
-    "pr_number": 55,
+    "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Fix setState-in-effect in UserManageModal", "status": "complete" },
-      { "id": 2, "title": "Fix setState-in-effect in UserModal + remove unused var", "status": "complete" },
-      { "id": 3, "title": "Fix fast-refresh in AuthContext", "status": "complete" },
-      { "id": 4, "title": "Validation (lint, build, tests)", "status": "complete" }
+      { "id": 1, "title": "Verify DB has all phrase and user data", "status": "complete" },
+      { "id": 2, "title": "Remove JSON data files (Phrases, Users, GameRecords)", "status": "complete" },
+      { "id": 3, "title": "Remove JSON repos, NoOp services, migration code", "status": "complete" },
+      { "id": 4, "title": "Remove DataProvider feature flag from Program.cs", "status": "complete" },
+      { "id": 5, "title": "Update csproj, fix tests, remove JSON health check tests", "status": "complete" },
+      { "id": 6, "title": "Build and test validation (321 backend, 64 frontend)", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 48,
+    "number": 49,
     "date": "2026-04-12",
     "result": "complete",
-    "items_completed": 4,
+    "items_completed": 6,
     "items_carried_over": 0,
-    "key_lesson": "React strict lint rules (react-hooks/set-state-in-effect, react-hooks/refs) require state-adjustment-during-render pattern instead of useEffect or useRef for prop-driven resets"
+    "key_lesson": "When decommissioning a feature-flagged legacy system, grep the entire codebase (including test projects) for all references before removing"
   },
   "test_metrics": {
-    "backend_tests_passing": 339,
+    "backend_tests_passing": 321,
     "frontend_tests_passing": 64,
     "lint_errors": 0
   },

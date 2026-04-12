@@ -120,6 +120,12 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 138 | CI lint: unused `_allUsers` variable in UserModal | P1 | 48 | ESLint `@typescript-eslint/no-unused-vars`. `allUsers` is destructured as `_allUsers` but never used. Remove from props interface or use it. |
 | 139 | CI lint: fast-refresh violation in AuthContext | P1 | 48 | ESLint `react-refresh/only-export-components` error on line 238. File exports both `AuthProvider` component and `useAuth` hook. Fix: move `useAuth` to a separate file or add eslint-disable comment. |
 
+### Data Cleanup
+
+| # | Item | Priority | Sprint | Notes |
+|---|------|----------|--------|-------|
+| 140 | Remove legacy JSON data files and JSON repository code | P1 | 49 | MySQL is the active data provider. JSON files in `Data/Phrases/`, `Data/Users/`, `Data/GameRecords/` are redundant. Remove: JSON data files, JSON repository classes (`JsonUserRepository`, `JsonGamePhraseRepository`, `JsonGameRecordRepository`), JSON health check, `DataProvider` feature flag, migration service/controller, `.csproj` copy rule. Verify DB has all data first. Update affected tests. |
+
 ### Security & Production Readiness
 
 | # | Item | Priority | Sprint | Notes |

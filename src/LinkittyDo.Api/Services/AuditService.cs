@@ -46,15 +46,3 @@ public class AuditService : IAuditService
         }
     }
 }
-
-/// <summary>
-/// No-op audit service for JSON data provider mode (no database available).
-/// </summary>
-public class NoOpAuditService : IAuditService
-{
-    public Task LogAsync(string action, string? userId = null, string? entityType = null,
-        string? entityId = null, string? details = null, string? ipAddress = null)
-    {
-        return Task.CompletedTask;
-    }
-}

@@ -127,30 +127,6 @@ public class ContentManagementTests
     }
 
     [Fact]
-    public void InMemorySiteConfigService_BasicOperations()
-    {
-        var service = new InMemorySiteConfigService();
-
-        var defaultDiff = service.GetIntAsync("DefaultDifficulty", 0).Result;
-        Assert.Equal(10, defaultDiff);
-
-        var maintenance = service.GetBoolAsync("MaintenanceMode", true).Result;
-        Assert.False(maintenance);
-
-        service.SetValueAsync("TestKey", "TestValue").Wait();
-        var val = service.GetValueAsync("TestKey").Result;
-        Assert.Equal("TestValue", val);
-    }
-
-    [Fact]
-    public async Task InMemorySiteConfigService_GetAll_ReturnsAllConfigs()
-    {
-        var service = new InMemorySiteConfigService();
-        var configs = await service.GetAllAsync();
-        Assert.True(configs.Count >= 4);
-    }
-
-    [Fact]
     public void SiteConfig_Model_HasCorrectDefaults()
     {
         var config = new SiteConfig();
