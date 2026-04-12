@@ -1,20 +1,17 @@
 {
   "current_sprint": {
-    "number": 51,
-    "status": "complete",
-    "branch": "feature/20260412-sprint-51",
+    "number": 52,
+    "status": "in-progress",
+    "branch": "feature/20260412-sprint-52",
     "plan_approved": true,
     "tasks": [
-      { "id": 1, "title": "Implement Daily Challenge backend (model, service, controller, DB)", "status": "complete" },
-      { "id": 2, "title": "Implement Daily Challenge frontend page", "status": "complete" },
-      { "id": 3, "title": "Implement Tutorial/Onboarding frontend page", "status": "complete" },
-      { "id": 4, "title": "Implement Player Profile backend endpoint", "status": "complete" },
-      { "id": 5, "title": "Implement Player Profile frontend page", "status": "complete" },
-      { "id": 6, "title": "Update navigation (Daily, How to Play, Profile links)", "status": "complete" },
-      { "id": 7, "title": "Write backend tests (10 new: DailyChallenge + Profile)", "status": "complete" },
-      { "id": 8, "title": "Write frontend tests (25 new: Tutorial, Profile, Daily, NavHeader)", "status": "complete" },
-      { "id": 9, "title": "Update documentation (README, CHANGELOG, BACKLOG)", "status": "complete" },
-      { "id": 10, "title": "Sprint retrospective", "status": "complete" }
+      { "id": 1, "title": "Fix ProfilePage.test.tsx build error", "status": "complete" },
+      { "id": 2, "title": "Add useAuth awareness to GameHistoryPage", "status": "complete" },
+      { "id": 3, "title": "Fix ProfilePage auth handling", "status": "complete" },
+      { "id": 4, "title": "Add user data re-sync to useUser hook", "status": "complete" },
+      { "id": 5, "title": "Add refreshUser and wire to pages", "status": "complete" },
+      { "id": 6, "title": "Verify full flow and builds", "status": "complete" },
+      { "id": 7, "title": "Update docs (BACKLOG, CHANGELOG, sprint)", "status": "complete" }
     ]
   },
   "last_completed": {

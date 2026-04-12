@@ -95,6 +95,15 @@ As of Sprint 50 (April 2026), LinkittyDo is a fully functional word-guessing gam
 | 26 | Societies / groups | P4 | Social groups with shared leaderboards and activity feeds. Design docs and ER diagrams exist in `docs/sources/`. Includes: create/join groups, group leaderboard (filtered by members), group activity feed. Large feature — multiple sprints. |
 | 27 | Player achievements and badges | P4 | Award badges for milestones: First Win, 10-Game Streak, 1000 Lifetime Points, Speed Demon (solved under 60s), No Wrong Guesses. Achievements table and UserAchievements junction. Show earned badges on profile page. |
 
+### Bugs
+
+| # | Item | Priority | Notes |
+|---|------|----------|-------|
+| ~~B1~~ | ~~Profile nav redirects to Play (starts new game)~~ | ~~P1~~ | ~~Completed Sprint 52~~ |
+| ~~B2~~ | ~~History page shows no games for logged-in user~~ | ~~P1~~ | ~~Completed Sprint 52~~ |
+| ~~B3~~ | ~~Header points not up-to-date~~ | ~~P1~~ | ~~Completed Sprint 52~~ |
+| ~~B4~~ | ~~ProfilePage.test.tsx build error (GameResult type)~~ | ~~P1~~ | ~~Completed Sprint 52~~ |
+
 ### Technical Debt & Quality
 
 | # | Item | Priority | Notes |

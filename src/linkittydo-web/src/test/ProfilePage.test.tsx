@@ -2,10 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { ProfilePage } from '../pages/ProfilePage';
+import type { GameResult } from '../types';
 
 const mockUseAuth = vi.fn();
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
+}));
+
+const mockRefreshUser = vi.fn();
+vi.mock('../hooks/useUser', () => ({
+  useUser: () => ({
+    isGuest: false,
+    refreshUser: mockRefreshUser,
+  }),
 }));
 
 vi.mock('../services/api', () => ({
@@ -43,7 +52,7 @@ const sampleProfile = {
       phraseId: 1,
       phraseText: 'the quick brown fox',
       difficulty: 20,
-      result: 'Solved',
+      result: 'Solved' as GameResult,
       isCompleted: true,
       events: [],
     },
@@ -65,14 +74,15 @@ describe('ProfilePage', () => {
     vi.clearAllMocks();
   });
 
-  it('redirects to /play when not authenticated', async () => {
+  it('shows session expired when not authenticated', async () => {
     mockUseAuth.mockReturnValue({ isAuthenticated: false, authUser: null });
 
     renderProfile();
 
     await waitFor(() => {
-      expect(screen.getByText('Play Page')).toBeInTheDocument();
+      expect(screen.getByText('Session Expired')).toBeInTheDocument();
     });
+    expect(screen.getByText('Your session has expired. Please log in again to view your profile.')).toBeInTheDocument();
   });
 
   it('shows loading state initially', () => {
@@ -146,6 +156,34 @@ describe('ProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load profile')).toBeInTheDocument();
+    });
+  });
+
+  it('shows session expired on 401 API error', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      authUser: { uniqueId: 'USR-123-ABC' },
+    });
+    mockGetUserProfile.mockRejectedValue(new Error('Failed to get user profile (401)'));
+
+    renderProfile();
+
+    await waitFor(() => {
+      expect(screen.getByText('Session Expired')).toBeInTheDocument();
+    });
+  });
+
+  it('calls refreshUser on mount', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      authUser: { uniqueId: 'USR-123-ABC' },
+    });
+    mockGetUserProfile.mockResolvedValue(sampleProfile);
+
+    renderProfile();
+
+    await waitFor(() => {
+      expect(mockRefreshUser).toHaveBeenCalled();
     });
   });
 });
