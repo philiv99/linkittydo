@@ -426,6 +426,8 @@ These lessons are extracted from sprint retrospectives. Check them before making
 - **L15** (Sprint 41): Integration tests for Singleton services that create DI scopes internally must use DbContextOptions factory pattern, not shared DbContext instances.
 - **L16** (Sprint 43): Avoid EF Core GroupJoin+SelectMany+Take for production queries. Prefer two separate queries joined in memory — more readable, testable, and correct.
 - **L17** (Sprint 43): Pre-computed tables (e.g., PlayerStats) need fallback paths. Always provide fallback computation from source data so users never see stale zeros.
+- **L18** (Sprint 48): React strict lint rules (`react-hooks/set-state-in-effect`, `react-hooks/refs`) require the "state adjustment during render" pattern (track previous prop with state, not refs) for prop-driven resets. Effects and refs are both disallowed.
+- **L19** (Sprint 48): When validation logic is both synchronous (format/length) and asynchronous (API availability), split them: sync in onChange handlers, async in effects with setState only inside setTimeout/Promise callbacks.
 
 ---
 
