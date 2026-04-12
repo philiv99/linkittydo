@@ -58,21 +58,28 @@ public class PhraseAdminController : ControllerBase
         if (request.Text.Trim().Length < 3 || request.Text.Trim().Length > 500)
             return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Phrase text must be between 3 and 500 characters" } });
 
-        var phrase = await _phraseAdminService.CreatePhraseAsync(request.Text, request.Difficulty);
-
-        return Created($"/api/admin/phrases/{phrase.UniqueId}", new
+        try
         {
-            data = new
+            var phrase = await _phraseAdminService.CreatePhraseAsync(request.Text, request.Difficulty);
+
+            return Created($"/api/admin/phrases/{phrase.UniqueId}", new
             {
-                phrase.UniqueId,
-                phrase.Text,
-                phrase.WordCount,
-                phrase.Difficulty,
-                phrase.IsActive,
-                phrase.GeneratedByLlm,
-                phrase.CreatedAt
-            }
-        });
+                data = new
+                {
+                    phrase.UniqueId,
+                    phrase.Text,
+                    phrase.WordCount,
+                    phrase.Difficulty,
+                    phrase.IsActive,
+                    phrase.GeneratedByLlm,
+                    phrase.CreatedAt
+                }
+            });
+        }
+        catch (InvalidOperationException ex) when (ex.Message == "PHRASE_EXISTS")
+        {
+            return Conflict(new { error = new { code = "PHRASE_EXISTS", message = "A phrase with this text already exists" } });
+        }
     }
 
     [HttpPut("{uniqueId}")]

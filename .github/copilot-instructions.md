@@ -428,6 +428,7 @@ These lessons are extracted from sprint retrospectives. Check them before making
 - **L17** (Sprint 43): Pre-computed tables (e.g., PlayerStats) need fallback paths. Always provide fallback computation from source data so users never see stale zeros.
 - **L18** (Sprint 48): React strict lint rules (`react-hooks/set-state-in-effect`, `react-hooks/refs`) require the "state adjustment during render" pattern (track previous prop with state, not refs) for prop-driven resets. Effects and refs are both disallowed.
 - **L19** (Sprint 48): When validation logic is both synchronous (format/length) and asynchronous (API availability), split them: sync in onChange handlers, async in effects with setState only inside setTimeout/Promise callbacks.
+- **L20** (Sprint 50): When backlog items span many sprints, perform a bulk audit before planning. The pre-sprint research step (L10) is especially critical after periods of rapid development where 10+ sprints may have completed without backlog updates.
 
 ---
 

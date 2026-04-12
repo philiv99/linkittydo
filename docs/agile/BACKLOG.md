@@ -2,7 +2,7 @@
 
 Master backlog of all planned work for LinkittyDo. Items are prioritized and grouped by category. This is the single source of truth for what to build next.
 
-**Last Updated**: 2026-04-10
+**Last Updated**: 2026-04-12 (Sprint 50 — backlog cleanup, 30 items moved to Completed)
 **Source Analysis**: See [DESIGN_CONTENT_ANALYSIS.md](DESIGN_CONTENT_ANALYSIS.md) for the full gap assessment that generated this backlog.
 
 ---
@@ -103,28 +103,30 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 113 | BUG: Admin users forced to re-login when navigating to admin pages | P1 | 33 | Dual token system: player login stores JWT in `linkittydo_token`, but `AdminGuard` and `adminApi` only read from `linkittydo_admin_token`. Admin users who logged in as players must login a second time. Fix: unify to a single token, have `adminApi` use the shared token, update `AdminGuard`. |
 | 114 | Introduce AuthContext for centralized auth state | P1 | 33 | Auth state is scattered across `useUser` hook, `api.ts` token functions, and `adminApi.ts` token functions. Create a React Context (`AuthContext`) providing token, user, roles, isAdmin to the entire component tree. Eliminates direct localStorage reads from multiple modules. |
 | 115 | Remove redundant admin login page and token storage | P2 | 33 | `AdminLogin.tsx` duplicates the player login flow against the same backend endpoint. `adminApi.ts` maintains separate `ADMIN_TOKEN_KEY`/`ADMIN_REFRESH_TOKEN_KEY`. Remove these in favor of the unified auth layer. Redirect `/admin/login` to the main login flow. |
-| 129 | BUG: Admin navigation persists after switching to non-admin user | P1 | 44 | When an admin user switches to a non-admin user (e.g., Tom), the Admin nav link and admin page access persist because `switchUser` only updates the displayed user profile via `api.getUser()` without re-authenticating. The JWT (with admin role) stays in AuthContext, so `isAdmin` remains true. Fix: `switchUser` must clear auth state (logout JWT) when switching users, forcing `isAdmin` to derive from the switched user's actual roles, not a stale JWT. Also: when current user lacks admin role, force-redirect away from admin pages and hide admin nav. |
-| 130 | BUG: Leaderboard shows rows without real player stats and names not displaying | P1 | 45 | Leaderboard shows all active non-simulated users regardless of whether they have actually played a game. Users with 0 games, 0 points appear with blank stats. Additionally, player names may not display correctly. Fix: (1) Backend — filter leaderboard to only include users with `GamesPlayed > 0` or `LifetimePoints > 0`, (2) Frontend — remove any canned/prepopulated rows, (3) Verify the Name column is populated correctly from the database, (4) Clarify Rank column (sequential 1-based index, medals for top 3). |
+| 129 | BUG: Admin navigation persists after switching to non-admin user | P1 | 44 | Done. `switchUser` clears auth state. AdminGuard redirects non-admin users. |
+| 130 | BUG: Leaderboard shows rows without real player stats and names not displaying | P1 | 45 | Done. Leaderboard filters zero-point users, names display correctly. |
 
 ### Admin Features
 
+_All items in this section are complete (Sprints 46-49)._
+
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 131 | Admin hard-delete user | P1 | 46 | Admin ability to permanently delete a user and ALL related data (GameRecords, GameEvents, GameSessions, UserRoles, PlayerStats, AuditLog entries). Uses transactional delete to maintain data integrity. Adds `DELETE /api/admin/users/{uniqueId}` endpoint with `[Authorize(Policy = "RequireAdmin")]`. Must delete in correct FK order to avoid constraint violations. |
-| 132 | Games Manager: show player name and hide Game ID | P1 | 47 | Game list table shows Game ID (truncated) which is useless to admins. Replace with player name by joining GameRecords with Users table. Backend: update SearchGames endpoint to include `playerName`. Frontend: replace Game ID column with Player column. |
-| 133 | Games Manager: rich event detail view | P1 | 47 | Game detail events only show type and timestamp. Expand to show: clue events with URL link, phrase word, search term; guess events with word, guess text, correct/incorrect badge, points; game end with reason. Backend: return full polymorphic event data from GetGameDetail. Frontend: render rich event rows. |
-| 134 | Add RelationshipType to ClueEvent | P1 | 47 | ClueEvent stores SearchTerm but not what type of relationship it has to the original word (synonym, antonym, trigger, homophone, similar). Add `RelationshipType` string property to ClueEvent, EF Core migration, update ClueService to track which Datamuse endpoint produced the selected term. |
-| 135 | Games Manager: date+time formatting | P2 | 47 | Played column shows date only, event timestamps show time only. Both should show full date and time. |
-| 136 | CI lint: setState-in-effect in UserManageModal | P1 | 48 | ESLint `react-hooks/set-state-in-effect` error. `useEffect` on line 35 calls `setDifficulty`/`setSelectedUserId` synchronously. Fix: initialize state from props using initializer functions or use key-based reset pattern. |
-| 137 | CI lint: setState-in-effect in UserModal (4 violations) | P1 | 48 | ESLint `react-hooks/set-state-in-effect` errors on lines 40, 53, 85, 112. Reset effect calls multiple setState synchronously; debounced validation effects set error state synchronously in early-return paths. Fix: use key-based reset for modal open, derive validation state or use event handlers. |
-| 138 | CI lint: unused `_allUsers` variable in UserModal | P1 | 48 | ESLint `@typescript-eslint/no-unused-vars`. `allUsers` is destructured as `_allUsers` but never used. Remove from props interface or use it. |
-| 139 | CI lint: fast-refresh violation in AuthContext | P1 | 48 | ESLint `react-refresh/only-export-components` error on line 238. File exports both `AuthProvider` component and `useAuth` hook. Fix: move `useAuth` to a separate file or add eslint-disable comment. |
+| 131 | Admin hard-delete user | P1 | 46 | Done. Cascade delete all related data with transactional integrity. |
+| 132 | Games Manager: show player name and hide Game ID | P1 | 47 | Done. Player name joined from Users table. |
+| 133 | Games Manager: rich event detail view | P1 | 47 | Done. Full polymorphic event data rendered. |
+| 134 | Add RelationshipType to ClueEvent | P1 | 47 | Done. Property added, migration applied, ClueService tracks relationship type. |
+| 135 | Games Manager: date+time formatting | P2 | 47 | Done. Full date+time displayed. |
+| 136 | CI lint: setState-in-effect in UserManageModal | P1 | 48 | Done. Key-based reset pattern applied. |
+| 137 | CI lint: setState-in-effect in UserModal (4 violations) | P1 | 48 | Done. Key-based reset and event handlers. |
+| 138 | CI lint: unused `_allUsers` variable in UserModal | P1 | 48 | Done. Removed unused variable. |
+| 139 | CI lint: fast-refresh violation in AuthContext | P1 | 48 | Done. `useAuth` moved to separate file. |
 
 ### Data Cleanup
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 140 | Remove legacy JSON data files and JSON repository code | P1 | 49 | MySQL is the active data provider. JSON files in `Data/Phrases/`, `Data/Users/`, `Data/GameRecords/` are redundant. Remove: JSON data files, JSON repository classes (`JsonUserRepository`, `JsonGamePhraseRepository`, `JsonGameRecordRepository`), JSON health check, `DataProvider` feature flag, migration service/controller, `.csproj` copy rule. Verify DB has all data first. Update affected tests. |
+| 140 | Remove legacy JSON data files and JSON repository code | P1 | 49 | Done. All JSON data files, JSON repos, DataProvider flag, migration service removed. |
 
 ### Security & Production Readiness
 
@@ -332,8 +334,8 @@ _Source: Comprehensive gap analysis of admin functionality (2026-04-10). Critica
 
 | # | Item | Priority | Sprint | Status | Notes |
 |---|------|----------|--------|--------|-------|
-| 116 | BUG: Admin menu not visible for logged-in admin user | P1 | 38 | | **DEFECT**: AuthContext does not implement automatic token refresh. JWT expires after 60 minutes; on expiry, `isAdmin` becomes `false` while user data persists in localStorage — admin appears logged in but has no admin menu. `api.refreshToken()` exists but is never called. Fix: (1) attempt token refresh in AuthContext initialization when stored token is expired, (2) attempt refresh on the expiry-check interval before clearing, (3) on refresh failure, force complete sign-out (clear auth + user localStorage). |
-| 117 | BUG: Roles stripped from user state after profile operations | P1 | 38 | | **DEFECT**: `UserController.UpdateUser()`, `UpdateDifficulty()`, `AddPoints()`, and `GetAllUsers()` call `MapToResponse()` without roles. After any profile operation, the frontend receives a `UserResponse` with empty `Roles`, overwriting the user object and losing admin status. Fix: use `MapToResponseWithRolesAsync()` (or pass roles) in all endpoints that return `UserResponse`. |
+| 116 | BUG: Admin menu not visible for logged-in admin user | P1 | 38 | Done | Token auto-refresh implemented in AuthContext. |
+| 117 | BUG: Roles stripped from user state after profile operations | P1 | 38 | Done | `MapToResponseWithRolesAsync()` used in all UserController endpoints. |
 
 ### Game Persistence Reliability
 
@@ -341,17 +343,17 @@ _Source: Full-stack persistence gap analysis (2026-04-11). Critical gaps where g
 
 | # | Item | Priority | Sprint | Status | Notes |
 |---|------|----------|--------|--------|-------|
-| 118 | Await game record persistence (fix fire-and-forget) | P1 | 39 | | **CRITICAL**: `PersistGameRecordAsync` is called with `_ = PersistGameRecordAsync(session)` (not awaited) in both `SubmitGuess` and `GiveUp`. If the DB is down or the save fails, the frontend receives a success response but the game is never recorded. Fix: make `SubmitGuess` and `GiveUp` async, await persistence, and return error status to frontend if save fails. |
-| 119 | Wrap GameRecord + GameEvents save in UnitOfWork transaction | P1 | 39 | | **CRITICAL**: `PersistGameRecordAsync` saves GameRecord and GameEvents in two separate `SaveChangesAsync` calls. If step 1 succeeds but step 2 fails, a GameRecord exists with no events (orphaned). Fix: wrap both saves in `IUnitOfWork.BeginTransactionAsync`/`CommitTransactionAsync` for atomicity. |
-| 120 | Load GameEvents when reading GameRecords from DB | P1 | 39 | | `EfGameRecordRepository.GetByGameIdAsync()` and `GetByUserIdAsync()` return GameRecords with empty Events list because `entity.Ignore(e => e.Events)` prevents EF Include. Fix: add explicit join query or separate events loading method. Required for game history, admin game detail, and API game record endpoint. |
-| 121 | Persist GameRecord to DB at game start (not just on completion) | P1 | 40 | | GameRecord is created in memory at game start (`Result = InProgress`) but only inserted into DB when game ends. If the server crashes or session expires, no record of the game exists. Fix: save GameRecord to DB immediately on game start, then update on completion. |
-| 122 | Persist game events incrementally (not batch at end) | P1 | 40 | | Clue and guess events accumulate in the in-memory session and are only written to DB when the game ends. A crash mid-game loses all events. Fix: persist each event to the `GameEvents` table as it occurs, not as a batch at game end. |
-| 123 | Track abandoned/expired games in DB | P2 | 40 | | `SessionCleanupService` removes expired sessions from memory with no DB record. Fix: before removing an expired session with a GameRecord, set `Result = Abandoned`, `CompletedAt = now`, and persist to DB. Add `Abandoned` to `GameResult` enum. |
-| 124 | Make GameService methods async end-to-end | P1 | 39 | | `SubmitGuess` and `GiveUp` are synchronous methods that fire-and-forget async persistence. Callers (`GameController`) already have async signatures but discard Tasks. Fix: make `SubmitGuess`/`GiveUp` return `Task<>`, await persistence inside, propagate errors to controller for proper HTTP error responses. |
+| 118 | Await game record persistence (fix fire-and-forget) | P1 | 39 | Done | All persistence calls are awaited. PersistenceStatus returned to caller. |
+| 119 | Wrap GameRecord + GameEvents save in UnitOfWork transaction | P1 | 39 | Done | Transaction wraps GameRecord + GameEvents save with rollback on failure. |
+| 120 | Load GameEvents when reading GameRecords from DB | P1 | 39 | Done | `GetByGameIdWithEventsAsync` and `GetByUserIdWithEventsAsync` methods added. |
+| 121 | Persist GameRecord to DB at game start (not just on completion) | P1 | 40 | Done | GameRecord saved to DB immediately in `StartNewGameAsync`. |
+| 122 | Persist game events incrementally (not batch at end) | P1 | 40 | Done | Events persisted immediately via `_dbContext.GameEvents.Add()` + `SaveChangesAsync()`. |
+| 123 | Track abandoned/expired games in DB | P2 | 40 | Done | `GameResult.Abandoned` added. `RemoveExpiredSessionsAsync` marks and persists. |
+| 124 | Make GameService methods async end-to-end | P1 | 39 | Done | All public methods with DB interaction are `async Task<T>`. |
 | 125 | Add persistence failure response to frontend | P2 | 41 | Done | Frontend has no concept of "game completed but save failed". After fixing fire-and-forget (#118), update `GuessResponse` and `GameState` DTOs to include `persistenceStatus` field (saved/failed/pending). Frontend can show warning if game wasn't saved. |
 | 126 | Game history API endpoint with events | P2 | 41 | Done | `GET /api/user/{id}/games` returns GameRecords without events. `GET /api/game/{sessionId}/record` only works for active sessions. Add `GET /api/game/{gameId}/detail` endpoint that loads GameRecord + GameEvents from DB for any completed game. Frontend game history drill-down needs this. |
 | 127 | Populate GameSessions table for session recovery | P3 | 41 | Done | `GameSessions` table exists but is never written to. Persist session state (RevealedWords, scores, clue/guess counts) to this table on each state change. On server restart, reload active sessions from DB. Complements in-memory `InMemorySessionStore` as a write-through cache. |
-| 128 | Backend tests for game persistence paths | P1 | 39 | | No tests cover the persistence code paths in `PersistGameRecordAsync`. Add tests: (1) successful persist with events, (2) transaction rollback on partial failure, (3) analytics recompute after persist, (4) guest session skips persistence. |
+| 128 | Backend tests for game persistence paths | P1 | 39 | Done | 17 tests in GamePersistenceTests.cs covering all persistence paths. |
 
 ### Leaderboard Data Quality
 
@@ -618,3 +620,29 @@ _Move items here after sprint completion. Include sprint number._
 | #113 BUG: Admin re-login (dual-token system) | 33 | 2026-04-10 |
 | #114 Introduce AuthContext for centralized auth | 33 | 2026-04-10 |
 | #115 Remove redundant admin login page | 33 | 2026-04-10 |
+| #116 BUG: Admin menu not visible (token auto-refresh) | 38 | 2026-04-11 |
+| #117 BUG: Roles stripped from user state | 38 | 2026-04-11 |
+| #118 Await game record persistence (fix fire-and-forget) | 39 | 2026-04-11 |
+| #119 Wrap GameRecord + GameEvents in UnitOfWork transaction | 39 | 2026-04-11 |
+| #120 Load GameEvents when reading GameRecords | 39 | 2026-04-11 |
+| #124 Make GameService methods async end-to-end | 39 | 2026-04-11 |
+| #128 Backend tests for game persistence paths | 39 | 2026-04-11 |
+| #121 Persist GameRecord to DB at game start | 40 | 2026-04-11 |
+| #122 Persist game events incrementally | 40 | 2026-04-11 |
+| #123 Track abandoned/expired games in DB | 40 | 2026-04-11 |
+| #125 Add persistence failure response to frontend | 41 | 2026-04-11 |
+| #126 Game history API endpoint with events | 41 | 2026-04-11 |
+| #127 Populate GameSessions table for session recovery | 41 | 2026-04-11 |
+| #129 Leaderboard shows only real player data | 42 | 2026-04-12 |
+| #130 BUG: Leaderboard shows zero-game users | 45 | 2026-04-12 |
+| #129a BUG: Admin nav persists after user switch | 44 | 2026-04-12 |
+| #131 Admin hard-delete user | 46 | 2026-04-12 |
+| #132 Games Manager: show player name | 47 | 2026-04-12 |
+| #133 Games Manager: rich event detail view | 47 | 2026-04-12 |
+| #134 Add RelationshipType to ClueEvent | 47 | 2026-04-12 |
+| #135 Games Manager: date+time formatting | 47 | 2026-04-12 |
+| #136 CI lint: setState-in-effect in UserManageModal | 48 | 2026-04-12 |
+| #137 CI lint: setState-in-effect in UserModal | 48 | 2026-04-12 |
+| #138 CI lint: unused _allUsers variable | 48 | 2026-04-12 |
+| #139 CI lint: fast-refresh violation in AuthContext | 48 | 2026-04-12 |
+| #140 Remove legacy JSON data files and repos | 49 | 2026-04-12 |
