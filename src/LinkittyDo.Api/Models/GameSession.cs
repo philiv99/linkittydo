@@ -53,4 +53,9 @@ public class GameSession
     /// Timestamp of the last activity on this session (start, guess, clue, etc.)
     /// </summary>
     public DateTime LastActivityAt { get; set; }
+
+    /// <summary>
+    /// Indicates if this game session is a daily challenge
+    /// </summary>
+    public bool IsDailyChallenge { get; set; }
 }

@@ -13,11 +13,13 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IRoleService _roleService;
+    private readonly IAnalyticsService _analyticsService;
 
-    public UserController(IUserService userService, IRoleService roleService)
+    public UserController(IUserService userService, IRoleService roleService, IAnalyticsService analyticsService)
     {
         _userService = userService;
         _roleService = roleService;
+        _analyticsService = analyticsService;
     }
 
     /// <summary>
@@ -427,6 +429,54 @@ public class UserController : ControllerBase
 
         var games = await _userService.GetUserGamesAsync(uniqueId);
         return Ok(new ApiResponse<IEnumerable<GameRecord>>(games));
+    }
+
+    /// <summary>
+    /// Get a user's profile with stats
+    /// </summary>
+    [Authorize]
+    [HttpGet("{uniqueId}/profile")]
+    public async Task<ActionResult<ApiResponse<ProfileResponse>>> GetUserProfile(string uniqueId)
+    {
+        var user = await _userService.GetUserByIdAsync(uniqueId);
+        if (user == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = new ErrorDetail
+                {
+                    Code = "USER_NOT_FOUND",
+                    Message = "User not found."
+                }
+            });
+        }
+
+        var stats = await _analyticsService.GetPlayerStatsAsync(uniqueId);
+        var recentGames = (await _userService.GetUserGamesAsync(uniqueId)).Take(5).ToList();
+
+        var profile = new ProfileResponse
+        {
+            UniqueId = user.UniqueId,
+            Name = user.Name,
+            Email = user.Email,
+            LifetimePoints = user.LifetimePoints,
+            PreferredDifficulty = user.PreferredDifficulty,
+            CreatedAt = user.CreatedAt,
+            GamesPlayed = stats?.GamesPlayed ?? 0,
+            GamesSolved = stats?.GamesSolved ?? 0,
+            GamesGaveUp = stats?.GamesGaveUp ?? 0,
+            SolveRate = stats != null && stats.GamesPlayed > 0
+                ? Math.Round((decimal)stats.GamesSolved / stats.GamesPlayed * 100, 1)
+                : 0,
+            AvgScore = stats?.AvgScore ?? 0,
+            BestScore = stats?.BestScore ?? 0,
+            CurrentStreak = stats?.CurrentStreak ?? 0,
+            BestStreak = stats?.BestStreak ?? 0,
+            LastPlayedAt = stats?.LastPlayedAt,
+            RecentGames = recentGames
+        };
+
+        return Ok(new ApiResponse<ProfileResponse>(profile, "Profile retrieved successfully"));
     }
 
     private static UserResponse MapToResponse(User user, int gamesPlayed = 0, IList<string>? roles = null)

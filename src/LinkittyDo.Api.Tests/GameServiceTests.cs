@@ -29,6 +29,7 @@ public class GameServiceTests
             .UseInMemoryDatabase(databaseName: $"GameServiceTests_{Guid.NewGuid()}")
             .Options;
         var dbContext = new LinkittyDoDbContext(dbContextOptions);
+        var dailyChallengeServiceMock = new Mock<IDailyChallengeService>();
         _service = new GameService(
             sessionStore,
             _phraseServiceMock.Object,
@@ -37,6 +38,7 @@ public class GameServiceTests
             _analyticsServiceMock.Object,
             _unitOfWorkMock.Object,
             dbContext,
+            dailyChallengeServiceMock.Object,
             loggerMock.Object);
     }
 

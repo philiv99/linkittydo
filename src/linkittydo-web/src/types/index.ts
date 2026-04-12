@@ -199,3 +199,42 @@ export interface AuthResponse {
   expiresAt: string;
   roles: string[];
 }
+
+// Daily Challenge types
+export interface DailyChallengeResponse {
+  date: string;
+  phraseUniqueId: string;
+  alreadyPlayed: boolean;
+  previousResult?: {
+    score: number;
+    result: string;
+    completedAt: string;
+  };
+}
+
+export interface DailyChallengeLeaderboardEntry {
+  rank: number;
+  playerName: string;
+  score: number;
+  result: string;
+}
+
+// Profile types
+export interface ProfileResponse {
+  uniqueId: string;
+  name: string;
+  email: string;
+  lifetimePoints: number;
+  preferredDifficulty: number;
+  createdAt: string;
+  gamesPlayed: number;
+  gamesSolved: number;
+  gamesGaveUp: number;
+  solveRate: number;
+  avgScore: number;
+  bestScore: number;
+  currentStreak: number;
+  bestStreak: number;
+  lastPlayedAt?: string;
+  recentGames: GameRecord[];
+}

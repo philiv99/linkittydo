@@ -22,6 +22,9 @@ Piece the clues together to guess: **"breaking news"**
 - Phrase-based puzzles with web links as clues
 - Each link points to a real web page hinting at a word or sub-phrase
 - Combine the clues to deduce the full phrase
+- **Daily Challenge**: A new shared puzzle every day — compete on the leaderboard
+- **Tutorial**: Step-by-step interactive guide for new players
+- **Player Profile**: View your stats, game history, streaks, and solve rate
 
 ## Quick Start
 

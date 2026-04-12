@@ -151,7 +151,8 @@ public class LeaderboardTests
     {
         var serviceMock = new Mock<IUserService>();
         var roleServiceMock = new Mock<IRoleService>();
-        var controller = new UserController(serviceMock.Object, roleServiceMock.Object);
+        var analyticsServiceMock = new Mock<IAnalyticsService>();
+        var controller = new UserController(serviceMock.Object, roleServiceMock.Object, analyticsServiceMock.Object);
 
         var result = await controller.GetLeaderboard(0);
 
@@ -169,7 +170,8 @@ public class LeaderboardTests
         };
         serviceMock.Setup(s => s.GetLeaderboardEntriesAsync(10)).ReturnsAsync(entries);
         var roleServiceMock = new Mock<IRoleService>();
-        var controller = new UserController(serviceMock.Object, roleServiceMock.Object);
+        var analyticsServiceMock = new Mock<IAnalyticsService>();
+        var controller = new UserController(serviceMock.Object, roleServiceMock.Object, analyticsServiceMock.Object);
 
         var result = await controller.GetLeaderboard(10);
 

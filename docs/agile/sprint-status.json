@@ -1,31 +1,33 @@
 {
   "current_sprint": {
-    "number": 50,
+    "number": 51,
     "status": "complete",
-    "branch": "feature/20260412-sprint-50",
+    "branch": "feature/20260412-sprint-51",
     "plan_approved": true,
-    "pr_number": 57,
     "tasks": [
-      { "id": 1, "title": "Clean up backlog drift (30+ items)", "status": "complete" },
-      { "id": 2, "title": "Expand phrase seed data to 115 curated phrases", "status": "complete" },
-      { "id": 3, "title": "Fix admin phrase duplicate handling (409)", "status": "complete" },
-      { "id": 4, "title": "Pre-compute difficulty at seed time", "status": "complete" },
-      { "id": 5, "title": "Add 8 PhraseScalingTests", "status": "complete" },
-      { "id": 6, "title": "Build and test validation (329 backend, 64 frontend)", "status": "complete" },
-      { "id": 7, "title": "Sprint retrospective", "status": "complete" }
+      { "id": 1, "title": "Implement Daily Challenge backend (model, service, controller, DB)", "status": "complete" },
+      { "id": 2, "title": "Implement Daily Challenge frontend page", "status": "complete" },
+      { "id": 3, "title": "Implement Tutorial/Onboarding frontend page", "status": "complete" },
+      { "id": 4, "title": "Implement Player Profile backend endpoint", "status": "complete" },
+      { "id": 5, "title": "Implement Player Profile frontend page", "status": "complete" },
+      { "id": 6, "title": "Update navigation (Daily, How to Play, Profile links)", "status": "complete" },
+      { "id": 7, "title": "Write backend tests (10 new: DailyChallenge + Profile)", "status": "complete" },
+      { "id": 8, "title": "Write frontend tests (25 new: Tutorial, Profile, Daily, NavHeader)", "status": "complete" },
+      { "id": 9, "title": "Update documentation (README, CHANGELOG, BACKLOG)", "status": "complete" },
+      { "id": 10, "title": "Sprint retrospective", "status": "complete" }
     ]
   },
   "last_completed": {
-    "number": 50,
+    "number": 51,
     "date": "2026-04-12",
     "result": "complete",
-    "items_completed": 7,
+    "items_completed": 10,
     "items_carried_over": 0,
-    "key_lesson": "When backlog items span many sprints, perform a bulk audit before planning. Pre-sprint research (L10) is critical after periods of rapid development."
+    "key_lesson": "When adding new constructor dependencies to services/controllers, grep all test files that instantiate them to prevent cascading build failures."
   },
   "test_metrics": {
-    "backend_tests_passing": 329,
-    "frontend_tests_passing": 64,
+    "backend_tests_passing": 339,
+    "frontend_tests_passing": 89,
     "lint_errors": 0
   },
   "sprint_history": {

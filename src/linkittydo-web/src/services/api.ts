@@ -19,6 +19,9 @@ import type {
   AuthResponse,
   RegisterRequest,
   LoginRequest,
+  DailyChallengeResponse,
+  DailyChallengeLeaderboardEntry,
+  ProfileResponse,
 } from '../types';
 
 // Ensure the API base URL always ends with /api
@@ -322,6 +325,49 @@ export const api = {
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('Failed to get game detail');
     const wrapper: ApiResponse<GameRecord> = await response.json();
+    return wrapper.data;
+  },
+
+  // Daily Challenge endpoints
+  async getDailyChallenge(userId?: string): Promise<DailyChallengeResponse> {
+    const params = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+    const response = await fetch(`${API_BASE_URL}/daily-challenge${params}`);
+    if (!response.ok) throw new Error('Failed to get daily challenge');
+    const wrapper: ApiResponse<DailyChallengeResponse> = await response.json();
+    return wrapper.data;
+  },
+
+  async startDailyChallenge(request?: StartGameRequest): Promise<GameState> {
+    const response = await fetch(`${API_BASE_URL}/daily-challenge/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request ?? {}),
+    });
+    if (response.status === 409) {
+      throw new Error('You have already completed today\'s daily challenge');
+    }
+    if (!response.ok) throw new Error('Failed to start daily challenge');
+    const wrapper: ApiResponse<GameState> = await response.json();
+    return wrapper.data;
+  },
+
+  async getDailyChallengeLeaderboard(date?: string, top: number = 10): Promise<DailyChallengeLeaderboardEntry[]> {
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
+    params.append('top', top.toString());
+    const response = await fetch(`${API_BASE_URL}/daily-challenge/leaderboard?${params}`);
+    if (!response.ok) throw new Error('Failed to get daily challenge leaderboard');
+    const wrapper: ApiResponse<DailyChallengeLeaderboardEntry[]> = await response.json();
+    return wrapper.data;
+  },
+
+  // Profile endpoint
+  async getUserProfile(uniqueId: string): Promise<ProfileResponse> {
+    const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/profile`, {
+      headers: { ...authHeaders() },
+    });
+    if (!response.ok) throw new Error('Failed to get user profile');
+    const wrapper: ApiResponse<ProfileResponse> = await response.json();
     return wrapper.data;
   },
 };

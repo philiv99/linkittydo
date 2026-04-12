@@ -30,6 +30,26 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
         >
           Play
         </Link>
+        <Link
+          to="/daily"
+          className={`nav-link ${location.pathname === '/daily' ? 'active' : ''}`}
+        >
+          Daily
+        </Link>
+        <Link
+          to="/tutorial"
+          className={`nav-link ${location.pathname === '/tutorial' ? 'active' : ''}`}
+        >
+          How to Play
+        </Link>
+        {!isGuest && (
+          <Link
+            to="/profile"
+            className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
+          >
+            Profile
+          </Link>
+        )}
         {!isGuest && (
           <Link
             to="/history"

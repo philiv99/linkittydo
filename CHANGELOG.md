@@ -7,6 +7,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **feat**: Sprint 51 — Daily Challenge mode with phrase-of-the-day, leaderboard, and one-play-per-day limit
+- **feat**: Interactive 6-step tutorial/onboarding flow for new players
+- **feat**: Player Profile page with stats grid, streaks, solve rate, and recent games
+- **feat**: Daily Challenge API endpoints (GET status, POST start, GET leaderboard)
+- **feat**: Profile API endpoint with computed stats from PlayerStats and game history
+- **feat**: NavHeader updated with Daily, How to Play, and Profile navigation links
+- **test**: Add DailyChallengeControllerTests (7 tests), UserController profile tests (3 tests)
+- **test**: Add frontend tests for TutorialPage, ProfilePage, DailyChallengePage, NavHeader updates (25 tests)
+- **docs**: Update README.md with new features (Daily Challenge, Tutorial, Player Profile)
+
+### 2026-04-12
 - **feat**: Sprint 50 — Scale phrase database from 5 to 115 curated seed phrases across difficulty bands (#7)
 - **feat**: Pre-compute difficulty for all seed phrases using `ComputeDifficultyFromText()` static method
 - **fix**: Admin phrase creation returns 409 Conflict on duplicate text instead of raw DB error
