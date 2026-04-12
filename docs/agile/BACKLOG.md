@@ -2,7 +2,7 @@
 
 Master backlog of all planned work for LinkittyDo. Items are prioritized and grouped by category. This is the single source of truth for what to build next.
 
-**Last Updated**: 2026-04-12
+**Last Updated**: 2026-04-12 (Sprint 50 — backlog cleanup, 30 items moved to Completed)
 **Source Analysis**: See [DESIGN_CONTENT_ANALYSIS.md](DESIGN_CONTENT_ANALYSIS.md) for the full gap assessment that generated this backlog.
 
 ---
@@ -83,6 +83,8 @@ _Critical gaps where game data is lost, partially saved, or never recorded._
 
 ### Admin Features
 
+_All items in this section are complete (Sprints 46-49)._
+
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
 | 101 | Admin data export (CSV) | P3 | — | No export capability for user lists, game stats, or config. Add CSV export buttons to AdminUsers and AdminGames pages. |
@@ -100,7 +102,7 @@ _Critical gaps where game data is lost, partially saved, or never recorded._
 
 | # | Item | Priority | Sprint | Notes |
 |---|------|----------|--------|-------|
-| 140 | Remove legacy JSON data files and JSON repository code | P1 | 49 | MySQL is the active data provider. JSON files in `Data/Phrases/`, `Data/Users/`, `Data/GameRecords/` are redundant. Remove: JSON data files, JSON repository classes (`JsonUserRepository`, `JsonGamePhraseRepository`, `JsonGameRecordRepository`), JSON health check, `DataProvider` feature flag, migration service/controller, `.csproj` copy rule. Verify DB has all data first. Update affected tests. |
+| 140 | Remove legacy JSON data files and JSON repository code | P1 | 49 | Done. All JSON data files, JSON repos, DataProvider flag, migration service removed. |
 
 ### Advanced Linguistic Features
 
@@ -283,3 +285,29 @@ _Move items here after sprint completion. Include sprint number._
 | #113 BUG: Admin re-login (dual-token system) | 33 | 2026-04-10 |
 | #114 Introduce AuthContext for centralized auth | 33 | 2026-04-10 |
 | #115 Remove redundant admin login page | 33 | 2026-04-10 |
+| #116 BUG: Admin menu not visible (token auto-refresh) | 38 | 2026-04-11 |
+| #117 BUG: Roles stripped from user state | 38 | 2026-04-11 |
+| #118 Await game record persistence (fix fire-and-forget) | 39 | 2026-04-11 |
+| #119 Wrap GameRecord + GameEvents in UnitOfWork transaction | 39 | 2026-04-11 |
+| #120 Load GameEvents when reading GameRecords | 39 | 2026-04-11 |
+| #124 Make GameService methods async end-to-end | 39 | 2026-04-11 |
+| #128 Backend tests for game persistence paths | 39 | 2026-04-11 |
+| #121 Persist GameRecord to DB at game start | 40 | 2026-04-11 |
+| #122 Persist game events incrementally | 40 | 2026-04-11 |
+| #123 Track abandoned/expired games in DB | 40 | 2026-04-11 |
+| #125 Add persistence failure response to frontend | 41 | 2026-04-11 |
+| #126 Game history API endpoint with events | 41 | 2026-04-11 |
+| #127 Populate GameSessions table for session recovery | 41 | 2026-04-11 |
+| #129 Leaderboard shows only real player data | 42 | 2026-04-12 |
+| #130 BUG: Leaderboard shows zero-game users | 45 | 2026-04-12 |
+| #129a BUG: Admin nav persists after user switch | 44 | 2026-04-12 |
+| #131 Admin hard-delete user | 46 | 2026-04-12 |
+| #132 Games Manager: show player name | 47 | 2026-04-12 |
+| #133 Games Manager: rich event detail view | 47 | 2026-04-12 |
+| #134 Add RelationshipType to ClueEvent | 47 | 2026-04-12 |
+| #135 Games Manager: date+time formatting | 47 | 2026-04-12 |
+| #136 CI lint: setState-in-effect in UserManageModal | 48 | 2026-04-12 |
+| #137 CI lint: setState-in-effect in UserModal | 48 | 2026-04-12 |
+| #138 CI lint: unused _allUsers variable | 48 | 2026-04-12 |
+| #139 CI lint: fast-refresh violation in AuthContext | 48 | 2026-04-12 |
+| #140 Remove legacy JSON data files and repos | 49 | 2026-04-12 |

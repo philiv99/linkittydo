@@ -505,4 +505,20 @@ Return only the phrase with no quotes or additional text.";
             .ToLowerInvariant()
             .Replace("  ", " ");
     }
+
+    /// <summary>
+    /// Computes difficulty from raw phrase text using the same algorithm as phrase selection.
+    /// Useful for seeding phrases with pre-computed difficulty values.
+    /// </summary>
+    public static int ComputeDifficultyFromText(string phraseText)
+    {
+        var tokens = TokenizePhrase(phraseText);
+        var hiddenIndices = new HashSet<int>();
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            if (!IsPunctuation(tokens[i]) && !IsStopWord(tokens[i]))
+                hiddenIndices.Add(i);
+        }
+        return ComputePhraseDifficulty(tokens, hiddenIndices);
+    }
 }

@@ -36,6 +36,12 @@ public class PhraseAdminService : IPhraseAdminService
 
     public async Task<GamePhrase> CreatePhraseAsync(string text, int difficulty = 0)
     {
+        var normalizedText = text.Trim();
+        var exists = await _context.GamePhrases
+            .AnyAsync(p => p.Text.ToLower() == normalizedText.ToLower());
+        if (exists)
+            throw new InvalidOperationException("PHRASE_EXISTS");
+
         var phrase = new GamePhrase
         {
             UniqueId = GamePhrase.GenerateUniqueId(),

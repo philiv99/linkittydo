@@ -91,7 +91,7 @@ public class DatabaseSeedServiceTests
 
         await seedService.StartAsync(CancellationToken.None);
 
-        phraseRepoMock.Verify(r => r.CreateAsync(It.IsAny<GamePhrase>()), Times.Exactly(5));
+        phraseRepoMock.Verify(r => r.CreateAsync(It.IsAny<GamePhrase>()), Times.AtLeast(100));
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class DatabaseSeedServiceTests
         userRepoMock.Setup(r => r.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
         userRepoMock.Setup(r => r.CreateAsync(It.IsAny<User>())).ReturnsAsync((User u) => u);
 
-        var existingPhrases = Enumerable.Range(1, 5).Select(i => new GamePhrase
+        var existingPhrases = Enumerable.Range(1, 120).Select(i => new GamePhrase
         {
             UniqueId = $"P-{i}",
             Text = $"phrase {i}",
