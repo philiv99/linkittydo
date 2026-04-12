@@ -1,4 +1,5 @@
 import { useUser } from '../hooks/useUser';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,24 +21,37 @@ const isGuessEvent = (e: GameEvent): e is GuessEvent => e.eventType === 'guess';
 const isGameEndEvent = (e: GameEvent): e is GameEndEvent => e.eventType === 'gameend';
 
 export const GameHistoryPage: React.FC = () => {
-  const { user, isGuest } = useUser();
+  const { user, isGuest, refreshUser } = useUser();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [games, setGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedGameId, setExpandedGameId] = useState<string | null>(null);
   const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
   const [detailCache, setDetailCache] = useState<Record<string, GameEvent[]>>({});
+  const [authError, setAuthError] = useState(false);
 
   useEffect(() => {
     if (isGuest) {
       setLoading(false);
       return;
     }
+    if (!isAuthenticated) {
+      setAuthError(true);
+      setLoading(false);
+      return;
+    }
+    refreshUser();
     api.getUserGames(user.uniqueId)
       .then(setGames)
-      .catch(() => setGames([]))
+      .catch((err) => {
+        if (err instanceof Error && err.message.includes('401')) {
+          setAuthError(true);
+        }
+        setGames([]);
+      })
       .finally(() => setLoading(false));
-  }, [isGuest, user.uniqueId]);
+  }, [isGuest, isAuthenticated, user.uniqueId, refreshUser]);
 
   if (isGuest) {
     return (
@@ -47,6 +61,20 @@ export const GameHistoryPage: React.FC = () => {
           <p>Create a profile to track your game history and see your progress over time.</p>
           <button className="history-play-button" onClick={() => navigate('/play')}>
             Go Play
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="history-page">
+        <div className="history-auth-error">
+          <h2>Session Expired</h2>
+          <p>Your session has expired. Please log in again to view your game history.</p>
+          <button className="history-play-button" onClick={() => navigate('/play')}>
+            Go to Play
           </button>
         </div>
       </div>

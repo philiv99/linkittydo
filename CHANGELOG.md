@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **fix**: Sprint 52 — Profile page no longer redirects to Play when JWT expires; shows "Session Expired" prompt instead
+- **fix**: History page no longer shows empty state when JWT expires; shows "Session Expired" prompt instead
+- **fix**: Header points now stay in sync with server after game completion (refreshUser on solve/giveup)
+- **fix**: ProfilePage.test.tsx build error (GameResult type literal cast)
+- **feat**: Added `refreshUser` function to `useUser` hook for on-demand server sync
+- **feat**: API error messages now include HTTP status codes for auth failure detection
+- **test**: 5 new frontend tests for auth error handling and user refresh behavior
+
+### 2026-04-12
 - **feat**: Sprint 51 — Daily Challenge mode with phrase-of-the-day, leaderboard, and one-play-per-day limit
 - **feat**: Interactive 6-step tutorial/onboarding flow for new players
 - **feat**: Player Profile page with stats grid, streaks, solve rate, and recent games

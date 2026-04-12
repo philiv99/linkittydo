@@ -295,6 +295,18 @@ export const useUser = () => {
     setError(null);
   }, []);
 
+  const refreshUser = useCallback(async (): Promise<void> => {
+    if (isGuest || !user.uniqueId) return;
+    try {
+      const serverUser = await api.getUser(user.uniqueId);
+      if (serverUser) {
+        setUser(prev => ({ ...prev, ...mapResponseToUser(serverUser), roles: prev.roles }));
+      }
+    } catch (e) {
+      console.warn('Failed to refresh user from server:', e);
+    }
+  }, [isGuest, user.uniqueId]);
+
   return {
     user,
     isGuest,
@@ -314,5 +326,6 @@ export const useUser = () => {
     signOut,
     clearError,
     fetchAllUsers,
+    refreshUser,
   };
 };

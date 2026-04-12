@@ -281,7 +281,7 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/games`, {
       headers: { ...authHeaders() },
     });
-    if (!response.ok) throw new Error('Failed to get user games');
+    if (!response.ok) throw new Error(`Failed to get user games (${response.status})`);
     const wrapper: ApiResponse<GameRecord[]> = await response.json();
     return wrapper.data;
   },
@@ -366,7 +366,7 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/user/${uniqueId}/profile`, {
       headers: { ...authHeaders() },
     });
-    if (!response.ok) throw new Error('Failed to get user profile');
+    if (!response.ok) throw new Error(`Failed to get user profile (${response.status})`);
     const wrapper: ApiResponse<ProfileResponse> = await response.json();
     return wrapper.data;
   },

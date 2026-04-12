@@ -84,6 +84,7 @@ const defaultUserState = {
   signOut: vi.fn(),
   clearError: vi.fn(),
   fetchAllUsers: vi.fn(),
+  refreshUser: vi.fn(),
 };
 
 beforeEach(() => {

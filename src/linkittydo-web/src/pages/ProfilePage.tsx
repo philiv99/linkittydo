@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useUser } from '../hooks/useUser';
 import type { ProfileResponse, GameRecord } from '../types';
 import './ProfilePage.css';
 
@@ -25,13 +26,15 @@ const formatDateTime = (dateStr: string): string => {
 
 export const ProfilePage: React.FC = () => {
   const { authUser, isAuthenticated } = useAuth();
+  const { isGuest, refreshUser } = useUser();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !authUser) {
+    if (isGuest) {
       navigate('/play');
       return;
     }
@@ -39,23 +42,48 @@ export const ProfilePage: React.FC = () => {
     const loadProfile = async () => {
       try {
         setLoading(true);
+        setAuthError(false);
+        if (!isAuthenticated || !authUser) {
+          setAuthError(true);
+          setLoading(false);
+          return;
+        }
         const data = await api.getUserProfile(authUser.uniqueId);
         setProfile(data);
       } catch (err) {
-        setError('Failed to load profile');
+        if (err instanceof Error && err.message.includes('401')) {
+          setAuthError(true);
+        } else {
+          setError('Failed to load profile');
+        }
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
+    refreshUser();
     loadProfile();
-  }, [authUser, isAuthenticated, navigate]);
+  }, [authUser, isAuthenticated, isGuest, navigate, refreshUser]);
 
   if (loading) {
     return (
       <div className="profile-page">
         <div className="profile-loading">Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="profile-page">
+        <div className="profile-auth-error">
+          <h2>Session Expired</h2>
+          <p>Your session has expired. Please log in again to view your profile.</p>
+          <button className="profile-login-button" onClick={() => navigate('/play')}>
+            Go to Play
+          </button>
+        </div>
       </div>
     );
   }

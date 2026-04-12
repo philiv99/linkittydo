@@ -35,7 +35,8 @@ export const GameBoard: React.FC = () => {
     checkNameAvailability, 
     checkEmailAvailability,
     signOut,
-    clearError 
+    clearError,
+    refreshUser,
   } = useUser();
   const [clueTabs, setClueTabs] = useState<ClueTab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
@@ -94,6 +95,8 @@ export const GameBoard: React.FC = () => {
         const guessableWords = gameState.words.filter(w => w.isHidden).length;
         const bonusPoints = guessableWords * POINTS_PER_WORD;
         await addPoints(bonusPoints);
+        // Refresh user data from server to ensure points are in sync
+        await refreshUser();
       }
     } else {
       playIncorrect();
@@ -170,7 +173,9 @@ export const GameBoard: React.FC = () => {
       setPersistenceWarning(true);
       setTimeout(() => setPersistenceWarning(false), 5000);
     }
-  }, [giveUp, playGaveUp]);
+    // Refresh user data from server to ensure points are in sync
+    await refreshUser();
+  }, [giveUp, playGaveUp, refreshUser]);
 
   const handleSignOut = () => {
     signOut();

@@ -18,6 +18,12 @@ vi.mock('../services/api', () => ({
   },
 }));
 
+// Mock useAuth hook
+const mockUseAuth = vi.fn();
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
 // Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -86,6 +92,7 @@ const guestUser = {
   signOut: vi.fn(),
   clearError: vi.fn(),
   fetchAllUsers: vi.fn(),
+  refreshUser: vi.fn(),
 };
 
 const registeredUser = {
@@ -97,6 +104,7 @@ const registeredUser = {
 describe('GameHistoryPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({ isAuthenticated: true });
   });
 
   it('shows guest message when not logged in', () => {
@@ -198,5 +206,49 @@ describe('GameHistoryPage', () => {
     const user = userEvent.setup();
     await user.click(screen.getByText('Go Play'));
     expect(mockNavigate).toHaveBeenCalledWith('/play');
+  });
+
+  it('shows session expired when not authenticated', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false });
+    mockUseUser.mockReturnValue(registeredUser);
+
+    render(
+      <MemoryRouter>
+        <GameHistoryPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Session Expired')).toBeInTheDocument();
+    expect(screen.getByText('Your session has expired. Please log in again to view your game history.')).toBeInTheDocument();
+  });
+
+  it('shows session expired on 401 API error', async () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: true });
+    mockUseUser.mockReturnValue(registeredUser);
+    mockGetUserGames.mockRejectedValue(new Error('Failed to get user games (401)'));
+
+    render(
+      <MemoryRouter>
+        <GameHistoryPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Session Expired')).toBeInTheDocument();
+    });
+  });
+
+  it('calls refreshUser on mount for registered user', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: true });
+    mockUseUser.mockReturnValue(registeredUser);
+    mockGetUserGames.mockResolvedValue(sampleGames);
+
+    render(
+      <MemoryRouter>
+        <GameHistoryPage />
+      </MemoryRouter>
+    );
+
+    expect(registeredUser.refreshUser).toHaveBeenCalled();
   });
 });
