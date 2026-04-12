@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### 2026-04-12
+- **feat**: Sprint 50 — Scale phrase database from 5 to 115 curated seed phrases across difficulty bands (#7)
+- **feat**: Pre-compute difficulty for all seed phrases using `ComputeDifficultyFromText()` static method
+- **fix**: Admin phrase creation returns 409 Conflict on duplicate text instead of raw DB error
+- **chore**: Backlog cleanup — moved 30+ completed items (Sprints 38-49) to Completed section
+- **test**: Add 8 PhraseScalingTests (difficulty computation, duplicate handling, difficulty range validation)
 - **chore**: Sprint 49 — Remove legacy JSON data files and JSON repository code (#140)
 - **chore**: Remove `DataProvider` feature flag — MySQL is now the sole data provider
 - **chore**: Delete JSON repository classes (`JsonUserRepository`, `JsonGamePhraseRepository`, `JsonGameRecordRepository`)

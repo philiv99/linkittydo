@@ -1,17 +1,18 @@
 {
   "current_sprint": {
-    "number": 49,
-    "status": "complete",
-    "branch": "feature/20260412-sprint-49",
+    "number": 50,
+    "status": "in-progress",
+    "branch": "feature/20260412-sprint-50",
     "plan_approved": true,
     "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Verify DB has all phrase and user data", "status": "complete" },
-      { "id": 2, "title": "Remove JSON data files (Phrases, Users, GameRecords)", "status": "complete" },
-      { "id": 3, "title": "Remove JSON repos, NoOp services, migration code", "status": "complete" },
-      { "id": 4, "title": "Remove DataProvider feature flag from Program.cs", "status": "complete" },
-      { "id": 5, "title": "Update csproj, fix tests, remove JSON health check tests", "status": "complete" },
-      { "id": 6, "title": "Build and test validation (321 backend, 64 frontend)", "status": "complete" }
+      { "id": 1, "title": "Clean up backlog drift (30+ items)", "status": "complete" },
+      { "id": 2, "title": "Expand phrase seed data to 115 curated phrases", "status": "complete" },
+      { "id": 3, "title": "Fix admin phrase duplicate handling (409)", "status": "complete" },
+      { "id": 4, "title": "Pre-compute difficulty at seed time", "status": "complete" },
+      { "id": 5, "title": "Add 8 PhraseScalingTests", "status": "complete" },
+      { "id": 6, "title": "Build and test validation (329 backend, 64 frontend)", "status": "complete" },
+      { "id": 7, "title": "Sprint retrospective", "status": "in-progress" }
     ]
   },
   "last_completed": {
