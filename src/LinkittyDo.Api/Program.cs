@@ -51,73 +51,37 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireModerator", policy => policy.RequireRole("Admin", "Moderator"));
 });
 
-// Data provider feature flag: "Json" (default) or "MySql"
-var dataProvider = builder.Configuration.GetValue<string>("DataProvider") ?? "Json";
+// EF Core + MySQL provider
+var connectionString = builder.Configuration.GetConnectionString("MySql")
+    ?? throw new InvalidOperationException("MySql connection string not configured");
+builder.Services.AddDbContext<LinkittyDoDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
-{
-    // EF Core + MySQL provider
-    var connectionString = builder.Configuration.GetConnectionString("MySql")
-        ?? throw new InvalidOperationException("MySql connection string not configured");
-    builder.Services.AddDbContext<LinkittyDoDbContext>(options =>
-        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddScoped<IUserRepository, EfUserRepository>();
+builder.Services.AddScoped<IGamePhraseRepository, EfGamePhraseRepository>();
+builder.Services.AddScoped<IGameRecordRepository, EfGameRecordRepository>();
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
-    builder.Services.AddScoped<IUserRepository, EfUserRepository>();
-    builder.Services.AddScoped<IGamePhraseRepository, EfGamePhraseRepository>();
-    builder.Services.AddScoped<IGameRecordRepository, EfGameRecordRepository>();
-    builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-
-    // Services must be Scoped when repositories are Scoped
-    builder.Services.AddScoped<IGamePhraseService, GamePhraseService>();
-    builder.Services.AddScoped<IUserService, UserService>();
-    builder.Services.AddScoped<IAuthService, AuthService>();
-    builder.Services.AddScoped<IRoleService, RoleService>();
-    builder.Services.AddSingleton<IAuditService, AuditService>();
-    builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
-    builder.Services.AddSingleton<ISiteConfigService, SiteConfigService>();
-    builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-    builder.Services.AddScoped<ISimulationService, SimulationService>();
-    builder.Services.AddScoped<IAdminService, AdminService>();
-    builder.Services.AddScoped<IGamesManagerService, GamesManagerService>();
-    builder.Services.AddScoped<IDataExplorerService, DataExplorerService>();
-    builder.Services.AddScoped<IPhraseAdminService, PhraseAdminService>();
-}
-else
-{
-    // JSON file provider (default)
-    builder.Services.AddSingleton<IUserRepository, JsonUserRepository>();
-    builder.Services.AddSingleton<IGamePhraseRepository, JsonGamePhraseRepository>();
-    builder.Services.AddSingleton<IGameRecordRepository, JsonGameRecordRepository>();
-
-    builder.Services.AddSingleton<IGamePhraseService, GamePhraseService>();
-    builder.Services.AddSingleton<IUserService, UserService>();
-    builder.Services.AddSingleton<IAuthService, AuthService>();
-    builder.Services.AddSingleton<IRoleService, NoOpRoleService>();
-    builder.Services.AddSingleton<IAuditService, NoOpAuditService>();
-    builder.Services.AddSingleton<ISiteConfigService, InMemorySiteConfigService>();
-    builder.Services.AddSingleton<IAnalyticsService, NoOpAnalyticsService>();
-}
+// Services must be Scoped when repositories are Scoped
+builder.Services.AddScoped<IGamePhraseService, GamePhraseService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddSingleton<IAuditService, AuditService>();
+builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
+builder.Services.AddSingleton<ISiteConfigService, SiteConfigService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<ISimulationService, SimulationService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IGamesManagerService, GamesManagerService>();
+builder.Services.AddScoped<IDataExplorerService, DataExplorerService>();
+builder.Services.AddScoped<IPhraseAdminService, PhraseAdminService>();
 
 // Session store is always Singleton (survives across Scoped lifetimes)
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddSingleton<ISessionStore, DatabaseSessionStore>();
-    builder.Services.AddScoped<IDataMigrationService, JsonToMySqlMigrationService>();
-}
-else
-{
-    builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
-}
+builder.Services.AddSingleton<ISessionStore, DatabaseSessionStore>();
 
 // GameService uses ISessionStore + repositories
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddScoped<IGameService, GameService>();
-}
-else
-{
-    builder.Services.AddSingleton<IGameService, GameService>();
-}
+builder.Services.AddScoped<IGameService, GameService>();
 
 builder.Services.AddHttpClient<IClueService, ClueService>();
 builder.Services.AddHttpClient<ILlmService, OpenAiLlmService>();
@@ -128,14 +92,7 @@ builder.Services.AddHostedService<DatabaseSeedService>();
 
 // Configure health checks
 var healthChecksBuilder = builder.Services.AddHealthChecks();
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
-{
-    healthChecksBuilder.AddCheck<MySqlHealthCheck>("mysql", tags: new[] { "db", "ready" });
-}
-else
-{
-    healthChecksBuilder.AddCheck<JsonStorageHealthCheck>("json-storage", tags: new[] { "storage", "ready" });
-}
+healthChecksBuilder.AddCheck<MySqlHealthCheck>("mysql", tags: new[] { "db", "ready" });
 
 // Configure rate limiting
 builder.Services.AddRateLimiter(options =>
@@ -204,7 +161,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Apply pending EF Core migrations on startup (Development only)
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase) && app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<LinkittyDoDbContext>();
@@ -212,7 +169,6 @@ if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase) && app.Envi
 }
 
 // Recover active game sessions from database on startup
-if (dataProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
 {
     var sessionStore = app.Services.GetRequiredService<ISessionStore>();
     if (sessionStore is DatabaseSessionStore dbSessionStore)

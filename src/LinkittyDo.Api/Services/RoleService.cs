@@ -56,15 +56,3 @@ public class RoleService : IRoleService
         await _dbContext.SaveChangesAsync();
     }
 }
-
-/// <summary>
-/// No-op role service for JSON data provider mode.
-/// </summary>
-public class NoOpRoleService : IRoleService
-{
-    public Task<IList<string>> GetUserRolesAsync(string userId) =>
-        Task.FromResult<IList<string>>(new List<string> { "Player" });
-
-    public Task AssignRoleAsync(string userId, string roleName) => Task.CompletedTask;
-    public Task RemoveRoleAsync(string userId, string roleName) => Task.CompletedTask;
-}

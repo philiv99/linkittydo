@@ -104,15 +104,6 @@ public class RolesAndAuditTests
     }
 
     [Fact]
-    public void NoOpRoleService_ReturnsPlayerRole()
-    {
-        var service = new NoOpRoleService();
-        var roles = service.GetUserRolesAsync("any-user").Result;
-        Assert.Single(roles);
-        Assert.Equal("Player", roles[0]);
-    }
-
-    [Fact]
     public async Task RoleClaimsTransformation_AddsRoleClaims()
     {
         using var context = CreateInMemoryContext();
@@ -169,11 +160,4 @@ public class RolesAndAuditTests
         Assert.Equal("User", entries[0].EntityType);
     }
 
-    [Fact]
-    public void NoOpAuditService_DoesNotThrow()
-    {
-        var service = new NoOpAuditService();
-        var task = service.LogAsync("TestAction", "user1", "Entity", "id1");
-        Assert.True(task.IsCompleted);
-    }
 }
