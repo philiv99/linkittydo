@@ -4,7 +4,7 @@
     "status": "complete",
     "branch": "feature/20260412-sprint-50",
     "plan_approved": true,
-    "pr_number": null,
+    "pr_number": 57,
     "tasks": [
       { "id": 1, "title": "Clean up backlog drift (30+ items)", "status": "complete" },
       { "id": 2, "title": "Expand phrase seed data to 115 curated phrases", "status": "complete" },
@@ -64,6 +64,6 @@
     "sprint_47": { "pr": 54, "items": "Games Manager detail enhancement (player names, rich events, RelationshipType, date+time)", "tests_after": 339 },
     "sprint_48": { "pr": 55, "items": "CI ESLint fixes (setState-in-effect, unused vars, fast-refresh)", "tests_after": 339 },
     "sprint_49": { "pr": null, "items": "JSON legacy removal (JsonUserRepository, JsonGameRecordRepository, JsonGamePhraseRepository)", "tests_after": 321 },
-    "sprint_50": { "pr": null, "items": "Backlog cleanup (30+ items), phrase scaling (115 phrases), admin duplicate handling, pre-computed difficulty", "tests_after": 393 }
+    "sprint_50": { "pr": 57, "items": "Backlog cleanup (30+ items), phrase scaling (115 phrases), admin duplicate handling, pre-computed difficulty", "tests_after": 393 }
   }
 }
