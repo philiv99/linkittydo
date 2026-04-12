@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### 2026-04-12
+- **fix**: Sprint 48 — Fix 7 CI ESLint errors across UserManageModal, UserModal, AuthContext
+- **fix**: Replace setState-in-effect patterns with state adjustment during render and onChange handlers (#136, #137)
+- **fix**: Remove unused `allUsers` prop from UserModal (#138)
+- **fix**: Suppress fast-refresh warning for `useAuth` co-export in AuthContext (#139)
+
 ### 2026-04-11
 - **feat**: Sprint 47 — Games Manager shows player name instead of Game ID in game list (#132)
 - **feat**: Rich event detail view — clue events show URL link, phrase word, search term with relationship type; guess events show result and points; game end shows reason (#133)

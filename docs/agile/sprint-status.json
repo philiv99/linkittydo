@@ -1,16 +1,15 @@
 {
   "current_sprint": {
-    "number": 47,
-    "status": "complete",
-    "branch": "feature/20260411-sprint-47",
+    "number": 48,
+    "status": "in-progress",
+    "branch": "feature/20260412-sprint-48",
     "plan_approved": true,
-    "pr_number": 54,
+    "pr_number": null,
     "tasks": [
-      { "id": 1, "title": "Add RelationshipType to ClueEvent + ClueService refactor", "status": "complete" },
-      { "id": 2, "title": "Show player name instead of Game ID in game list", "status": "complete" },
-      { "id": 3, "title": "Rich event detail view with polymorphic data", "status": "complete" },
-      { "id": 4, "title": "Date+time formatting in list and detail", "status": "complete" },
-      { "id": 5, "title": "Add 3 unit tests for new functionality", "status": "complete" }
+      { "id": 1, "title": "Fix setState-in-effect in UserManageModal", "status": "complete" },
+      { "id": 2, "title": "Fix setState-in-effect in UserModal + remove unused var", "status": "complete" },
+      { "id": 3, "title": "Fix fast-refresh in AuthContext", "status": "complete" },
+      { "id": 4, "title": "Validation (lint, build, tests)", "status": "complete" }
     ]
   },
   "last_completed": {

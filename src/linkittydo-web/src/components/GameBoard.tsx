@@ -358,7 +358,6 @@ export const GameBoard: React.FC = () => {
         }}
         onCheckName={checkNameAvailability}
         onCheckEmail={checkEmailAvailability}
-        allUsers={allUsers}
         loading={userLoading}
         error={userError}
       />

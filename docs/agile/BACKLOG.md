@@ -115,6 +115,10 @@ Master backlog of all planned work for LinkittyDo. Items are prioritized and gro
 | 133 | Games Manager: rich event detail view | P1 | 47 | Game detail events only show type and timestamp. Expand to show: clue events with URL link, phrase word, search term; guess events with word, guess text, correct/incorrect badge, points; game end with reason. Backend: return full polymorphic event data from GetGameDetail. Frontend: render rich event rows. |
 | 134 | Add RelationshipType to ClueEvent | P1 | 47 | ClueEvent stores SearchTerm but not what type of relationship it has to the original word (synonym, antonym, trigger, homophone, similar). Add `RelationshipType` string property to ClueEvent, EF Core migration, update ClueService to track which Datamuse endpoint produced the selected term. |
 | 135 | Games Manager: date+time formatting | P2 | 47 | Played column shows date only, event timestamps show time only. Both should show full date and time. |
+| 136 | CI lint: setState-in-effect in UserManageModal | P1 | 48 | ESLint `react-hooks/set-state-in-effect` error. `useEffect` on line 35 calls `setDifficulty`/`setSelectedUserId` synchronously. Fix: initialize state from props using initializer functions or use key-based reset pattern. |
+| 137 | CI lint: setState-in-effect in UserModal (4 violations) | P1 | 48 | ESLint `react-hooks/set-state-in-effect` errors on lines 40, 53, 85, 112. Reset effect calls multiple setState synchronously; debounced validation effects set error state synchronously in early-return paths. Fix: use key-based reset for modal open, derive validation state or use event handlers. |
+| 138 | CI lint: unused `_allUsers` variable in UserModal | P1 | 48 | ESLint `@typescript-eslint/no-unused-vars`. `allUsers` is destructured as `_allUsers` but never used. Remove from props interface or use it. |
+| 139 | CI lint: fast-refresh violation in AuthContext | P1 | 48 | ESLint `react-refresh/only-export-components` error on line 238. File exports both `AuthProvider` component and `useAuth` hook. Fix: move `useAuth` to a separate file or add eslint-disable comment. |
 
 ### Security & Production Readiness
 
