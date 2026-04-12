@@ -283,6 +283,14 @@ public class GamePhraseService : IGamePhraseService
         return await _phraseRepository.GetCountAsync();
     }
 
+    public async Task<Phrase?> GetPhraseByUniqueIdAsync(string uniqueId)
+    {
+        var gamePhrase = await _phraseRepository.GetByIdAsync(uniqueId);
+        if (gamePhrase == null || !gamePhrase.IsActive)
+            return null;
+        return CreatePhraseFromGamePhrase(gamePhrase);
+    }
+
     /// <summary>
     /// Generates a single new phrase using the LLM service (used as fallback)
     /// </summary>

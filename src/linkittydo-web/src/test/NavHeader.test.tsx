@@ -106,4 +106,32 @@ describe('NavHeader', () => {
     const adminLink = screen.getByRole('link', { name: 'Admin' });
     expect(adminLink).toHaveAttribute('href', '/admin');
   });
+
+  it('renders Daily link', () => {
+    renderWithRouter(
+      <NavHeader userName="Guest" isGuest={true} isAdmin={false} lifetimePoints={0} onUserClick={() => {}} />
+    );
+    expect(screen.getByText('Daily')).toBeInTheDocument();
+  });
+
+  it('renders How to Play link', () => {
+    renderWithRouter(
+      <NavHeader userName="Guest" isGuest={true} isAdmin={false} lifetimePoints={0} onUserClick={() => {}} />
+    );
+    expect(screen.getByText('How to Play')).toBeInTheDocument();
+  });
+
+  it('shows Profile link for registered users', () => {
+    renderWithRouter(
+      <NavHeader userName="Alice" isGuest={false} isAdmin={false} lifetimePoints={500} onUserClick={() => {}} />
+    );
+    expect(screen.getByText('Profile')).toBeInTheDocument();
+  });
+
+  it('does not show Profile link for guest users', () => {
+    renderWithRouter(
+      <NavHeader userName="Guest" isGuest={true} isAdmin={false} lifetimePoints={0} onUserClick={() => {}} />
+    );
+    expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+  });
 });

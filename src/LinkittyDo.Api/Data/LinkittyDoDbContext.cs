@@ -25,6 +25,8 @@ public class LinkittyDoDbContext : DbContext
     public DbSet<PlayerStats> PlayerStats => Set<PlayerStats>();
     public DbSet<PhrasePlayStats> PhrasePlayStats => Set<PhrasePlayStats>();
     public DbSet<SimulationProfile> SimulationProfiles => Set<SimulationProfile>();
+    public DbSet<DailyChallenge> DailyChallenges => Set<DailyChallenge>();
+    public DbSet<DailyChallengeResult> DailyChallengeResults => Set<DailyChallengeResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,6 +42,7 @@ public class LinkittyDoDbContext : DbContext
         ConfigureContentManagement(modelBuilder);
         ConfigureAnalytics(modelBuilder);
         ConfigureSimulation(modelBuilder);
+        ConfigureDailyChallenge(modelBuilder);
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -341,5 +344,28 @@ public class LinkittyDoDbContext : DbContext
 
         modelBuilder.Entity<GameRecord>()
             .Property(e => e.IsSimulated).HasDefaultValue(false);
+    }
+
+    private static void ConfigureDailyChallenge(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DailyChallenge>(entity =>
+        {
+            entity.HasKey(e => e.Date);
+            entity.Property(e => e.PhraseUniqueId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<DailyChallengeResult>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.UserId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.GameId).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.Score).HasDefaultValue(0);
+            entity.Property(e => e.Result).HasConversion<string>().HasMaxLength(20);
+            entity.Property(e => e.CompletedAt).IsRequired();
+
+            entity.HasIndex(e => new { e.ChallengeDate, e.UserId }).IsUnique();
+        });
     }
 }

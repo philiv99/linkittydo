@@ -76,6 +76,7 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IGamesManagerService, GamesManagerService>();
 builder.Services.AddScoped<IDataExplorerService, DataExplorerService>();
 builder.Services.AddScoped<IPhraseAdminService, PhraseAdminService>();
+builder.Services.AddScoped<IDailyChallengeService, DailyChallengeService>();
 
 // Session store is always Singleton (survives across Scoped lifetimes)
 builder.Services.AddSingleton<ISessionStore, DatabaseSessionStore>();

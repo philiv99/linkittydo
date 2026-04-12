@@ -6,6 +6,7 @@ namespace LinkittyDo.Api.Services;
 public interface IGameService
 {
     Task<GameSession> StartNewGameAsync(string? userId = null, int difficulty = 10);
+    Task<GameSession> StartDailyChallengeAsync(string? userId = null, int difficulty = 10);
     GameSession? GetGame(Guid sessionId);
     Task<GuessResponse> SubmitGuessAsync(Guid sessionId, GuessRequest request);
     GameState GetGameState(Guid sessionId);
@@ -25,6 +26,7 @@ public class GameService : IGameService
     private readonly IAnalyticsService _analyticsService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly LinkittyDo.Api.Data.LinkittyDoDbContext _dbContext;
+    private readonly IDailyChallengeService _dailyChallengeService;
     private readonly ILogger<GameService> _logger;
 
     public GameService(
@@ -35,6 +37,7 @@ public class GameService : IGameService
         IAnalyticsService analyticsService,
         IUnitOfWork unitOfWork,
         LinkittyDo.Api.Data.LinkittyDoDbContext dbContext,
+        IDailyChallengeService dailyChallengeService,
         ILogger<GameService> logger)
     {
         _sessionStore = sessionStore;
@@ -44,6 +47,7 @@ public class GameService : IGameService
         _analyticsService = analyticsService;
         _unitOfWork = unitOfWork;
         _dbContext = dbContext;
+        _dailyChallengeService = dailyChallengeService;
         _logger = logger;
     }
 
@@ -110,6 +114,66 @@ public class GameService : IGameService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to persist initial GameRecord for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        _sessionStore.Set(session.SessionId, session);
+        return session;
+    }
+
+    public async Task<GameSession> StartDailyChallengeAsync(string? userId = null, int difficulty = 10)
+    {
+        _logger.LogInformation("Starting daily challenge for user: {UserId}", userId ?? "guest");
+
+        var challenge = await _dailyChallengeService.GetOrCreateTodaysChallengeAsync();
+        var phrase = await _phraseService.GetPhraseByUniqueIdAsync(challenge.PhraseUniqueId);
+        if (phrase == null)
+            throw new InvalidOperationException("Daily challenge phrase not found");
+
+        var now = DateTime.UtcNow;
+        var session = new GameSession
+        {
+            SessionId = Guid.NewGuid(),
+            PhraseId = phrase.Id,
+            Phrase = phrase,
+            RevealedWords = new Dictionary<int, bool>(),
+            Score = 0,
+            Difficulty = difficulty,
+            StartedAt = now,
+            LastActivityAt = now,
+            UserId = userId,
+            IsDailyChallenge = true
+        };
+
+        foreach (var word in phrase.Words.Where(w => w.IsHidden))
+        {
+            session.RevealedWords[word.Index] = false;
+        }
+
+        if (!session.IsGuestSession)
+        {
+            session.GameRecord = new GameRecord
+            {
+                GameId = GenerateGameId(),
+                UserId = userId!,
+                PlayedAt = now,
+                PhraseId = phrase.Id,
+                PhraseUniqueId = phrase.UniqueId,
+                PhraseText = phrase.FullText,
+                Difficulty = difficulty,
+                Score = 0,
+                Result = GameResult.InProgress,
+                Events = new List<GameEvent>()
+            };
+
+            try
+            {
+                await _gameRecordRepository.CreateAsync(session.GameRecord);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist daily challenge GameRecord for user {UserId}", userId);
                 throw;
             }
         }
@@ -499,6 +563,22 @@ public class GameService : IGameService
             {
                 _logger.LogWarning(ex, "Failed to recompute analytics for game {GameId}, data will be stale until next recompute",
                     session.GameRecord.GameId);
+            }
+
+            // Record daily challenge result if applicable
+            if (session.IsDailyChallenge && !string.IsNullOrEmpty(session.UserId))
+            {
+                try
+                {
+                    await _dailyChallengeService.RecordChallengeResultAsync(
+                        session.UserId, session.GameRecord.GameId,
+                        session.GameRecord.Score, session.GameRecord.Result);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to record daily challenge result for game {GameId}",
+                        session.GameRecord.GameId);
+                }
             }
 
             _logger.LogInformation("Persisted game record {GameId} for user {UserId}",

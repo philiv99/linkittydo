@@ -10,13 +10,15 @@ public class UserControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<IRoleService> _roleServiceMock;
+    private readonly Mock<IAnalyticsService> _analyticsServiceMock;
     private readonly UserController _controller;
 
     public UserControllerTests()
     {
         _userServiceMock = new Mock<IUserService>();
         _roleServiceMock = new Mock<IRoleService>();
-        _controller = new UserController(_userServiceMock.Object, _roleServiceMock.Object);
+        _analyticsServiceMock = new Mock<IAnalyticsService>();
+        _controller = new UserController(_userServiceMock.Object, _roleServiceMock.Object, _analyticsServiceMock.Object);
     }
 
     private static User CreateTestUser(string id = "USR-1234567890123-ABC123", string name = "TestUser", string email = "test@example.com")
@@ -309,5 +311,68 @@ public class UserControllerTests
         var result = await _controller.GetUserGames("nonexistent");
 
         Assert.IsType<NotFoundObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetUserProfile_ReturnsOk_WithStatsAndRecentGames()
+    {
+        var user = CreateTestUser();
+        var stats = new PlayerStats
+        {
+            UserId = user.UniqueId,
+            GamesPlayed = 10,
+            GamesSolved = 7,
+            GamesGaveUp = 3,
+            AvgScore = 250,
+            BestScore = 500,
+            CurrentStreak = 2,
+            BestStreak = 5,
+            LastPlayedAt = DateTime.UtcNow
+        };
+        var games = new List<GameRecord>
+        {
+            new() { GameId = "GAME-1-A", Score = 300, Result = GameResult.Solved }
+        };
+
+        _userServiceMock.Setup(s => s.GetUserByIdAsync(user.UniqueId)).ReturnsAsync(user);
+        _analyticsServiceMock.Setup(s => s.GetPlayerStatsAsync(user.UniqueId)).ReturnsAsync(stats);
+        _userServiceMock.Setup(s => s.GetUserGamesAsync(user.UniqueId)).ReturnsAsync(games);
+
+        var result = await _controller.GetUserProfile(user.UniqueId);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<ProfileResponse>>(okResult.Value);
+        Assert.Equal(user.Name, response.Data!.Name);
+        Assert.Equal(10, response.Data.GamesPlayed);
+        Assert.Equal(7, response.Data.GamesSolved);
+        Assert.Equal(500, response.Data.BestScore);
+        Assert.Single(response.Data.RecentGames);
+    }
+
+    [Fact]
+    public async Task GetUserProfile_ReturnsNotFound_WhenUserMissing()
+    {
+        _userServiceMock.Setup(s => s.GetUserByIdAsync("nonexistent")).ReturnsAsync((User?)null);
+
+        var result = await _controller.GetUserProfile("nonexistent");
+
+        Assert.IsType<NotFoundObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetUserProfile_ReturnsDefaults_WhenNoStats()
+    {
+        var user = CreateTestUser();
+        _userServiceMock.Setup(s => s.GetUserByIdAsync(user.UniqueId)).ReturnsAsync(user);
+        _analyticsServiceMock.Setup(s => s.GetPlayerStatsAsync(user.UniqueId)).ReturnsAsync((PlayerStats?)null);
+        _userServiceMock.Setup(s => s.GetUserGamesAsync(user.UniqueId)).ReturnsAsync(new List<GameRecord>());
+
+        var result = await _controller.GetUserProfile(user.UniqueId);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<ProfileResponse>>(okResult.Value);
+        Assert.Equal(0, response.Data!.GamesPlayed);
+        Assert.Equal(0, response.Data.SolveRate);
+        Assert.Empty(response.Data.RecentGames);
     }
 }
