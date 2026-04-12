@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import type { User } from '../types';
 import './UserModal.css';
 
 interface UserModalProps {
@@ -9,7 +8,6 @@ interface UserModalProps {
   onLogin: (email: string, password: string) => Promise<boolean>;
   onCheckName: (name: string) => Promise<boolean>;
   onCheckEmail: (email: string) => Promise<boolean>;
-  allUsers: User[];
   loading: boolean;
   error: string | null;
 }
@@ -21,7 +19,6 @@ export const UserModal: React.FC<UserModalProps> = ({
   onLogin,
   onCheckName,
   onCheckEmail,
-  allUsers: _allUsers,
   loading,
   error,
 }) => {
@@ -34,40 +31,77 @@ export const UserModal: React.FC<UserModalProps> = ({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setName('');
-      setEmail('');
-      setPassword('');
-      setNameError(null);
-      setEmailError(null);
-      setPasswordError(null);
-      setMode('login');
-    }
-  }, [isOpen]);
+  // Reset state when modal opens (state adjustment during render)
+  if (isOpen && !prevIsOpen) {
+    setName('');
+    setEmail('');
+    setPassword('');
+    setNameError(null);
+    setEmailError(null);
+    setPasswordError(null);
+    setMode('login');
+  }
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+  }
 
-  // Debounced name availability check (register only)
-  useEffect(() => {
-    if (mode !== 'register' || !name || name.length < 2) {
+  const handleNameChange = (value: string) => {
+    setName(value);
+    if (mode !== 'register' || !value || value.length < 2) {
       setNameError(null);
       return;
     }
-
     const nameRegex = /^[a-zA-Z0-9\s_-]+$/;
-    if (!nameRegex.test(name)) {
+    if (!nameRegex.test(value)) {
       setNameError('Name can only contain letters, numbers, spaces, underscores, and hyphens');
       return;
     }
-
-    if (name.length > 50) {
+    if (value.length > 50) {
       setNameError('Name must be 50 characters or less');
       return;
     }
+    setNameError(null);
+  };
 
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (mode !== 'register' || !value) {
+      setEmailError(null);
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    setEmailError(null);
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (!value) {
+      setPasswordError(null);
+    } else if (value.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+    } else {
+      setPasswordError(null);
+    }
+  };
+
+  // Debounced name availability check (register only, async only)
+  useEffect(() => {
+    if (mode !== 'register' || !name || name.length < 2) return;
+    const nameRegex = /^[a-zA-Z0-9\s_-]+$/;
+    if (!nameRegex.test(name) || name.length > 50) return;
+
+    let cancelled = false;
     const timeoutId = setTimeout(async () => {
+      if (cancelled) return;
       setIsCheckingName(true);
       const available = await onCheckName(name);
+      if (cancelled) return;
       setIsCheckingName(false);
       if (!available) {
         setNameError('This name is already taken');
@@ -76,25 +110,24 @@ export const UserModal: React.FC<UserModalProps> = ({
       }
     }, 500);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [name, onCheckName, mode]);
 
-  // Debounced email availability check (register only)
+  // Debounced email availability check (register only, async only)
   useEffect(() => {
-    if (mode !== 'register' || !email) {
-      setEmailError(null);
-      return;
-    }
-
+    if (mode !== 'register' || !email) return;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
+    if (!emailRegex.test(email)) return;
 
+    let cancelled = false;
     const timeoutId = setTimeout(async () => {
+      if (cancelled) return;
       setIsCheckingEmail(true);
       const available = await onCheckEmail(email);
+      if (cancelled) return;
       setIsCheckingEmail(false);
       if (!available) {
         setEmailError('This email is already registered');
@@ -103,21 +136,11 @@ export const UserModal: React.FC<UserModalProps> = ({
       }
     }, 500);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [email, onCheckEmail, mode]);
-
-  // Password validation
-  useEffect(() => {
-    if (!password) {
-      setPasswordError(null);
-      return;
-    }
-    if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
-    } else {
-      setPasswordError(null);
-    }
-  }, [password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,7 +205,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                 id="name"
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="Choose a display name"
                 maxLength={50}
                 disabled={loading}
@@ -200,7 +223,7 @@ export const UserModal: React.FC<UserModalProps> = ({
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="Enter your email"
               disabled={loading}
               className={emailError ? 'error' : ''}
@@ -215,7 +238,7 @@ export const UserModal: React.FC<UserModalProps> = ({
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder={mode === 'register' ? 'At least 8 characters' : 'Enter your password'}
               disabled={loading}
               className={passwordError ? 'error' : ''}

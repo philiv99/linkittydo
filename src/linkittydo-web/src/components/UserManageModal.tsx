@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { User } from '../types';
 import './UserManageModal.css';
 
@@ -30,14 +30,16 @@ export const UserManageModal: React.FC<UserManageModalProps> = ({
   const [difficulty, setDifficulty] = useState(currentUser.preferredDifficulty);
   const [selectedUserId, setSelectedUserId] = useState(currentUser.uniqueId);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(false);
 
-  // Reset state when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setDifficulty(currentUser.preferredDifficulty);
-      setSelectedUserId(currentUser.uniqueId);
-    }
-  }, [isOpen, currentUser.preferredDifficulty, currentUser.uniqueId]);
+  // Reset state when modal opens (state adjustment during render)
+  if (isOpen && !prevIsOpen) {
+    setDifficulty(currentUser.preferredDifficulty);
+    setSelectedUserId(currentUser.uniqueId);
+  }
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+  }
 
   const handleDifficultyChange = async (newDifficulty: number) => {
     setDifficulty(newDifficulty);

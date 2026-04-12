@@ -90,7 +90,6 @@ function App() {
         }}
         onCheckName={checkNameAvailability}
         onCheckEmail={checkEmailAvailability}
-        allUsers={allUsers}
         loading={userLoading}
         error={userError}
       />
